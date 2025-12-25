@@ -2,6 +2,7 @@
   import { app, actions, selectedTemplate } from '../state/store'
   import type { SymbolDef } from '../state/types'
   import { clickOutside } from './actions/clickOutside'
+  import LabelPreview from './LabelPreview.svelte'
 
   $: tpl = $selectedTemplate
   $: usedByKeyCount =
@@ -34,9 +35,11 @@
     actions.selectTemplate(id)
     isTemplateMenuOpen = false
   }
+
+  $: previewTextsBySymbolId = tpl ? Object.fromEntries(tpl.symbols.map((s) => [s.id, s.slotName])) : {}
 </script>
 
-<div class="grid gap-4 lg:grid-cols-[1fr_2fr]">
+<div class="grid gap-4 lg:grid-cols-[1fr_2fr_340px]">
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4">
     <div class="flex items-center justify-between gap-3">
       <div class="text-sm font-semibold">Template</div>
@@ -252,6 +255,14 @@
         X/Y are normalized to the keycap face: (0,0)=top-left, (1,1)=bottom-right.
       </div>
     {/if}
+  </section>
+
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4">
+    <div class="text-sm font-semibold">Template preview</div>
+    <div class="mt-3 flex items-center justify-center">
+      <LabelPreview template={tpl} textsBySymbolId={previewTextsBySymbolId} sizePx={288} />
+    </div>
+    <div class="mt-3 text-xs text-slate-400">Uses each symbol’s slot name as placeholder text.</div>
   </section>
 </div>
 

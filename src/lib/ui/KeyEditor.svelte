@@ -1,6 +1,7 @@
 <script lang="ts">
   import { app, actions, selectedKey } from '../state/store'
   import type { Template } from '../state/types'
+  import LabelPreview from './LabelPreview.svelte'
 
   $: key = $selectedKey
   $: tpl =
@@ -116,27 +117,7 @@
           <div class="text-xs font-semibold text-slate-300">2D preview</div>
 
           <div class="mt-3 flex items-center justify-center">
-            <svg viewBox="0 0 100 100" class="h-72 w-72 rounded-lg border border-slate-800 bg-slate-950">
-              <rect x="4" y="4" width="92" height="92" rx="10" fill="none" stroke="rgba(148,163,184,0.25)" />
-              {#if tpl}
-                {#each tpl.symbols as sym (sym.id)}
-                  {@const text = key.textsBySymbolId[sym.id] ?? ''}
-                  <g transform={`translate(${sym.x * 100} ${sym.y * 100}) rotate(${sym.rotationDeg})`}>
-                    <text
-                      x="0"
-                      y="0"
-                      text-anchor="middle"
-                      dominant-baseline="middle"
-                      font-size={Math.max(1, sym.fontSizeMm * 2)}
-                      fill={sym.color}
-                      style="font-family: system-ui;"
-                    >
-                      {text}
-                    </text>
-                  </g>
-                {/each}
-              {/if}
-            </svg>
+            <LabelPreview template={tpl} textsBySymbolId={key.textsBySymbolId} sizePx={288} />
           </div>
 
           <div class="mt-3 text-xs text-slate-400">
