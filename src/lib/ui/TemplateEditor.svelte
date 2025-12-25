@@ -23,13 +23,9 @@
   const fontWeights: Array<SymbolDef['fontWeight']> = ['regular', 'bold']
 
   let isTemplateMenuOpen = false
-  let lastTemplateId: string | null = null
   let templateNameDraft = ''
 
-  $: if (tpl && tpl.id !== lastTemplateId) {
-    lastTemplateId = tpl.id
-    templateNameDraft = tpl.name
-  }
+  $: templateNameDraft = tpl?.name ?? ''
 
   function selectTemplate(id: string) {
     actions.selectTemplate(id)
@@ -63,8 +59,7 @@
               disabled={!tpl}
               on:input={(e) => {
                 if (!tpl) return
-                templateNameDraft = (e.currentTarget as HTMLInputElement).value
-                actions.renameTemplate(tpl.id, templateNameDraft)
+                actions.renameTemplate(tpl.id, (e.currentTarget as HTMLInputElement).value)
               }}
               on:keydown={(e) => {
                 if (e.key === 'Escape') isTemplateMenuOpen = false

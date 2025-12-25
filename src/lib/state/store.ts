@@ -196,7 +196,9 @@ export const actions = {
   setKeyText(keyId: string, symbolId: string, text: string) {
     app.update((s) => ({
       ...s,
-      keys: s.keys.map((k) => (k.id === keyId ? { ...k, textsBySymbolId: { ...k.textsBySymbolId, [symbolId]: text } } : k)),
+      keys: s.keys.map((k) =>
+        k.id === keyId ? { ...k, textsBySymbolId: { ...k.textsBySymbolId, [symbolId]: text } } : k,
+      ),
     }))
   },
 

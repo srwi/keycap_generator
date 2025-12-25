@@ -3,6 +3,7 @@ import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg'
 
 export function subtractGeometry(a: BufferGeometry, b: BufferGeometry): BufferGeometry {
   const evaluator = new Evaluator()
+  evaluator.attributes = ['position']
   evaluator.useGroups = false
 
   const brushA = new Brush(a)

@@ -1,19 +1,10 @@
 <script lang="ts">
   import { app, actions, selectedKey } from '../state/store'
-  import type { Template } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
 
   $: key = $selectedKey
   $: tpl =
     key == null ? null : $app.templates.find((t) => t.id === key.templateId) ?? null
-
-  function pickTemplateOptions() {
-    return $app.templates
-  }
-
-  function templateUsedForKeyOptions(tpls: Template[]) {
-    return tpls
-  }
 </script>
 
 <div class="grid gap-4 lg:grid-cols-[320px_1fr]">
@@ -84,7 +75,7 @@
                 value={key.templateId}
                 on:change={(e) => actions.setKeyTemplate(key.id, (e.currentTarget as HTMLSelectElement).value)}
               >
-                {#each templateUsedForKeyOptions(pickTemplateOptions()) as t (t.id)}
+                {#each $app.templates as t (t.id)}
                   <option value={t.id}>{t.name}</option>
                 {/each}
               </select>

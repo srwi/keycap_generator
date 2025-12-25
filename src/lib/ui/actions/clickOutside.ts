@@ -13,5 +13,3 @@ export function clickOutside(node: HTMLElement, onOutside: () => void) {
     },
   }
 }
-
-

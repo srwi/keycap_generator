@@ -9,7 +9,6 @@
 
   async function onStlFileSelected(ev: Event) {
     const input = ev.currentTarget as HTMLInputElement
-    const inputValue = input.value
     const file = input.files?.[0]
     input.value = ''
     if (!file) return
@@ -18,7 +17,7 @@
     try {
       const buf = await file.arrayBuffer()
       stlArrayBuffer.set(buf)
-      const pathHint = (file as any).webkitRelativePath || inputValue || file.name
+      const pathHint = (file as any).webkitRelativePath || file.name
       actions.setStlAsset({ fileName: file.name, pathHint })
     } finally {
       isStlLoading = false
@@ -67,7 +66,7 @@
       </div>
 
       <div class="text-sm">
-        <div class="text-xs text-slate-400">Saved reference (path hint)</div>
+        <div class="text-xs text-slate-400">Saved reference</div>
         <div class="font-mono text-xs text-slate-200">
           {$app.stl?.pathHint ?? '—'}
         </div>

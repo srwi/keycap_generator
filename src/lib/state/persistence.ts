@@ -9,6 +9,48 @@ function sanitizeForExport(state: AppState): AppState {
   return { ...state, stl: { fileName: state.stl.fileName, pathHint: state.stl.pathHint } }
 }
 
+function asString(v: unknown, fallback = ''): string {
+  return typeof v === 'string' ? v : fallback
+}
+
+function asNumber(v: unknown, fallback: number): number {
+  const n = typeof v === 'number' ? v : Number(v)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null
+}
+
+function parseProjectV1(raw: unknown): AppState | null {
+  if (!isRecord(raw)) return null
+  if (raw.version !== 1) return null
+  if (!Array.isArray(raw.templates) || !Array.isArray(raw.keys)) return null
+
+  const stlRaw = isRecord(raw.stl) ? raw.stl : null
+  const stl =
+    stlRaw && typeof stlRaw.fileName === 'string'
+      ? { fileName: stlRaw.fileName, pathHint: asString(stlRaw.pathHint, '') }
+      : null
+
+  const settingsRaw = isRecord(raw.settings) ? raw.settings : null
+  const uiRaw = isRecord(raw.ui) ? raw.ui : null
+
+  // Note: templates/keys are kept as-is (already app-internal shape) but we still
+  // guard the outer envelope so project loading is predictable.
+  return {
+    version: 1,
+    templates: raw.templates as AppState['templates'],
+    keys: raw.keys as AppState['keys'],
+    stl,
+    settings: { extrusionDepthMm: asNumber(settingsRaw?.extrusionDepthMm, 0.8) },
+    ui: {
+      selectedTemplateId: typeof uiRaw?.selectedTemplateId === 'string' ? uiRaw.selectedTemplateId : null,
+      selectedKeyId: typeof uiRaw?.selectedKeyId === 'string' ? uiRaw.selectedKeyId : null,
+    },
+  }
+}
+
 export function downloadStateFile(state: AppState) {
   const safe = sanitizeForExport(state)
   const json = JSON.stringify(safe, null, 2)
@@ -30,26 +72,10 @@ export async function loadStateFromFile(ev: Event) {
   if (!file) return
 
   const text = await file.text()
-  const raw = JSON.parse(text) as any
-
-  if (!raw || raw.version !== 1 || !Array.isArray(raw.templates) || !Array.isArray(raw.keys)) {
+  const parsed = parseProjectV1(JSON.parse(text) as unknown)
+  if (!parsed) {
     window.alert('Invalid project file.')
     return
-  }
-
-  const parsed: AppState = {
-    version: 1,
-    templates: raw.templates,
-    keys: raw.keys,
-    stl:
-      raw.stl && typeof raw.stl.fileName === 'string'
-        ? { fileName: raw.stl.fileName, pathHint: typeof raw.stl.pathHint === 'string' ? raw.stl.pathHint : '' }
-        : null,
-    settings: { extrusionDepthMm: Number(raw.settings?.extrusionDepthMm ?? 0.8) },
-    ui: {
-      selectedTemplateId: raw.ui?.selectedTemplateId ?? null,
-      selectedKeyId: raw.ui?.selectedKeyId ?? null,
-    },
   }
 
   // Loaded projects only contain the STL reference; require re-upload for generation.
