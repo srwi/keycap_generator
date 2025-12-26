@@ -3,14 +3,12 @@
 
   export let template: Template | null
   export let textsBySymbolId: Record<string, string> = {}
-  export let sizePx = 288
+  export let className = ''
 </script>
 
 <svg
   viewBox="0 0 100 100"
-  width={sizePx}
-  height={sizePx}
-  class="rounded-lg border border-slate-800 bg-slate-950"
+  class={`h-auto w-full rounded-lg bg-slate-950 ${className}`}
 >
   <rect x="4" y="4" width="92" height="92" rx="10" fill="none" stroke="rgba(148,163,184,0.25)" />
 

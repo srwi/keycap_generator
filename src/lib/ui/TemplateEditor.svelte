@@ -35,8 +35,9 @@
   $: previewTextsBySymbolId = tpl ? Object.fromEntries(tpl.symbols.map((s) => [s.id, s.slotName])) : {}
 </script>
 
-<div class="grid gap-4 lg:grid-cols-[1fr_2fr_340px]">
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4">
+<div class="flex flex-col gap-4 lg:flex-row">
+  <div class="flex flex-col gap-4 lg:min-w-0 lg:flex-1">
+    <section class="rounded-lg border border-slate-800 bg-slate-950 p-4">
     <div class="flex items-center justify-between gap-3">
       <div class="text-sm font-semibold">Template</div>
       <button
@@ -101,9 +102,9 @@
         </button>
       {/if}
     </div>
-  </section>
+    </section>
 
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4">
+    <section class="min-w-0 rounded-lg border border-slate-800 bg-slate-950 p-4">
     <div class="flex items-center justify-between gap-3">
       <div class="text-sm font-semibold">Symbols</div>
       {#if tpl}
@@ -119,7 +120,7 @@
     {#if !tpl}
       <div class="mt-3 text-sm text-slate-400">Create a template to start.</div>
     {:else}
-      <div class="mt-3 overflow-auto">
+      <div class="mt-3 max-w-full overflow-x-auto">
         <table class="w-full min-w-[980px] text-left text-sm">
           <thead class="text-xs text-slate-400">
             <tr class="border-b border-slate-800">
@@ -250,12 +251,13 @@
         X/Y are normalized to the keycap face: (0,0)=top-left, (1,1)=bottom-right.
       </div>
     {/if}
-  </section>
+    </section>
+  </div>
 
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4">
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:w-[340px] lg:flex-none">
     <div class="text-sm font-semibold">Template preview</div>
     <div class="mt-3 flex items-center justify-center">
-      <LabelPreview template={tpl} textsBySymbolId={previewTextsBySymbolId} sizePx={288} />
+      <LabelPreview template={tpl} textsBySymbolId={previewTextsBySymbolId} className="max-w-[340px]" />
     </div>
     <div class="mt-3 text-xs text-slate-400">Uses each symbol’s slot name as placeholder text.</div>
   </section>

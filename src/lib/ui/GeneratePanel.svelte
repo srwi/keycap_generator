@@ -1,11 +1,16 @@
 <script lang="ts">
-  import { app, actions } from '../state/store'
+  import { app, actions, selectedKey } from '../state/store'
   import { generateAll3mfs } from '../generate/generate'
   import { stlArrayBuffer } from '../state/sessionAssets'
+  import LabelPreview from './LabelPreview.svelte'
 
   let isStlLoading = false
   let isGenerating = false
   let progressText = ''
+
+  $: key = $selectedKey
+  $: tpl =
+    key == null ? null : $app.templates.find((t) => t.id === key.templateId) ?? null
 
   async function onStlFileSelected(ev: Event) {
     const input = ev.currentTarget as HTMLInputElement
@@ -43,8 +48,8 @@
   }
 </script>
 
-<div class="grid gap-4 lg:grid-cols-[1fr_1fr]">
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4">
+<div class="grid gap-4 lg:grid-cols-12">
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-8">
     <div class="text-sm font-semibold">Base keycap STL</div>
     <div class="mt-3 grid gap-3">
       <label class="grid gap-1 text-xs text-slate-400">
@@ -78,7 +83,7 @@
     </div>
   </section>
 
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4">
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-8">
     <div class="text-sm font-semibold">Generate 3MF</div>
     <div class="mt-3 grid gap-3">
       <label class="grid gap-1 text-xs text-slate-400">
@@ -108,6 +113,20 @@
       {#if progressText}
         <div class="text-xs text-slate-300">{progressText}</div>
       {/if}
+    </div>
+  </section>
+
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1">
+    <div class="text-sm font-semibold">Preview</div>
+    <div class="mt-3 flex items-center justify-center">
+      {#if key}
+        <LabelPreview template={tpl} textsBySymbolId={key.textsBySymbolId} className="max-w-[340px]" />
+      {:else}
+        <div class="text-sm text-slate-400">Select a key to preview.</div>
+      {/if}
+    </div>
+    <div class="mt-3 text-xs text-slate-400">
+      This is the legend preview for the currently selected key.
     </div>
   </section>
 </div>
