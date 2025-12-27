@@ -33,6 +33,14 @@
   }
 
   $: previewTextsBySymbolId = tpl ? Object.fromEntries(tpl.symbols.map((s) => [s.id, s.slotName])) : {}
+  $: model =
+    tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
+  $: modelWidthU = model?.widthU ?? 1
+  $: modelHeightU = model?.heightU ?? 1
+
+  function clamp(n: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, n))
+  }
 </script>
 
 <div class="flex flex-col gap-4 lg:flex-row">
@@ -94,6 +102,19 @@
       </div>
 
       {#if tpl}
+        <label class="mt-3 grid gap-1 text-xs text-slate-400">
+          Keycap model
+          <select
+            class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+            value={tpl.keycapModelId}
+            on:change={(e) => actions.setTemplateKeycapModel(tpl.id, (e.currentTarget as HTMLSelectElement).value)}
+          >
+            {#each $app.keycapModels as km (km.id)}
+              <option value={km.id}>{km.name} ({km.widthU}u×{km.heightU}u)</option>
+            {/each}
+          </select>
+        </label>
+
         <button
           class="mt-2 rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-1.5 text-sm text-rose-200 hover:bg-rose-950/60"
           on:click={onDeleteTemplate}
@@ -151,11 +172,13 @@
                     class="w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm"
                     type="number"
                     min="0"
-                    max="1"
+                    max={modelWidthU}
                     step="0.01"
                     value={sym.x}
                     on:input={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, { x: Number((e.currentTarget as HTMLInputElement).value) })}
+                      actions.updateSymbol(tpl.id, sym.id, {
+                        x: clamp(Number((e.currentTarget as HTMLInputElement).value), 0, modelWidthU),
+                      })}
                   />
                 </td>
                 <td class="px-2 py-2">
@@ -163,11 +186,13 @@
                     class="w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm"
                     type="number"
                     min="0"
-                    max="1"
+                    max={modelHeightU}
                     step="0.01"
                     value={sym.y}
                     on:input={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, { y: Number((e.currentTarget as HTMLInputElement).value) })}
+                      actions.updateSymbol(tpl.id, sym.id, {
+                        y: clamp(Number((e.currentTarget as HTMLInputElement).value), 0, modelHeightU),
+                      })}
                   />
                 </td>
                 <td class="px-2 py-2">
@@ -248,7 +273,7 @@
       </div>
 
       <div class="mt-3 text-xs text-slate-400">
-        X/Y are normalized to the keycap face: (0,0)=top-left, (1,1)=bottom-right.
+        X/Y are in keycap units (u): (0,0)=top-left. Max is model size ({modelWidthU}u×{modelHeightU}u).
       </div>
     {/if}
     </section>
@@ -257,7 +282,13 @@
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:w-[340px] lg:flex-none">
     <div class="text-sm font-semibold">Template preview</div>
     <div class="mt-3 flex items-center justify-center">
-      <LabelPreview template={tpl} textsBySymbolId={previewTextsBySymbolId} className="max-w-[340px]" />
+      <LabelPreview
+        template={tpl}
+        textsBySymbolId={previewTextsBySymbolId}
+        widthU={modelWidthU}
+        heightU={modelHeightU}
+        className="max-w-[340px]"
+      />
     </div>
     <div class="mt-3 text-xs text-slate-400">Uses each symbol’s slot name as placeholder text.</div>
   </section>

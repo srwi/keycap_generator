@@ -5,6 +5,10 @@
   $: key = $selectedKey
   $: tpl =
     key == null ? null : $app.templates.find((t) => t.id === key.templateId) ?? null
+  $: model =
+    tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
+  $: modelWidthU = model?.widthU ?? 1
+  $: modelHeightU = model?.heightU ?? 1
 </script>
 
 <div class="grid gap-4 lg:grid-cols-12">
@@ -106,7 +110,13 @@
     <div class="text-sm font-semibold">Preview</div>
     <div class="mt-3 flex items-center justify-center">
       {#if key}
-        <LabelPreview template={tpl} textsBySymbolId={key.textsBySymbolId} className="max-w-[340px]" />
+        <LabelPreview
+          template={tpl}
+          textsBySymbolId={key.textsBySymbolId}
+          widthU={modelWidthU}
+          heightU={modelHeightU}
+          className="max-w-[340px]"
+        />
       {:else}
         <div class="text-sm text-slate-400">Select a key to preview.</div>
       {/if}

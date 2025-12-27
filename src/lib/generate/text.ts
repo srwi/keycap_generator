@@ -7,6 +7,8 @@ import { getFont } from './fonts'
 export function buildKeyTextGeometry(opts: {
   key: KeyDef
   template: Template
+  modelWidthU: number
+  modelHeightU: number
   extrusionDepthMm: number
   faceMinX: number
   faceMaxX: number
@@ -17,6 +19,8 @@ export function buildKeyTextGeometry(opts: {
 
   const width = opts.faceMaxX - opts.faceMinX
   const height = opts.faceMaxY - opts.faceMinY
+  const wU = opts.modelWidthU || 1
+  const hU = opts.modelHeightU || 1
 
   for (const sym of opts.template.symbols) {
     const text = (opts.key.textsBySymbolId[sym.id] ?? '').trim()
@@ -39,8 +43,11 @@ export function buildKeyTextGeometry(opts: {
 
     g.translate(dx, dy, 0)
 
-    const tx = opts.faceMinX + sym.x * width
-    const ty = opts.faceMaxY - sym.y * height
+    const xNorm = sym.x / wU
+    const yNorm = sym.y / hU
+
+    const tx = opts.faceMinX + xNorm * width
+    const ty = opts.faceMaxY - yNorm * height
 
     const rz = MathUtils.degToRad(sym.rotationDeg)
     if (rz !== 0) g.rotateZ(rz)

@@ -1,4 +1,4 @@
-import type { AppState, KeyDef, Template } from '../state/types'
+import type { AppState, KeyDef, KeycapModel, Template } from '../state/types'
 import { alignMinZToZero, parseStl } from './stl'
 import { buildKeyTextGeometry } from './text'
 import { subtractGeometry } from './csg'
@@ -27,13 +27,37 @@ function getTemplate(state: AppState, key: KeyDef): Template | null {
   return state.templates.find((t) => t.id === key.templateId) ?? null
 }
 
+function getModel(state: AppState, tpl: Template): KeycapModel | null {
+  return state.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
+}
+
+const serverStlCache = new Map<string, ArrayBuffer>()
+
+async function getStlBufferForModel(model: KeycapModel, stlBuffersByModelId: Record<string, ArrayBuffer | null>) {
+  if (model.source.kind === 'upload') {
+    const buf = stlBuffersByModelId[model.id]
+    if (!buf) throw new Error(`Missing STL for model "${model.name}". Upload it in the Models step.`)
+    return buf
+  }
+
+  const cached = serverStlCache.get(model.source.url)
+  if (cached) return cached
+
+  const res = await fetch(model.source.url)
+  if (!res.ok) {
+    throw new Error(`Failed to fetch server STL for model "${model.name}" (${model.source.url}).`)
+  }
+  const buf = await res.arrayBuffer()
+  serverStlCache.set(model.source.url, buf)
+  return buf
+}
+
 export async function generateAll3mfs(
   state: AppState,
-  stlBuf: ArrayBuffer,
+  stlBuffersByModelId: Record<string, ArrayBuffer | null>,
   onProgress?: (p: { current: number; total: number; keyName: string }) => void,
 ) {
-  const base = parseStl(stlBuf)
-  const aligned = alignMinZToZero(base)
+  const alignedByModelId = new Map<string, ReturnType<typeof alignMinZToZero>>()
 
   const total = state.keys.length
   for (let i = 0; i < total; i++) {
@@ -43,9 +67,23 @@ export async function generateAll3mfs(
     const tpl = getTemplate(state, key)
     if (!tpl) continue
 
+    const model = getModel(state, tpl)
+    if (!model) throw new Error(`Template "${tpl.name}" references a missing keycap model.`)
+
+    let aligned = alignedByModelId.get(model.id)
+    if (!aligned) {
+      const stlBuf = await getStlBufferForModel(model, stlBuffersByModelId)
+      aligned = alignMinZToZero(parseStl(stlBuf))
+      alignedByModelId.set(model.id, aligned)
+    }
+
+    const baseGeom = aligned.geometry.clone()
+
     const legendGeom = buildKeyTextGeometry({
       key,
       template: tpl,
+      modelWidthU: model.widthU,
+      modelHeightU: model.heightU,
       extrusionDepthMm: state.settings.extrusionDepthMm,
       faceMinX: aligned.min.x,
       faceMaxX: aligned.max.x,
@@ -53,7 +91,7 @@ export async function generateAll3mfs(
       faceMaxY: aligned.max.y,
     })
 
-    const bodyGeom = legendGeom ? subtractGeometry(aligned.geometry, legendGeom) : aligned.geometry.clone()
+    const bodyGeom = legendGeom ? subtractGeometry(baseGeom, legendGeom) : baseGeom
 
     const zip = make3mfZip({
       modelName: key.name,

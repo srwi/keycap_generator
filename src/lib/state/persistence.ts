@@ -1,12 +1,19 @@
 import { get } from 'svelte/store'
 import { app } from './store'
 import type { AppState } from './types'
-import { stlArrayBuffer } from './sessionAssets'
+import { stlBuffersByModelId } from './sessionAssets'
 
 function sanitizeForExport(state: AppState): AppState {
-  // Never embed STL bytes in the project file. Only keep the persisted reference.
-  if (!state.stl) return state
-  return { ...state, stl: { fileName: state.stl.fileName, pathHint: state.stl.pathHint } }
+  // Never embed STL bytes in the project file. Only keep refs on models.
+  return {
+    ...state,
+    keycapModels: state.keycapModels.map((m) => {
+      if (m.source.kind === 'upload') {
+        return { ...m, source: { ...m.source, stl: m.source.stl ? { ...m.source.stl } : null } }
+      }
+      return { ...m, source: { ...m.source, stl: { ...m.source.stl } } }
+    }),
+  }
 }
 
 function asString(v: unknown, fallback = ''): string {
@@ -25,13 +32,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 function parseProjectV1(raw: unknown): AppState | null {
   if (!isRecord(raw)) return null
   if (raw.version !== 1) return null
-  if (!Array.isArray(raw.templates) || !Array.isArray(raw.keys)) return null
-
-  const stlRaw = isRecord(raw.stl) ? raw.stl : null
-  const stl =
-    stlRaw && typeof stlRaw.fileName === 'string'
-      ? { fileName: stlRaw.fileName, pathHint: asString(stlRaw.pathHint, '') }
-      : null
+  if (!Array.isArray((raw as any).keycapModels) || !Array.isArray(raw.templates) || !Array.isArray(raw.keys)) return null
 
   const settingsRaw = isRecord(raw.settings) ? raw.settings : null
   const uiRaw = isRecord(raw.ui) ? raw.ui : null
@@ -40,11 +41,12 @@ function parseProjectV1(raw: unknown): AppState | null {
   // guard the outer envelope so project loading is predictable.
   return {
     version: 1,
+    keycapModels: (raw as any).keycapModels as AppState['keycapModels'],
     templates: raw.templates as AppState['templates'],
     keys: raw.keys as AppState['keys'],
-    stl,
     settings: { extrusionDepthMm: asNumber(settingsRaw?.extrusionDepthMm, 0.8) },
     ui: {
+      selectedKeycapModelId: typeof (uiRaw as any)?.selectedKeycapModelId === 'string' ? (uiRaw as any).selectedKeycapModelId : null,
       selectedTemplateId: typeof uiRaw?.selectedTemplateId === 'string' ? uiRaw.selectedTemplateId : null,
       selectedKeyId: typeof uiRaw?.selectedKeyId === 'string' ? uiRaw.selectedKeyId : null,
     },
@@ -78,8 +80,8 @@ export async function loadStateFromFile(ev: Event) {
     return
   }
 
-  // Loaded projects only contain the STL reference; require re-upload for generation.
-  stlArrayBuffer.set(null)
+  // Loaded projects only contain STL references; require re-upload / server fetch for generation.
+  stlBuffersByModelId.set({})
   app.set(parsed)
 }
 

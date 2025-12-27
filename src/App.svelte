@@ -1,11 +1,12 @@
 <script lang="ts">
   import { app } from './lib/state/store'
   import { downloadStateFile, loadStateFromFile } from './lib/state/persistence'
+  import KeycapModelsEditor from './lib/ui/KeycapModelsEditor.svelte'
   import TemplateEditor from './lib/ui/TemplateEditor.svelte'
   import KeyEditor from './lib/ui/KeyEditor.svelte'
   import GeneratePanel from './lib/ui/GeneratePanel.svelte'
 
-  let tab: 'templates' | 'keys' | 'generate' = 'templates'
+  let tab: 'models' | 'templates' | 'keys' | 'generate' = 'models'
 </script>
 
 <div class="min-h-dvh">
@@ -36,6 +37,13 @@
     <nav class="flex flex-wrap gap-2">
       <button
         class="rounded-md px-3 py-1.5 text-sm ring-1 ring-slate-800 hover:bg-slate-900"
+        class:bg-slate-900={tab === 'models'}
+        on:click={() => (tab = 'models')}
+      >
+        Models
+      </button>
+      <button
+        class="rounded-md px-3 py-1.5 text-sm ring-1 ring-slate-800 hover:bg-slate-900"
         class:bg-slate-900={tab === 'templates'}
         on:click={() => (tab = 'templates')}
       >
@@ -58,7 +66,9 @@
     </nav>
 
     <div class="mt-4">
-      {#if tab === 'templates'}
+      {#if tab === 'models'}
+        <KeycapModelsEditor />
+      {:else if tab === 'templates'}
         <TemplateEditor />
       {:else if tab === 'keys'}
         <KeyEditor />

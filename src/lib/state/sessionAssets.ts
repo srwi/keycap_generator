@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store'
 
-// Session-only (never exported in project file).
-export const stlArrayBuffer = writable<ArrayBuffer | null>(null)
+// Session-only STL bytes (never exported in project file).
+export const stlBuffersByModelId = writable<Record<string, ArrayBuffer | null>>({})
 
 

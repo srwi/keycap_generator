@@ -1,5 +1,5 @@
 import { derived, writable } from 'svelte/store'
-import type { AppState, KeyDef, SymbolDef, Template } from './types'
+import type { AppState, KeyDef, KeycapModel, SymbolDef, Template } from './types'
 import { newId } from '../utils/id'
 
 function defaultSymbol(): SymbolDef {
@@ -16,16 +16,28 @@ function defaultSymbol(): SymbolDef {
   }
 }
 
-function defaultTemplate(): Template {
+function defaultKeycapModel(): KeycapModel {
+  return {
+    id: newId('model'),
+    name: '1u',
+    widthU: 1,
+    heightU: 1,
+    source: { kind: 'upload', stl: null },
+  }
+}
+
+function defaultTemplate(keycapModelId: string): Template {
   return {
     id: newId('tpl'),
     name: 'New template',
+    keycapModelId,
     symbols: [defaultSymbol()],
   }
 }
 
 function defaultState(): AppState {
-  const tpl = defaultTemplate()
+  const model = defaultKeycapModel()
+  const tpl = defaultTemplate(model.id)
   const key: KeyDef = {
     id: newId('key'),
     name: 'Key 1',
@@ -35,13 +47,14 @@ function defaultState(): AppState {
 
   return {
     version: 1,
+    keycapModels: [model],
     templates: [tpl],
     keys: [key],
-    stl: null,
     settings: {
       extrusionDepthMm: 0.8,
     },
     ui: {
+      selectedKeycapModelId: model.id,
       selectedTemplateId: tpl.id,
       selectedKeyId: key.id,
     },
@@ -57,6 +70,10 @@ export const selectedTemplate = derived(app, ($app) =>
 export const selectedKey = derived(app, ($app) => $app.keys.find((k) => k.id === $app.ui.selectedKeyId) ?? null)
 
 export const actions = {
+  selectKeycapModel(modelId: string | null) {
+    app.update((s) => ({ ...s, ui: { ...s.ui, selectedKeycapModelId: modelId } }))
+  },
+
   selectTemplate(templateId: string | null) {
     app.update((s) => ({ ...s, ui: { ...s.ui, selectedTemplateId: templateId } }))
   },
@@ -66,12 +83,16 @@ export const actions = {
   },
 
   createTemplate() {
-    const tpl = defaultTemplate()
-    app.update((s) => ({
-      ...s,
-      templates: [...s.templates, tpl],
-      ui: { ...s.ui, selectedTemplateId: tpl.id },
-    }))
+    app.update((s) => {
+      const modelId = s.ui.selectedKeycapModelId ?? s.keycapModels[0]?.id
+      if (!modelId) return s
+      const tpl = defaultTemplate(modelId)
+      return {
+        ...s,
+        templates: [...s.templates, tpl],
+        ui: { ...s.ui, selectedTemplateId: tpl.id },
+      }
+    })
   },
 
   renameTemplate(templateId: string, name: string) {
@@ -98,6 +119,73 @@ export const actions = {
         templates: nextTemplates,
         keys: nextKeys,
         ui: { ...s.ui, selectedTemplateId: nextSelectedTemplateId, selectedKeyId: nextSelectedKeyId },
+      }
+    })
+  },
+
+  setTemplateKeycapModel(templateId: string, keycapModelId: string) {
+    app.update((s) => ({
+      ...s,
+      templates: s.templates.map((t) => (t.id === templateId ? { ...t, keycapModelId } : t)),
+    }))
+  },
+
+  createKeycapModel() {
+    const model = defaultKeycapModel()
+    app.update((s) => ({
+      ...s,
+      keycapModels: [...s.keycapModels, model],
+      ui: { ...s.ui, selectedKeycapModelId: model.id },
+    }))
+  },
+
+  renameKeycapModel(modelId: string, name: string) {
+    app.update((s) => ({ ...s, keycapModels: s.keycapModels.map((m) => (m.id === modelId ? { ...m, name } : m)) }))
+  },
+
+  updateKeycapModel(modelId: string, patch: Partial<Pick<KeycapModel, 'widthU' | 'heightU'>>) {
+    app.update((s) => ({
+      ...s,
+      keycapModels: s.keycapModels.map((m) => (m.id === modelId ? { ...m, ...patch } : m)),
+    }))
+  },
+
+  setKeycapModelSource(modelId: string, source: KeycapModel['source']) {
+    app.update((s) => ({
+      ...s,
+      keycapModels: s.keycapModels.map((m) => (m.id === modelId ? { ...m, source } : m)),
+    }))
+  },
+
+  deleteKeycapModel(modelId: string) {
+    app.update((s) => {
+      const templatesToRemove = s.templates.filter((t) => t.keycapModelId === modelId).map((t) => t.id)
+      const keysToRemove = s.keys.filter((k) => templatesToRemove.includes(k.templateId)).map((k) => k.id)
+
+      const nextModels = s.keycapModels.filter((m) => m.id !== modelId)
+      const nextTemplates = s.templates.filter((t) => t.keycapModelId !== modelId)
+      const nextKeys = s.keys.filter((k) => !templatesToRemove.includes(k.templateId))
+
+      const nextSelectedModelId =
+        s.ui.selectedKeycapModelId === modelId ? (nextModels[0]?.id ?? null) : s.ui.selectedKeycapModelId
+      const nextSelectedTemplateId = templatesToRemove.includes(s.ui.selectedTemplateId ?? '')
+        ? (nextTemplates[0]?.id ?? null)
+        : s.ui.selectedTemplateId
+      const nextSelectedKeyId = keysToRemove.includes(s.ui.selectedKeyId ?? '')
+        ? (nextKeys[0]?.id ?? null)
+        : s.ui.selectedKeyId
+
+      return {
+        ...s,
+        keycapModels: nextModels,
+        templates: nextTemplates,
+        keys: nextKeys,
+        ui: {
+          ...s.ui,
+          selectedKeycapModelId: nextSelectedModelId,
+          selectedTemplateId: nextSelectedTemplateId,
+          selectedKeyId: nextSelectedKeyId,
+        },
       }
     })
   },
@@ -204,10 +292,6 @@ export const actions = {
 
   setExtrusionDepthMm(extrusionDepthMm: number) {
     app.update((s) => ({ ...s, settings: { ...s.settings, extrusionDepthMm } }))
-  },
-
-  setStlAsset(stl: AppState['stl']) {
-    app.update((s) => ({ ...s, stl }))
   },
 }
 
