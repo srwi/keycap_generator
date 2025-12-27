@@ -1,19 +1,10 @@
 <script lang="ts">
-  import { app, actions, selectedKey } from '../state/store'
+  import { app, actions } from '../state/store'
   import { generateAll3mfs } from '../generate/generate'
   import { stlBuffersByModelId } from '../state/sessionAssets'
-  import LabelPreview from './LabelPreview.svelte'
 
   let isGenerating = false
   let progressText = ''
-
-  $: key = $selectedKey
-  $: tpl =
-    key == null ? null : $app.templates.find((t) => t.id === key.templateId) ?? null
-  $: model =
-    tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
-  $: modelWidthU = model?.widthU ?? 1
-  $: modelHeightU = model?.heightU ?? 1
 
   $: requiredModelIds = Array.from(
     new Set(
@@ -87,26 +78,6 @@
           {/if}
         </div>
       </div>
-    </div>
-  </section>
-
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1">
-    <div class="text-sm font-semibold">Preview</div>
-    <div class="mt-3 flex items-center justify-center">
-      {#if key}
-        <LabelPreview
-          template={tpl}
-          textsBySymbolId={key.textsBySymbolId}
-          widthU={modelWidthU}
-          heightU={modelHeightU}
-          className="max-w-[340px]"
-        />
-      {:else}
-        <div class="text-sm text-slate-400">Select a key to preview.</div>
-      {/if}
-    </div>
-    <div class="mt-3 text-xs text-slate-400">
-      This is the legend preview for the currently selected key.
     </div>
   </section>
 </div>

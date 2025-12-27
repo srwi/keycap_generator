@@ -2,12 +2,12 @@ import { derived, writable } from 'svelte/store'
 import type { AppState, KeyDef, KeycapModel, SymbolDef, Template } from './types'
 import { newId } from '../utils/id'
 
-function defaultSymbol(): SymbolDef {
+function defaultSymbol(x?: number, y?: number): SymbolDef {
   return {
     id: newId('sym'),
     slotName: 'main',
-    x: 0.5,
-    y: 0.5,
+    x: x ?? 0.5,
+    y: y ?? 0.5,
     fontFamily: 'helvetiker',
     fontWeight: 'regular',
     fontSizeMm: 4,
@@ -191,10 +191,14 @@ export const actions = {
   },
 
   addSymbol(templateId: string) {
-    const sym = defaultSymbol()
     app.update((s) => {
       const tpl = s.templates.find((t) => t.id === templateId)
       if (!tpl) return s
+
+      const model = s.keycapModels.find((m) => m.id === tpl.keycapModelId)
+      const x = model ? model.widthU / 2 : 0.5
+      const y = model ? model.heightU / 2 : 0.5
+      const sym = defaultSymbol(x, y)
 
       const nextTemplates = s.templates.map((t) => (t.id === templateId ? { ...t, symbols: [...t.symbols, sym] } : t))
       const nextKeys = s.keys.map((k) => {
