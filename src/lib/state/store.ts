@@ -5,7 +5,7 @@ import { newId } from '../utils/id'
 function defaultSymbol(x?: number, y?: number): SymbolDef {
   return {
     id: newId('sym'),
-    slotName: 'main',
+    slotName: 'Symbol',
     x: x ?? 0.5,
     y: y ?? 0.5,
     fontFamily: 'helvetiker',
@@ -29,7 +29,7 @@ function defaultKeycapModel(): KeycapModel {
 function defaultTemplate(keycapModelId: string): Template {
   return {
     id: newId('tpl'),
-    name: 'New template',
+    name: 'Regular key',
     keycapModelId,
     symbols: [defaultSymbol()],
   }

@@ -1,4 +1,3 @@
-import { get } from 'svelte/store'
 import { app } from './store'
 import type { AppState } from './types'
 import { stlBuffersByModelId } from './sessionAssets'
@@ -14,10 +13,6 @@ function sanitizeForExport(state: AppState): AppState {
       return { ...m, source: { ...m.source, stl: { ...m.source.stl } } }
     }),
   }
-}
-
-function asString(v: unknown, fallback = ''): string {
-  return typeof v === 'string' ? v : fallback
 }
 
 function asNumber(v: unknown, fallback: number): number {
@@ -63,7 +58,7 @@ export function downloadStateFile(state: AppState) {
 
   const a = document.createElement('a')
   a.href = url
-  a.download = 'keycap-generator.project.json'
+  a.download = 'keycap-generator-project.json'
   a.click()
 
   setTimeout(() => URL.revokeObjectURL(url), 500)
@@ -85,8 +80,4 @@ export async function loadStateFromFile(ev: Event) {
   // Loaded projects only contain STL references; require re-upload / server fetch for generation.
   stlBuffersByModelId.set({})
   app.set(parsed)
-}
-
-export function exportState(): AppState {
-  return sanitizeForExport(get(app))
 }
