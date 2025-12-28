@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "keycap_generator_cursor",
+      "name": "keycap_generator",
       "dependencies": {
         "fflate": "^0.8.2",
         "three": "^0.182.0",
