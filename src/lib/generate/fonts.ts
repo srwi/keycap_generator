@@ -29,5 +29,3 @@ export function getFont(family: FontFamily, weight: FontWeight): Font {
   cache.set(key, font)
   return font
 }
-
-

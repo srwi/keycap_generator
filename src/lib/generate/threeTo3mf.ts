@@ -40,10 +40,10 @@ export async function exportTo3MF(group: THREE.Group, options?: { printer_name?:
   let objectId = 1
 
   // Traverse the group and collect all meshes
-  group.traverse((child) => {
+  group.traverse(child => {
     if (child instanceof THREE.Mesh && child.geometry) {
       const geometry = child.geometry.clone()
-      
+
       // Apply mesh matrix to geometry (safe even if identity)
       if (child.matrix) {
         geometry.applyMatrix4(child.matrix)
@@ -52,7 +52,7 @@ export async function exportTo3MF(group: THREE.Group, options?: { printer_name?:
       const name = child.name || `object_${objectId}`
       const meshXml = geometryToMeshXml(geometry)
       resources.push(
-        `<object id="${objectId}" type="model"><metadata name="name">${esc(name)}</metadata>${meshXml}</object>`,
+        `<object id="${objectId}" type="model"><metadata name="name">${esc(name)}</metadata>${meshXml}</object>`
       )
       buildItems.push(`<item objectid="${objectId}"/>`)
       objectId++
@@ -88,5 +88,3 @@ export async function exportTo3MF(group: THREE.Group, options?: { printer_name?:
 
   return new Blob([zipBytes], { type: 'model/3mf' })
 }
-
-

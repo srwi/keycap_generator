@@ -64,5 +64,3 @@ export type AppState = {
   settings: AppSettings
   ui: AppUiState
 }
-
-

@@ -8,11 +8,13 @@ import { MathUtils, Group, Mesh, BufferGeometry } from 'three'
 import { zipSync } from 'fflate'
 
 function safeFileName(name: string): string {
-  return name
-    .trim()
-    .replaceAll(/[\s]+/g, '_')
-    .replaceAll(/[<>:"/\\|?*\u0000-\u001F]/g, '_')
-    .slice(0, 120) || 'key'
+  return (
+    name
+      .trim()
+      .replaceAll(/[\s]+/g, '_')
+      .replaceAll(/[<>:"/\\|?*\u0000-\u001F]/g, '_')
+      .slice(0, 120) || 'key'
+  )
 }
 
 function downloadBytes(bytes: Uint8Array, fileName: string, mime = 'model/3mf') {
@@ -27,11 +29,11 @@ function downloadBytes(bytes: Uint8Array, fileName: string, mime = 'model/3mf') 
 }
 
 function getTemplate(state: AppState, key: KeyDef): Template | null {
-  return state.templates.find((t) => t.id === key.templateId) ?? null
+  return state.templates.find(t => t.id === key.templateId) ?? null
 }
 
 function getModel(state: AppState, tpl: Template): KeycapModel | null {
-  return state.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
+  return state.keycapModels.find(m => m.id === tpl.keycapModelId) ?? null
 }
 
 const serverStlCache = new Map<string, ArrayBuffer>()
@@ -58,7 +60,7 @@ async function getStlBufferForModel(model: KeycapModel, stlBuffersByModelId: Rec
 export async function generateAll3mfs(
   state: AppState,
   stlBuffersByModelId: Record<string, ArrayBuffer | null>,
-  onProgress?: (p: { current: number; total: number; keyName: string }) => void,
+  onProgress?: (p: { current: number; total: number; keyName: string }) => void
 ) {
   const baseGeomByModelId = new Map<string, BufferGeometry>()
   const files: Record<string, Uint8Array> = {}
@@ -161,12 +163,10 @@ export async function generateAll3mfs(
     files[`${safeFileName(key.name)}.3mf`] = new Uint8Array(arrayBuffer)
 
     // Yield to keep UI responsive when generating many keys.
-    await new Promise((r) => setTimeout(r, 0))
+    await new Promise(r => setTimeout(r, 0))
   }
 
   // Create a single ZIP file containing all 3MF files
   const allFilesZip = zipSync(files)
   downloadBytes(allFilesZip, 'keycaps.zip', 'application/zip')
 }
-
-

@@ -31,5 +31,3 @@ export function csgUnionMeshes(meshes: THREE.Mesh[]): THREE.Mesh | null {
   }
   return CSG.CSG.toMesh(acc, meshes[0].matrix, meshes[0].material)
 }
-
-

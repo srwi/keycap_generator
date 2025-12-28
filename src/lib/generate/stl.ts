@@ -22,5 +22,3 @@ export function alignBottomTo(geometry: BufferGeometry, targetZ = 0): void {
   const minZ = geometry.boundingBox!.min.z
   geometry.translate(0, 0, targetZ - minZ)
 }
-
-

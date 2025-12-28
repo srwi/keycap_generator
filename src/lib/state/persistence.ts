@@ -7,7 +7,7 @@ function sanitizeForExport(state: AppState): AppState {
   // Never embed STL bytes in the project file. Only keep refs on models.
   return {
     ...state,
-    keycapModels: state.keycapModels.map((m) => {
+    keycapModels: state.keycapModels.map(m => {
       if (m.source.kind === 'upload') {
         return { ...m, source: { ...m.source, stl: m.source.stl ? { ...m.source.stl } : null } }
       }
@@ -32,7 +32,8 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 function parseProjectV1(raw: unknown): AppState | null {
   if (!isRecord(raw)) return null
   if (raw.version !== 1) return null
-  if (!Array.isArray((raw as any).keycapModels) || !Array.isArray(raw.templates) || !Array.isArray(raw.keys)) return null
+  if (!Array.isArray((raw as any).keycapModels) || !Array.isArray(raw.templates) || !Array.isArray(raw.keys))
+    return null
 
   const settingsRaw = isRecord(raw.settings) ? raw.settings : null
   const uiRaw = isRecord(raw.ui) ? raw.ui : null
@@ -46,7 +47,8 @@ function parseProjectV1(raw: unknown): AppState | null {
     keys: raw.keys as AppState['keys'],
     settings: { extrusionDepthMm: asNumber(settingsRaw?.extrusionDepthMm, 0.8) },
     ui: {
-      selectedKeycapModelId: typeof (uiRaw as any)?.selectedKeycapModelId === 'string' ? (uiRaw as any).selectedKeycapModelId : null,
+      selectedKeycapModelId:
+        typeof (uiRaw as any)?.selectedKeycapModelId === 'string' ? (uiRaw as any).selectedKeycapModelId : null,
       selectedTemplateId: typeof uiRaw?.selectedTemplateId === 'string' ? uiRaw.selectedTemplateId : null,
       selectedKeyId: typeof uiRaw?.selectedKeyId === 'string' ? uiRaw.selectedKeyId : null,
     },
@@ -88,5 +90,3 @@ export async function loadStateFromFile(ev: Event) {
 export function exportState(): AppState {
   return sanitizeForExport(get(app))
 }
-
-
