@@ -25,7 +25,6 @@
   "dependencies": {
     "fflate": "^0.8.2",
     "three": "^0.182.0",
-    "three-bvh-csg": "^0.0.17",
-    "three-mesh-bvh": "^0.9.4"
+    "three-csg-ts": "^3.2.0"
   }
 }

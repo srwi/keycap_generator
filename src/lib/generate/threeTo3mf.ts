@@ -1,4 +1,5 @@
 import type { BufferGeometry } from 'three'
+import * as THREE from 'three'
 import { zipSync, strToU8 } from 'fflate'
 
 function esc(s: string): string {
@@ -33,27 +34,35 @@ function geometryToMeshXml(geometry: BufferGeometry): string {
   return `<mesh><vertices>${vertices}</vertices><triangles>${triangles}</triangles></mesh>`
 }
 
-export function make3mfZip(opts: {
-  modelName: string
-  bodyGeometry: BufferGeometry
-  legendGeometry: BufferGeometry | null
-}): Uint8Array {
+export async function exportTo3MF(group: THREE.Group, options?: { printer_name?: string }): Promise<Blob> {
   const resources: string[] = []
-  resources.push(
-    `<object id="1" type="model"><metadata name="name">${esc(opts.modelName)}-body</metadata>${geometryToMeshXml(opts.bodyGeometry)}</object>`,
-  )
-  if (opts.legendGeometry) {
-    resources.push(
-      `<object id="2" type="model"><metadata name="name">${esc(opts.modelName)}-legend</metadata>${geometryToMeshXml(opts.legendGeometry)}</object>`,
-    )
-  }
+  const buildItems: string[] = []
+  let objectId = 1
 
-  const buildItems = [`<item objectid="1"/>`]
-  if (opts.legendGeometry) buildItems.push(`<item objectid="2"/>`)
+  // Traverse the group and collect all meshes
+  group.traverse((child) => {
+    if (child instanceof THREE.Mesh && child.geometry) {
+      const geometry = child.geometry.clone()
+      
+      // Apply mesh matrix to geometry (safe even if identity)
+      if (child.matrix) {
+        geometry.applyMatrix4(child.matrix)
+      }
+
+      const name = child.name || `object_${objectId}`
+      const meshXml = geometryToMeshXml(geometry)
+      resources.push(
+        `<object id="${objectId}" type="model"><metadata name="name">${esc(name)}</metadata>${meshXml}</object>`,
+      )
+      buildItems.push(`<item objectid="${objectId}"/>`)
+      objectId++
+    }
+  })
 
   const modelXml =
     `<?xml version="1.0" encoding="UTF-8"?>` +
     `<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02">` +
+    `<metadata name="printer_name">${options?.printer_name || 'Unknown'}</metadata>` +
     `<resources>${resources.join('')}</resources>` +
     `<build>${buildItems.join('')}</build>` +
     `</model>`
@@ -71,11 +80,13 @@ export function make3mfZip(opts: {
     `<Relationship Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel" Target="/3D/3dmodel.model"/>` +
     `</Relationships>`
 
-  return zipSync({
+  const zipBytes = zipSync({
     '[Content_Types].xml': strToU8(contentTypes),
     '_rels/.rels': strToU8(rels),
     '3D/3dmodel.model': strToU8(modelXml),
   })
+
+  return new Blob([zipBytes], { type: 'model/3mf' })
 }
 
 

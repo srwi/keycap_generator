@@ -1,8 +1,10 @@
 import type { AppState, KeyDef, KeycapModel, Template } from '../state/types'
-import { alignMinZToZero, parseStl } from './stl'
-import { buildKeyTextGeometry } from './text'
-import { subtractGeometry } from './csg'
-import { make3mfZip } from './threeTo3mf'
+import { parseSTL, centerGeometryXY, alignBottomTo } from './stl'
+import { makeMesh, csgIntersect, csgSubtract, csgUnionMeshes } from './csg'
+import { exportTo3MF } from './threeTo3mf'
+import { getFont } from './fonts'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
+import { MathUtils, Group, Mesh, BufferGeometry } from 'three'
 import { zipSync } from 'fflate'
 
 function safeFileName(name: string): string {
@@ -58,50 +60,105 @@ export async function generateAll3mfs(
   stlBuffersByModelId: Record<string, ArrayBuffer | null>,
   onProgress?: (p: { current: number; total: number; keyName: string }) => void,
 ) {
-  const alignedByModelId = new Map<string, ReturnType<typeof alignMinZToZero>>()
+  const baseGeomByModelId = new Map<string, BufferGeometry>()
   const files: Record<string, Uint8Array> = {}
+
+  if (state.keys.length === 0) {
+    throw new Error('No keys configured')
+  }
 
   const total = state.keys.length
   for (let i = 0; i < total; i++) {
     const key = state.keys[i]
     onProgress?.({ current: i + 1, total, keyName: key.name })
 
-    const tpl = getTemplate(state, key)
-    if (!tpl) continue
-
-    const model = getModel(state, tpl)
-    if (!model) throw new Error(`Template "${tpl.name}" references a missing keycap model.`)
-
-    let aligned = alignedByModelId.get(model.id)
-    if (!aligned) {
-      const stlBuf = await getStlBufferForModel(model, stlBuffersByModelId)
-      aligned = alignMinZToZero(parseStl(stlBuf))
-      alignedByModelId.set(model.id, aligned)
+    const template = getTemplate(state, key)
+    if (!template) {
+      onProgress?.({ current: i + 1, total, keyName: `Skipping key ${i + 1}: template not found` })
+      continue
     }
 
-    const baseGeom = aligned.geometry.clone()
+    const model = getModel(state, template)
+    if (!model) throw new Error(`Template "${template.name}" references a missing keycap model.`)
 
-    const legendGeom = buildKeyTextGeometry({
-      key,
-      template: tpl,
-      modelWidthU: model.widthU,
-      modelHeightU: model.heightU,
-      extrusionDepthMm: state.settings.extrusionDepthMm,
-      faceMinX: aligned.min.x,
-      faceMaxX: aligned.max.x,
-      faceMinY: aligned.min.y,
-      faceMaxY: aligned.max.y,
+    // Get or create base geometry for this model
+    let baseGeom = baseGeomByModelId.get(model.id)
+    if (!baseGeom) {
+      const stlBuf = await getStlBufferForModel(model, stlBuffersByModelId)
+      baseGeom = await parseSTL(stlBuf)
+      centerGeometryXY(baseGeom)
+      alignBottomTo(baseGeom, 0)
+      baseGeom.computeBoundingBox()
+      baseGeomByModelId.set(model.id, baseGeom)
+    }
+
+    const baseMinZ = baseGeom.boundingBox!.min.z
+    const textMeshes: { mesh: Mesh; color: number; name?: string }[] = []
+    const extrusionMeshes: Mesh[] = []
+
+    // Process each symbol in the template
+    for (const sym of template.symbols) {
+      const text = (key.textsBySymbolId[sym.id] ?? '').trim()
+      if (!text) continue
+
+      const font = getFont(sym.fontFamily, sym.fontWeight)
+      const textGeom = new TextGeometry(text, {
+        font,
+        size: sym.fontSizeMm,
+        height: state.settings.extrusionDepthMm,
+        curveSegments: 6,
+        bevelEnabled: false,
+      } as any)
+
+      textGeom.computeVertexNormals()
+      centerGeometryXY(textGeom)
+
+      // Calculate position based on symbol coordinates
+      const width = baseGeom.boundingBox!.max.x - baseGeom.boundingBox!.min.x
+      const height = baseGeom.boundingBox!.max.y - baseGeom.boundingBox!.min.y
+      const wU = model.widthU || 1
+      const hU = model.heightU || 1
+
+      const xNorm = sym.x / wU
+      const yNorm = sym.y / hU
+      const tx = baseGeom.boundingBox!.min.x + xNorm * width
+      const ty = baseGeom.boundingBox!.max.y - yNorm * height
+
+      const rz = MathUtils.degToRad(sym.rotationDeg)
+      if (rz !== 0) textGeom.rotateZ(rz)
+      textGeom.translate(tx, ty, 0)
+      alignBottomTo(textGeom, baseMinZ)
+
+      const color = parseInt(sym.color.replace('#', '0x'))
+      const extrMesh = makeMesh(textGeom, color)
+      extrusionMeshes.push(extrMesh)
+
+      const interMesh = makeMesh(textGeom.clone() as BufferGeometry, color)
+      textMeshes.push({ mesh: interMesh, color, name: text })
+    }
+
+    onProgress?.({ current: i + 1, total, keyName: `Performing CSG operations for ${key.name}...` })
+
+    const baseMesh = makeMesh(baseGeom.clone() as BufferGeometry, 0xdddddd)
+    const unionExtrusion = csgUnionMeshes(extrusionMeshes)
+    const bodyResult = unionExtrusion ? csgSubtract(baseMesh, unionExtrusion) : baseMesh
+
+    const group = new Group()
+    bodyResult.name = 'body'
+    group.add(bodyResult)
+
+    textMeshes.forEach((tr, j) => {
+      const r = csgIntersect(baseMesh, tr.mesh)
+      r.material = tr.mesh.material
+      r.name = tr.name || `text_${j}`
+      group.add(r)
     })
 
-    const bodyGeom = legendGeom ? subtractGeometry(baseGeom, legendGeom) : baseGeom
+    onProgress?.({ current: i + 1, total, keyName: `Exporting ${key.name}...` })
 
-    const zip = make3mfZip({
-      modelName: key.name,
-      bodyGeometry: bodyGeom,
-      legendGeometry: legendGeom,
-    })
-
-    files[`${safeFileName(key.name)}.3mf`] = zip
+    const blob = await exportTo3MF(group, { printer_name: 'Bambu Lab A1' })
+    const arrayBuffer = await blob.arrayBuffer()
+    files[`${safeFileName(key.name)}.3mf`] = new Uint8Array(arrayBuffer)
 
     // Yield to keep UI responsive when generating many keys.
     await new Promise((r) => setTimeout(r, 0))

@@ -1,23 +1,26 @@
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
-import { BufferGeometry, Vector3 } from 'three'
+import { BufferGeometry } from 'three'
 
-export function parseStl(arrayBuffer: ArrayBuffer): BufferGeometry {
+export async function parseSTL(arrayBuffer: ArrayBuffer): Promise<BufferGeometry> {
   const loader = new STLLoader()
-  const geom = loader.parse(arrayBuffer)
+  const geometry = loader.parse(arrayBuffer)
+  const geom = geometry as BufferGeometry
   geom.computeVertexNormals()
-  geom.computeBoundingBox()
   return geom
 }
 
-export function alignMinZToZero(geom: BufferGeometry): { geometry: BufferGeometry; min: Vector3; max: Vector3 } {
-  const g = geom.clone()
-  g.computeBoundingBox()
-  const bb = g.boundingBox
-  if (!bb) throw new Error('No bounding box')
-  g.translate(0, 0, -bb.min.z)
-  g.computeBoundingBox()
-  const bb2 = g.boundingBox!
-  return { geometry: g, min: bb2.min.clone(), max: bb2.max.clone() }
+export function centerGeometryXY(geometry: BufferGeometry): void {
+  geometry.computeBoundingBox()
+  const bb = geometry.boundingBox!
+  const centerX = (bb.max.x + bb.min.x) / 2
+  const centerY = (bb.max.y + bb.min.y) / 2
+  geometry.translate(-centerX, -centerY, 0)
+}
+
+export function alignBottomTo(geometry: BufferGeometry, targetZ = 0): void {
+  geometry.computeBoundingBox()
+  const minZ = geometry.boundingBox!.min.z
+  geometry.translate(0, 0, targetZ - minZ)
 }
 
 
