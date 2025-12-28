@@ -26,7 +26,7 @@
       await generateAll3mfs($app, $stlBuffersByModelId, (p) => {
         progressText = `Generating ${p.current}/${p.total}: ${p.keyName}`
       })
-      progressText = `Done. Downloaded ${$app.keys.length} file(s).`
+      progressText = `Done. Downloaded keycaps.zip with ${$app.keys.length} file(s).`
     } catch (e) {
       console.error(e)
       progressText = e instanceof Error ? e.message : 'Generation failed.'
@@ -62,7 +62,7 @@
             disabled={$app.keys.length === 0 || missingUploadModels.length > 0 || isGenerating}
             on:click={onGenerate}
           >
-            {isGenerating ? 'Generating…' : `Generate & download 3MF files (${$app.keys.length})`}
+            {isGenerating ? 'Generating…' : `Generate & download ZIP (${$app.keys.length} keys)`}
           </button>
 
           {#if $app.keys.length === 0}

@@ -3,6 +3,7 @@ import { alignMinZToZero, parseStl } from './stl'
 import { buildKeyTextGeometry } from './text'
 import { subtractGeometry } from './csg'
 import { make3mfZip } from './threeTo3mf'
+import { zipSync } from 'fflate'
 
 function safeFileName(name: string): string {
   return name
@@ -58,6 +59,7 @@ export async function generateAll3mfs(
   onProgress?: (p: { current: number; total: number; keyName: string }) => void,
 ) {
   const alignedByModelId = new Map<string, ReturnType<typeof alignMinZToZero>>()
+  const files: Record<string, Uint8Array> = {}
 
   const total = state.keys.length
   for (let i = 0; i < total; i++) {
@@ -99,11 +101,15 @@ export async function generateAll3mfs(
       legendGeometry: legendGeom,
     })
 
-    downloadBytes(zip, `${safeFileName(key.name)}.3mf`)
+    files[`${safeFileName(key.name)}.3mf`] = zip
 
     // Yield to keep UI responsive when generating many keys.
     await new Promise((r) => setTimeout(r, 0))
   }
+
+  // Create a single ZIP file containing all 3MF files
+  const allFilesZip = zipSync(files)
+  downloadBytes(allFilesZip, 'keycaps.zip', 'application/zip')
 }
 
 
