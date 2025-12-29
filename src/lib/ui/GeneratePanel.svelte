@@ -1,10 +1,15 @@
 <script lang="ts">
   import { app, actions } from '../state/store'
-  import { generateAll3mfs } from '../generate/generate'
+  import { generateAll3mfs, generatePreviewModel } from '../generate/generate'
   import { stlBuffersByModelId } from '../state/sessionAssets'
+  import Model3DViewer from './Model3DViewer.svelte'
+  import type { Group } from 'three'
 
   let isGenerating = false
   let progressText = ''
+  let selectedPreviewKeyId: string | null = null
+  let previewModel: Group | null = null
+  let isGeneratingPreview = false
 
   $: requiredModelIds = Array.from(
     new Set(
@@ -33,6 +38,21 @@
       window.alert(progressText)
     } finally {
       isGenerating = false
+    }
+  }
+
+  async function onPreview() {
+    if (!selectedPreviewKeyId) return
+    isGeneratingPreview = true
+    try {
+      const model = await generatePreviewModel($app, selectedPreviewKeyId, $stlBuffersByModelId)
+      previewModel = model
+    } catch (e) {
+      console.error(e)
+      window.alert(e instanceof Error ? e.message : 'Preview generation failed.')
+      previewModel = null
+    } finally {
+      isGeneratingPreview = false
     }
   }
 </script>
@@ -78,6 +98,53 @@
           {/if}
         </div>
       </div>
+
+      <div>
+        <div class="text-xs font-semibold text-slate-300">3D Preview</div>
+        <div class="mt-2 grid gap-3">
+          <label class="grid gap-1 text-xs text-slate-400">
+            Select keycap to preview
+            <select
+              class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+              value={selectedPreviewKeyId ?? ''}
+              on:change={(e) => {
+                selectedPreviewKeyId = (e.currentTarget as HTMLSelectElement).value || null
+                previewModel = null
+              }}
+            >
+              <option value="">— Select a keycap —</option>
+              {#each $app.keys as k}
+                <option value={k.id}>{k.name}</option>
+              {/each}
+            </select>
+          </label>
+
+          <button
+            class="w-fit rounded-md border border-blue-900/60 bg-blue-950/30 px-4 py-2 text-sm text-blue-200 hover:bg-blue-950/60 disabled:opacity-50"
+            disabled={!selectedPreviewKeyId || isGeneratingPreview || missingUploadModels.length > 0}
+            on:click={onPreview}
+          >
+            {isGeneratingPreview ? 'Generating preview…' : 'Preview 3D Model'}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
+    <div class="text-sm font-semibold">3D Preview</div>
+    <div class="mt-3 h-96 rounded-lg border border-slate-800 overflow-hidden">
+      {#if previewModel}
+        <Model3DViewer modelGroup={previewModel} />
+      {:else if isGeneratingPreview}
+        <div class="flex h-full items-center justify-center text-sm text-slate-400">
+          Generating preview…
+        </div>
+      {:else}
+        <div class="flex h-full items-center justify-center text-sm text-slate-400">
+          Select a keycap and click Preview to see the 3D model
+        </div>
+      {/if}
     </div>
   </section>
 </div>

@@ -170,3 +170,86 @@ export async function generateAll3mfs(
   const allFilesZip = zipSync(files)
   downloadBytes(allFilesZip, 'keycaps.zip', 'application/zip')
 }
+
+export async function generatePreviewModel(
+  state: AppState,
+  keyId: string,
+  stlBuffersByModelId: Record<string, ArrayBuffer | null>
+): Promise<Group | null> {
+  const key = state.keys.find(k => k.id === keyId)
+  if (!key) return null
+
+  const template = getTemplate(state, key)
+  if (!template) return null
+
+  const model = getModel(state, template)
+  if (!model) return null
+
+  const stlBuf = await getStlBufferForModel(model, stlBuffersByModelId)
+  const baseGeom = await parseSTL(stlBuf)
+  centerGeometryXY(baseGeom)
+  alignBottomTo(baseGeom, 0)
+  baseGeom.computeBoundingBox()
+
+  const baseMinZ = baseGeom.boundingBox!.min.z
+  const textMeshes: { mesh: Mesh; color: number; name?: string }[] = []
+  const extrusionMeshes: Mesh[] = []
+
+  // Process each symbol in the template
+  for (const sym of template.symbols) {
+    const text = (key.textsBySymbolId[sym.id] ?? '').trim()
+    if (!text) continue
+
+    const font = getFont(sym.fontFamily, sym.fontWeight)
+    const textGeom = new TextGeometry(text, {
+      font,
+      size: sym.fontSizeMm,
+      height: state.settings.extrusionDepthMm,
+      curveSegments: 6,
+      bevelEnabled: false,
+    } as any)
+
+    textGeom.computeVertexNormals()
+    centerGeometryXY(textGeom)
+
+    // Calculate position based on symbol coordinates
+    const width = baseGeom.boundingBox!.max.x - baseGeom.boundingBox!.min.x
+    const height = baseGeom.boundingBox!.max.y - baseGeom.boundingBox!.min.y
+    const wU = model.widthU || 1
+    const hU = model.heightU || 1
+
+    const xNorm = sym.x / wU
+    const yNorm = sym.y / hU
+    const tx = baseGeom.boundingBox!.min.x + xNorm * width
+    const ty = baseGeom.boundingBox!.max.y - yNorm * height
+
+    const rz = MathUtils.degToRad(sym.rotationDeg)
+    if (rz !== 0) textGeom.rotateZ(rz)
+    textGeom.translate(tx, ty, 0)
+    alignBottomTo(textGeom, baseMinZ)
+
+    const color = parseInt(sym.color.replace('#', '0x'))
+    const extrMesh = makeMesh(textGeom, color)
+    extrusionMeshes.push(extrMesh)
+
+    const interMesh = makeMesh(textGeom.clone() as BufferGeometry, color)
+    textMeshes.push({ mesh: interMesh, color, name: text })
+  }
+
+  const baseMesh = makeMesh(baseGeom.clone() as BufferGeometry, 0xdddddd)
+  const unionExtrusion = csgUnionMeshes(extrusionMeshes)
+  const bodyResult = unionExtrusion ? csgSubtract(baseMesh, unionExtrusion) : baseMesh
+
+  const group = new Group()
+  bodyResult.name = 'body'
+  group.add(bodyResult)
+
+  textMeshes.forEach((tr, j) => {
+    const r = csgIntersect(baseMesh, tr.mesh)
+    r.material = tr.mesh.material
+    r.name = tr.name || `text_${j}`
+    group.add(r)
+  })
+
+  return group
+}

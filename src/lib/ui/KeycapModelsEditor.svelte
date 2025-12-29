@@ -1,6 +1,7 @@
 <script lang="ts">
   import { app, actions } from '../state/store'
   import { stlBuffersByModelId } from '../state/sessionAssets'
+  import Model3DViewer from './Model3DViewer.svelte'
 
   type ServerModel = {
     id: string
@@ -20,6 +21,10 @@
 
   $: selectedId = $app.ui.selectedKeycapModelId
   $: model = selectedId ? $app.keycapModels.find((m) => m.id === selectedId) ?? null : null
+
+  $: modelStlUrl = model?.source.kind === 'server' ? model.source.url : null
+  $: modelStlBuffer =
+    model?.source.kind === 'upload' && model ? $stlBuffersByModelId[model.id] ?? null : null
 
   $: usedByTemplateCount = model ? $app.templates.filter((t) => t.keycapModelId === model.id).length : 0
   $: usedByKeyCount =
@@ -193,6 +198,19 @@
               ? `${model.source.stl.fileName} (${model.source.url})`
               : model.source.stl?.fileName ?? '—'}
           </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <div class="text-xs font-semibold text-slate-300 mb-2">3D Preview</div>
+        <div class="h-64 rounded-lg border border-slate-800 overflow-hidden">
+          {#if modelStlUrl || modelStlBuffer}
+            <Model3DViewer stlUrl={modelStlUrl} stlBuffer={modelStlBuffer} />
+          {:else}
+            <div class="flex h-full items-center justify-center text-sm text-slate-400">
+              Upload or select an STL file to preview
+            </div>
+          {/if}
         </div>
       </div>
     {/if}
