@@ -8,7 +8,8 @@
         "@google/model-viewer": "^4.1.0",
         "fflate": "^0.8.2",
         "three": "^0.182.0",
-        "three-csg-ts": "^3.2.0",
+        "three-bvh-csg": "^0.0.17",
+        "three-mesh-bvh": "^0.9.4",
       },
       "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^6.2.1",
@@ -367,7 +368,9 @@
 
     "three": ["three@0.182.0", "", {}, "sha512-GbHabT+Irv+ihI1/f5kIIsZ+Ef9Sl5A1Y7imvS5RQjWgtTPfPnZ43JmlYI7NtCRDK9zir20lQpfg8/9Yd02OvQ=="],
 
-    "three-csg-ts": ["three-csg-ts@3.2.0", "", { "peerDependencies": { "@types/three": ">= 0.154.0", "three": ">= 0.154.0" } }, "sha512-oTYg8kdal6qgHDbso/6VzA12Udf2ic2uXhf0XlJzuSP+Gs0OUR5gTHSZ7GotAE+M/QcVlw41eOwiWZVnJG5/8w=="],
+    "three-bvh-csg": ["three-bvh-csg@0.0.17", "", { "peerDependencies": { "three": ">=0.151.0", "three-mesh-bvh": ">=0.6.6" } }, "sha512-iEkHDF8GRfGM6593Cuw8SnF1vfENCp46gIAtRzuL4nGXGWPcR1sbTBwM9ptDONb5twqlZp5WkAKya5aBKe2qcA=="],
+
+    "three-mesh-bvh": ["three-mesh-bvh@0.9.4", "", { "peerDependencies": { "three": ">= 0.159.0" } }, "sha512-+y6xLS6k5LWkNNhYsTgKXBC2D9r/z0swiehVHYhZZ8AOhaKDRCWKsN94ctV5Xy7xA4Xbnv4LKYzf7epRLPT6oQ=="],
 
     "tinyglobby": ["tinyglobby@0.2.15", "", { "dependencies": { "fdir": "^6.5.0", "picomatch": "^4.0.3" } }, "sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ=="],
 
