@@ -1,8 +1,9 @@
 <script lang="ts">
   import { app, actions } from '../state/store'
-  import { generateAll3mfs, generatePreviewModel } from '../generate/generate'
+  import { generateAll3mfsWithWorker, generatePreviewModel } from '../generate/generate'
   import { stlBuffersByModelId } from '../state/sessionAssets'
   import Model3DViewer from './Model3DViewer.svelte'
+  import ProcessingModal from './ProcessingModal.svelte'
   import type { Group } from 'three'
 
   let isGenerating = false
@@ -10,6 +11,9 @@
   let selectedPreviewKeyId: string | null = null
   let previewModel: Group | null = null
   let isGeneratingPreview = false
+  let previewProgressText = ''
+  let generateAbortController: AbortController | null = null
+  let previewAbortController: AbortController | null = null
 
   $: requiredModelIds = Array.from(
     new Set(
@@ -24,35 +28,73 @@
     .filter((m) => m.source.kind === 'upload' && !$stlBuffersByModelId[m.id])
 
   async function onGenerate() {
-    if (missingUploadModels.length > 0) return
+    if (missingUploadModels.length > 0 || isGenerating) return
+
     isGenerating = true
-    progressText = ''
+    progressText = 'Starting generation...'
+    generateAbortController = new AbortController()
+    
     try {
-      await generateAll3mfs($app, $stlBuffersByModelId, (p) => {
+      await generateAll3mfsWithWorker($app, $stlBuffersByModelId, (p) => {
         progressText = `Generating ${p.current}/${p.total}: ${p.keyName}`
-      })
+      }, generateAbortController.signal)
       progressText = `Done. Downloaded keycaps.zip with ${$app.keys.length} file(s).`
+      // Keep modal open briefly to show completion, then close
+      await new Promise(r => setTimeout(r, 1500))
     } catch (e) {
       console.error(e)
-      progressText = e instanceof Error ? e.message : 'Generation failed.'
-      window.alert(progressText)
+      if (e instanceof Error && e.message === 'Generation cancelled') {
+        progressText = 'Generation cancelled.'
+      } else {
+        progressText = e instanceof Error ? e.message : 'Generation failed.'
+        window.alert(progressText)
+      }
     } finally {
       isGenerating = false
+      generateAbortController = null
+      progressText = ''
+    }
+  }
+
+  function onCancelGenerate() {
+    if (generateAbortController) {
+      generateAbortController.abort()
+      generateAbortController = null
+      isGenerating = false
+      progressText = ''
     }
   }
 
   async function onPreview() {
-    if (!selectedPreviewKeyId) return
+    if (!selectedPreviewKeyId || isGeneratingPreview) return
+
     isGeneratingPreview = true
+    previewProgressText = 'Generating preview...'
+    previewAbortController = new AbortController()
+    
     try {
-      const model = await generatePreviewModel($app, selectedPreviewKeyId, $stlBuffersByModelId)
+      const model = await generatePreviewModel($app, selectedPreviewKeyId, $stlBuffersByModelId, previewAbortController.signal)
       previewModel = model
     } catch (e) {
       console.error(e)
-      window.alert(e instanceof Error ? e.message : 'Preview generation failed.')
+      if (!(e instanceof Error && e.message === 'Preview generation cancelled')) {
+        window.alert(e instanceof Error ? e.message : 'Preview generation failed.')
+      }
       previewModel = null
     } finally {
       isGeneratingPreview = false
+      previewAbortController = null
+      previewProgressText = ''
+    }
+  }
+
+  function onCancelPreview() {
+    if (previewAbortController) {
+      previewAbortController.abort()
+      previewAbortController = null
+      isGeneratingPreview = false
+      previewModel = null
+      previewProgressText = ''
     }
   }
 </script>
@@ -82,7 +124,7 @@
             disabled={$app.keys.length === 0 || missingUploadModels.length > 0 || isGenerating}
             on:click={onGenerate}
           >
-            {isGenerating ? 'Generating…' : `Generate & download ZIP (${$app.keys.length} keys)`}
+            Generate & download ZIP ({$app.keys.length} keys)
           </button>
 
           {#if $app.keys.length === 0}
@@ -91,10 +133,6 @@
             <div class="text-xs text-amber-300/90">
               Missing STL uploads for: {missingUploadModels.map((m) => m.name).join(', ')}. Upload them in the Models step.
             </div>
-          {/if}
-
-          {#if progressText}
-            <div class="text-xs text-slate-300">{progressText}</div>
           {/if}
         </div>
       </div>
@@ -121,10 +159,10 @@
 
           <button
             class="w-fit rounded-md border border-blue-900/60 bg-blue-950/30 px-4 py-2 text-sm text-blue-200 hover:bg-blue-950/60 disabled:opacity-50"
-            disabled={!selectedPreviewKeyId || isGeneratingPreview || missingUploadModels.length > 0}
+            disabled={!selectedPreviewKeyId || missingUploadModels.length > 0 || isGeneratingPreview}
             on:click={onPreview}
           >
-            {isGeneratingPreview ? 'Generating preview…' : 'Preview 3D Model'}
+            Preview 3D Model
           </button>
         </div>
       </div>
@@ -133,20 +171,43 @@
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <div class="text-sm font-semibold">3D Preview</div>
-    <div class="mt-3 h-96 rounded-lg border border-slate-800 overflow-hidden">
+    <div class="mt-3 h-96 rounded-lg border border-slate-800 overflow-hidden relative">
       {#if previewModel}
         <Model3DViewer modelGroup={previewModel} />
-      {:else if isGeneratingPreview}
-        <div class="flex h-full items-center justify-center text-sm text-slate-400">
-          Generating preview…
-        </div>
       {:else}
         <div class="flex h-full items-center justify-center text-sm text-slate-400">
           Select a keycap and click Preview to see the 3D model
         </div>
       {/if}
+      {#if isGeneratingPreview}
+        <div class="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-10">
+          <div class="flex flex-col items-center gap-3">
+            <svg class="animate-spin h-8 w-8 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <div class="text-sm text-slate-300">{previewProgressText || 'Generating preview…'}</div>
+            <button
+              class="mt-1 rounded-md border border-red-900/60 bg-red-950/30 px-3 py-1.5 text-xs text-red-200 hover:bg-red-950/60 transition-colors"
+              on:click={onCancelPreview}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      {/if}
     </div>
   </section>
 </div>
+
+<!-- Generation Modal -->
+{#if isGenerating}
+  <ProcessingModal
+    title="Generating Keycaps"
+    statusText={progressText}
+    spinnerColor="text-emerald-400"
+    onCancel={onCancelGenerate}
+  />
+{/if}
 
 

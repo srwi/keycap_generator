@@ -57,127 +57,81 @@ async function getStlBufferForModel(model: KeycapModel, stlBuffersByModelId: Rec
   return buf
 }
 
-export async function generateAll3mfs(
+// Worker-based generation for better performance
+export function generateAll3mfsWithWorker(
   state: AppState,
   stlBuffersByModelId: Record<string, ArrayBuffer | null>,
-  onProgress?: (p: { current: number; total: number; keyName: string }) => void
-) {
-  const baseGeomByModelId = new Map<string, BufferGeometry>()
-  const files: Record<string, Uint8Array> = {}
+  onProgress?: (p: { current: number; total: number; keyName: string }) => void,
+  signal?: AbortSignal
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const workerUrl = new URL('./generate.worker.ts', import.meta.url)
+    const worker = new Worker(workerUrl, { type: 'module' })
+    let cancelled = false
 
-  if (state.keys.length === 0) {
-    throw new Error('No keys configured')
-  }
-
-  const total = state.keys.length
-  for (let i = 0; i < total; i++) {
-    const key = state.keys[i]
-    onProgress?.({ current: i + 1, total, keyName: key.name })
-
-    const template = getTemplate(state, key)
-    if (!template) {
-      onProgress?.({ current: i + 1, total, keyName: `Skipping key ${i + 1}: template not found` })
-      continue
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        cancelled = true
+        worker.postMessage({ type: 'cancel' })
+        worker.terminate()
+        reject(new Error('Generation cancelled'))
+      })
     }
 
-    const model = getModel(state, template)
-    if (!model) throw new Error(`Template "${template.name}" references a missing keycap model.`)
+    worker.onmessage = (e) => {
+      const { type, payload } = e.data
 
-    // Get or create base geometry for this model
-    let baseGeom = baseGeomByModelId.get(model.id)
-    if (!baseGeom) {
-      const stlBuf = await getStlBufferForModel(model, stlBuffersByModelId)
-      baseGeom = await parseSTL(stlBuf)
-      centerGeometryXY(baseGeom)
-      alignBottomTo(baseGeom, 0)
-      baseGeom.computeBoundingBox()
-      baseGeomByModelId.set(model.id, baseGeom)
+      if (type === 'progress') {
+        if (!cancelled) {
+          onProgress?.(payload)
+        }
+      } else if (type === 'complete') {
+        if (!cancelled) {
+          const { zipData } = payload
+          downloadBytes(zipData, 'keycaps.zip', 'application/zip')
+          worker.terminate()
+          resolve()
+        }
+      } else if (type === 'error') {
+        if (!cancelled) {
+          worker.terminate()
+          reject(new Error(payload.message))
+        }
+      }
     }
 
-    const baseMinZ = baseGeom.boundingBox!.min.z
-    const textMeshes: { mesh: Mesh; color: number; name?: string }[] = []
-    const extrusionMeshes: Mesh[] = []
-
-    // Process each symbol in the template
-    for (const sym of template.symbols) {
-      const text = (key.textsBySymbolId[sym.id] ?? '').trim()
-      if (!text) continue
-
-      const font = getFont(sym.fontFamily, sym.fontWeight)
-      const textGeom = new TextGeometry(text, {
-        font,
-        size: sym.fontSizeMm,
-        height: state.settings.extrusionDepthMm,
-        curveSegments: 6,
-        bevelEnabled: false,
-      } as any)
-
-      textGeom.computeVertexNormals()
-      centerGeometryXY(textGeom)
-
-      // Calculate position based on symbol coordinates
-      const width = baseGeom.boundingBox!.max.x - baseGeom.boundingBox!.min.x
-      const height = baseGeom.boundingBox!.max.y - baseGeom.boundingBox!.min.y
-      const wU = model.widthU || 1
-      const hU = model.heightU || 1
-
-      const xNorm = sym.x / wU
-      const yNorm = sym.y / hU
-      const tx = baseGeom.boundingBox!.min.x + xNorm * width
-      const ty = baseGeom.boundingBox!.max.y - yNorm * height
-
-      const rz = MathUtils.degToRad(sym.rotationDeg)
-      if (rz !== 0) textGeom.rotateZ(rz)
-      textGeom.translate(tx, ty, 0)
-      alignBottomTo(textGeom, baseMinZ)
-
-      const color = parseInt(sym.color.replace('#', '0x'))
-      const extrMesh = makeMesh(textGeom, color)
-      extrusionMeshes.push(extrMesh)
-
-      const interMesh = makeMesh(textGeom.clone() as BufferGeometry, color)
-      textMeshes.push({ mesh: interMesh, color, name: text })
+    worker.onerror = (error) => {
+      if (!cancelled) {
+        worker.terminate()
+        reject(error)
+      }
     }
 
-    onProgress?.({ current: i + 1, total, keyName: `Performing CSG operations for ${key.name}...` })
-
-    const baseMesh = makeMesh(baseGeom.clone() as BufferGeometry, 0xdddddd)
-    const unionExtrusion = csgUnionMeshes(extrusionMeshes)
-    const bodyResult = unionExtrusion ? csgSubtract(baseMesh, unionExtrusion) : baseMesh
-
-    const group = new Group()
-    bodyResult.name = 'body'
-    group.add(bodyResult)
-
-    textMeshes.forEach((tr, j) => {
-      const r = csgIntersect(baseMesh, tr.mesh)
-      r.material = tr.mesh.material
-      r.name = tr.name || `text_${j}`
-      group.add(r)
+    worker.postMessage({
+      type: 'generate-all',
+      payload: { state, stlBuffersByModelId },
     })
-
-    onProgress?.({ current: i + 1, total, keyName: `Exporting ${key.name}...` })
-
-    const blob = await exportTo3MF(group, { printer_name: 'Bambu Lab A1' })
-    const arrayBuffer = await blob.arrayBuffer()
-    files[`${safeFileName(key.name)}.3mf`] = new Uint8Array(arrayBuffer)
-
-    // Yield to keep UI responsive when generating many keys.
-    await new Promise(r => setTimeout(r, 0))
-  }
-
-  // Create a single ZIP file containing all 3MF files
-  const allFilesZip = zipSync(files)
-  downloadBytes(allFilesZip, 'keycaps.zip', 'application/zip')
+  })
 }
 
 export async function generatePreviewModel(
   state: AppState,
   keyId: string,
-  stlBuffersByModelId: Record<string, ArrayBuffer | null>
+  stlBuffersByModelId: Record<string, ArrayBuffer | null>,
+  signal?: AbortSignal
 ): Promise<Group | null> {
+  // Helper to yield and check for cancellation
+  const yieldAndCheck = async () => {
+    await new Promise(r => setTimeout(r, 0))
+    if (signal?.aborted) {
+      throw new Error('Preview generation cancelled')
+    }
+  }
+
   const key = state.keys.find(k => k.id === keyId)
   if (!key) return null
+
+  await yieldAndCheck()
 
   const template = getTemplate(state, key)
   if (!template) return null
@@ -185,11 +139,15 @@ export async function generatePreviewModel(
   const model = getModel(state, template)
   if (!model) return null
 
+  await yieldAndCheck()
   const stlBuf = await getStlBufferForModel(model, stlBuffersByModelId)
+  await yieldAndCheck()
   const baseGeom = await parseSTL(stlBuf)
   centerGeometryXY(baseGeom)
   alignBottomTo(baseGeom, 0)
   baseGeom.computeBoundingBox()
+
+  await yieldAndCheck()
 
   const baseMinZ = baseGeom.boundingBox!.min.z
   const textMeshes: { mesh: Mesh; color: number; name?: string }[] = []
@@ -197,6 +155,8 @@ export async function generatePreviewModel(
 
   // Process each symbol in the template
   for (const sym of template.symbols) {
+    await yieldAndCheck()
+
     const text = (key.textsBySymbolId[sym.id] ?? '').trim()
     if (!text) continue
 
@@ -236,6 +196,8 @@ export async function generatePreviewModel(
     textMeshes.push({ mesh: interMesh, color, name: text })
   }
 
+  await yieldAndCheck()
+
   const baseMesh = makeMesh(baseGeom.clone() as BufferGeometry, 0xdddddd)
   const unionExtrusion = csgUnionMeshes(extrusionMeshes)
   const bodyResult = unionExtrusion ? csgSubtract(baseMesh, unionExtrusion) : baseMesh
@@ -250,6 +212,8 @@ export async function generatePreviewModel(
     r.name = tr.name || `text_${j}`
     group.add(r)
   })
+
+  await yieldAndCheck()
 
   return group
 }
