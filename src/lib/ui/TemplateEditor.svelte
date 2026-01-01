@@ -1,8 +1,8 @@
 <script lang="ts">
   import { app, actions, selectedTemplate } from '../state/store'
   import type { SymbolDef } from '../state/types'
-  import { clickOutside } from './actions/clickOutside'
   import LabelPreview from './LabelPreview.svelte'
+  import { slide } from 'svelte/transition'
 
   $: tpl = $selectedTemplate
   $: usedByKeyCount =
@@ -22,16 +22,6 @@
   const fontFamilies: Array<SymbolDef['fontFamily']> = ['helvetiker']
   const fontWeights: Array<SymbolDef['fontWeight']> = ['regular', 'bold']
 
-  let isTemplateMenuOpen = false
-  let templateNameDraft = ''
-
-  $: templateNameDraft = tpl?.name ?? ''
-
-  function selectTemplate(id: string) {
-    actions.selectTemplate(id)
-    isTemplateMenuOpen = false
-  }
-
   $: previewTextsBySymbolId = tpl ? Object.fromEntries(tpl.symbols.map((s) => [s.id, s.slotName])) : {}
   $: model =
     tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
@@ -41,13 +31,34 @@
   function clamp(n: number, min: number, max: number) {
     return Math.min(max, Math.max(min, n))
   }
+
+  let collapsedSymbols = new Set<string>()
+  let previousSymbolIds: Set<string> | null = null
+
+  function toggleSymbol(symbolId: string) {
+    if (collapsedSymbols.has(symbolId)) {
+      collapsedSymbols.delete(symbolId)
+    } else {
+      collapsedSymbols.add(symbolId)
+    }
+    collapsedSymbols = collapsedSymbols
+  }
+
+  $: if (tpl) {
+    const currentSymbolIds = new Set(tpl.symbols.map(s => s.id))
+    const kept = new Set([...collapsedSymbols].filter(id => currentSymbolIds.has(id)))
+    const newIds = previousSymbolIds
+      ? new Set([...currentSymbolIds].filter(id => !previousSymbolIds!.has(id)))
+      : new Set<string>()
+    collapsedSymbols = new Set([...kept, ...newIds])
+    previousSymbolIds = currentSymbolIds
+  }
 </script>
 
-<div class="flex flex-col gap-4 lg:flex-row">
-  <div class="flex flex-col gap-4 lg:min-w-0 lg:flex-1">
-    <section class="rounded-lg border border-slate-800 bg-slate-950 p-4">
+<div class="grid gap-4 lg:grid-cols-12">
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <div class="flex items-center justify-between gap-3">
-      <div class="text-sm font-semibold">Template</div>
+      <div class="text-sm font-semibold">Templates</div>
       <button
         class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
         on:click={actions.createTemplate}
@@ -57,52 +68,51 @@
     </div>
 
     <div class="mt-3 grid gap-2">
-      <div class="grid gap-1 text-xs text-slate-400">
-        Template
-        <div class="relative" use:clickOutside={() => (isTemplateMenuOpen = false)}>
-          <div class="flex">
-            <input
-              class="min-w-0 flex-1 rounded-l-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 outline-none focus:border-slate-500 disabled:opacity-60"
-              placeholder="Select template…"
-              value={tpl ? templateNameDraft : ''}
-              disabled={!tpl}
-              on:input={(e) => {
-                if (!tpl) return
-                actions.renameTemplate(tpl.id, (e.currentTarget as HTMLInputElement).value)
-              }}
-              on:keydown={(e) => {
-                if (e.key === 'Escape') isTemplateMenuOpen = false
-              }}
-            />
-            <button
-              class="rounded-r-md border border-l-0 border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-200 hover:bg-slate-800"
-              type="button"
-              aria-label="Select template"
-              on:click={() => (isTemplateMenuOpen = !isTemplateMenuOpen)}
-            >
-              ▾
-            </button>
-          </div>
-
-          {#if isTemplateMenuOpen}
-            <div class="absolute z-10 mt-1 w-full overflow-hidden rounded-md border border-slate-800 bg-slate-950 shadow-lg">
-              {#each $app.templates as t (t.id)}
-                <button
-                  type="button"
-                  class="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-slate-900"
-                  class:bg-slate-900={tpl?.id === t.id}
-                  on:click={() => selectTemplate(t.id)}
-                >
-                  <span class="truncate">{t.name}</span>
-                </button>
-              {/each}
+      {#each $app.templates as t (t.id)}
+        <button
+          class="flex w-full items-center justify-between gap-2 rounded-md border border-slate-800 px-3 py-2 text-left hover:bg-slate-900"
+          class:bg-slate-900={$app.ui.selectedTemplateId === t.id}
+          on:click={() => actions.selectTemplate(t.id)}
+        >
+          <div class="min-w-0">
+            <div class="truncate text-sm font-medium">{t.name}</div>
+            <div class="truncate text-xs text-slate-400">
+              {$app.keycapModels.find((m) => m.id === t.keycapModelId)?.name ?? '—'}
             </div>
-          {/if}
-        </div>
-      </div>
+          </div>
+        </button>
+      {/each}
+    </div>
 
-      {#if tpl}
-        <label class="mt-3 grid gap-1 text-xs text-slate-400">
+    {#if tpl}
+      <div class="mt-3">
+        <button
+          class="w-full rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-1.5 text-sm text-rose-200 hover:bg-rose-950/60"
+          on:click={onDeleteTemplate}
+        >
+          Delete template{usedByKeyCount > 0 ? ` (and ${usedByKeyCount} key(s))` : ''}
+        </button>
+      </div>
+    {/if}
+  </section>
+
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
+    {#if !tpl}
+      <div class="text-sm text-slate-400">Create/select a template to edit.</div>
+    {:else}
+      <div class="text-sm font-semibold">Template configuration</div>
+
+      <div class="mt-3 grid gap-3">
+        <label class="grid gap-1 text-xs text-slate-400">
+          Name
+          <input
+            class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+            value={tpl.name}
+            on:input={(e) => actions.renameTemplate(tpl.id, (e.currentTarget as HTMLInputElement).value)}
+          />
+        </label>
+
+        <label class="grid gap-1 text-xs text-slate-400">
           Keycap model
           <select
             class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
@@ -110,187 +120,202 @@
             on:change={(e) => actions.setTemplateKeycapModel(tpl.id, (e.currentTarget as HTMLSelectElement).value)}
           >
             {#each $app.keycapModels as km (km.id)}
-              <option value={km.id}>{km.name} ({km.widthU}u×{km.heightU}u)</option>
+              <option value={km.id}>{km.name}</option>
             {/each}
           </select>
         </label>
 
-        <button
-          class="mt-2 rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-1.5 text-sm text-rose-200 hover:bg-rose-950/60"
-          on:click={onDeleteTemplate}
-        >
-          Delete template{usedByKeyCount > 0 ? ` (and ${usedByKeyCount} key(s))` : ''}
-        </button>
-      {/if}
-    </div>
-    </section>
+        <div class="mt-2">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-xs font-semibold text-slate-300">Symbols</div>
+            <button
+              class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
+              on:click={() => actions.addSymbol(tpl.id)}
+            >
+              Add symbol
+            </button>
+          </div>
 
-    <section class="min-w-0 rounded-lg border border-slate-800 bg-slate-950 p-4">
-    <div class="flex items-center justify-between gap-3">
-      <div class="text-sm font-semibold">Symbols</div>
-      {#if tpl}
-        <button
-          class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
-          on:click={() => actions.addSymbol(tpl.id)}
-        >
-          Add symbol
-        </button>
-      {/if}
-    </div>
-
-    {#if !tpl}
-      <div class="mt-3 text-sm text-slate-400">Create a template to start.</div>
-    {:else}
-      <div class="mt-3 max-w-full overflow-x-auto">
-        <table class="w-full min-w-[980px] text-left text-sm">
-          <thead class="text-xs text-slate-400">
-            <tr class="border-b border-slate-800">
-              <th class="px-2 py-2 font-medium">Slot name</th>
-              <th class="px-2 py-2 font-medium">X</th>
-              <th class="px-2 py-2 font-medium">Y</th>
-              <th class="px-2 py-2 font-medium">Font</th>
-              <th class="px-2 py-2 font-medium">Weight</th>
-              <th class="px-2 py-2 font-medium">Size (mm)</th>
-              <th class="px-2 py-2 font-medium">Color</th>
-              <th class="px-2 py-2 font-medium">Rot (deg)</th>
-              <th class="px-2 py-2 font-medium"></th>
-            </tr>
-          </thead>
-          <tbody>
+          <div class="mt-3 grid gap-3">
             {#each tpl.symbols as sym (sym.id)}
-              <tr class="border-b border-slate-900">
-                <td class="px-2 py-2">
-                  <input
-                    class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm"
-                    value={sym.slotName}
-                    on:input={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, { slotName: (e.currentTarget as HTMLInputElement).value })}
-                  />
-                </td>
-                <td class="px-2 py-2">
-                  <input
-                    class="w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm"
-                    type="number"
-                    min="0"
-                    max={modelWidthU}
-                    step="0.01"
-                    value={sym.x}
-                    on:input={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, {
-                        x: clamp(Number((e.currentTarget as HTMLInputElement).value), 0, modelWidthU),
-                      })}
-                  />
-                </td>
-                <td class="px-2 py-2">
-                  <input
-                    class="w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm"
-                    type="number"
-                    min="0"
-                    max={modelHeightU}
-                    step="0.01"
-                    value={sym.y}
-                    on:input={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, {
-                        y: clamp(Number((e.currentTarget as HTMLInputElement).value), 0, modelHeightU),
-                      })}
-                  />
-                </td>
-                <td class="px-2 py-2">
-                  <select
-                    class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm"
-                    value={sym.fontFamily}
-                    on:change={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, {
-                        fontFamily: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontFamily'],
-                      })}
-                  >
-                    {#each fontFamilies as ff}
-                      <option value={ff}>{ff}</option>
-                    {/each}
-                  </select>
-                </td>
-                <td class="px-2 py-2">
-                  <select
-                    class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm"
-                    value={sym.fontWeight}
-                    on:change={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, {
-                        fontWeight: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontWeight'],
-                      })}
-                  >
-                    {#each fontWeights as fw}
-                      <option value={fw}>{fw}</option>
-                    {/each}
-                  </select>
-                </td>
-                <td class="px-2 py-2">
-                  <input
-                    class="w-28 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm"
-                    type="number"
-                    min="0.1"
-                    step="0.1"
-                    value={sym.fontSizeMm}
-                    on:input={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, {
-                        fontSizeMm: Number((e.currentTarget as HTMLInputElement).value),
-                      })}
-                  />
-                </td>
-                <td class="px-2 py-2">
-                  <input
-                    class="h-9 w-20 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5"
-                    type="color"
-                    value={sym.color}
-                    on:input={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, { color: (e.currentTarget as HTMLInputElement).value })}
-                  />
-                </td>
-                <td class="px-2 py-2">
-                  <input
-                    class="w-28 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm"
-                    type="number"
-                    step="1"
-                    value={sym.rotationDeg}
-                    on:input={(e) =>
-                      actions.updateSymbol(tpl.id, sym.id, {
-                        rotationDeg: Number((e.currentTarget as HTMLInputElement).value),
-                      })}
-                  />
-                </td>
-                <td class="px-2 py-2 text-right">
+              {@const isCollapsed = collapsedSymbols.has(sym.id)}
+              <div class="rounded-lg border border-slate-800 bg-slate-900/50 overflow-hidden">
+                <div class="flex items-center justify-between gap-2 p-3">
                   <button
-                    class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 hover:bg-slate-900"
+                    type="button"
+                    class="flex items-center gap-2 flex-1 min-w-0 hover:bg-slate-900/50 transition-colors rounded px-2 py-1 -mx-2 -my-1"
+                    on:click={() => toggleSymbol(sym.id)}
+                  >
+                    <svg
+                      class="h-4 w-4 text-slate-400 transition-transform {isCollapsed ? '' : 'rotate-90'}"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span class="text-sm font-medium text-slate-200 truncate">{sym.slotName || 'Unnamed symbol'}</span>
+                  </button>
+                  <button
+                    class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={tpl.symbols.length <= 1}
                     on:click={() => actions.deleteSymbol(tpl.id, sym.id)}
                   >
                     Remove
                   </button>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+                </div>
 
-      <div class="mt-3 text-xs text-slate-400">
-        X/Y are in keycap units (u): (0,0)=top-left. Max is model size ({modelWidthU}u×{modelHeightU}u).
+                {#if !isCollapsed}
+                  <div class="p-3 pt-0 space-y-3" transition:slide={{ duration: 200 }}>
+                    <label class="grid gap-1 text-xs text-slate-400">
+                      Slot name
+                      <input
+                        class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                        value={sym.slotName}
+                        on:input={(e) =>
+                          actions.updateSymbol(tpl.id, sym.id, { slotName: (e.currentTarget as HTMLInputElement).value })}
+                      />
+                    </label>
+
+                    <div class="grid grid-cols-2 gap-3">
+                  <label class="grid gap-1 text-xs text-slate-400">
+                    X (u)
+                    <input
+                      class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                      type="number"
+                      min="0"
+                      max={modelWidthU}
+                      step="0.01"
+                      value={sym.x}
+                      on:input={(e) =>
+                        actions.updateSymbol(tpl.id, sym.id, {
+                          x: clamp(Number((e.currentTarget as HTMLInputElement).value), 0, modelWidthU),
+                        })}
+                    />
+                  </label>
+                  <label class="grid gap-1 text-xs text-slate-400">
+                    Y (u)
+                    <input
+                      class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                      type="number"
+                      min="0"
+                      max={modelHeightU}
+                      step="0.01"
+                      value={sym.y}
+                      on:input={(e) =>
+                        actions.updateSymbol(tpl.id, sym.id, {
+                          y: clamp(Number((e.currentTarget as HTMLInputElement).value), 0, modelHeightU),
+                        })}
+                    />
+                  </label>
+                </div>
+
+                <div class="mt-3 grid grid-cols-2 gap-3">
+                  <label class="grid gap-1 text-xs text-slate-400">
+                    Font
+                    <select
+                      class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                      value={sym.fontFamily}
+                      on:change={(e) =>
+                        actions.updateSymbol(tpl.id, sym.id, {
+                          fontFamily: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontFamily'],
+                        })}
+                    >
+                      {#each fontFamilies as ff}
+                        <option value={ff}>{ff}</option>
+                      {/each}
+                    </select>
+                  </label>
+                  <label class="grid gap-1 text-xs text-slate-400">
+                    Weight
+                    <select
+                      class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                      value={sym.fontWeight}
+                      on:change={(e) =>
+                        actions.updateSymbol(tpl.id, sym.id, {
+                          fontWeight: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontWeight'],
+                        })}
+                    >
+                      {#each fontWeights as fw}
+                        <option value={fw}>{fw}</option>
+                      {/each}
+                    </select>
+                  </label>
+                </div>
+
+                <div class="mt-3 grid grid-cols-2 gap-3">
+                  <label class="grid gap-1 text-xs text-slate-400">
+                    Size (mm)
+                    <input
+                      class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      value={sym.fontSizeMm}
+                      on:input={(e) =>
+                        actions.updateSymbol(tpl.id, sym.id, {
+                          fontSizeMm: Number((e.currentTarget as HTMLInputElement).value),
+                        })}
+                    />
+                  </label>
+                  <label class="grid gap-1 text-xs text-slate-400">
+                    Rotation (deg)
+                    <input
+                      class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                      type="number"
+                      step="1"
+                      value={sym.rotationDeg}
+                      on:input={(e) =>
+                        actions.updateSymbol(tpl.id, sym.id, {
+                          rotationDeg: Number((e.currentTarget as HTMLInputElement).value),
+                        })}
+                    />
+                  </label>
+                </div>
+
+                    <label class="grid gap-1 text-xs text-slate-400">
+                      Color
+                      <div class="flex items-center gap-2">
+                        <input
+                          class="h-9 w-20 rounded-md border border-slate-700 bg-slate-900"
+                          type="color"
+                          value={sym.color}
+                          on:input={(e) =>
+                            actions.updateSymbol(tpl.id, sym.id, { color: (e.currentTarget as HTMLInputElement).value })}
+                        />
+                        <span class="text-xs text-slate-500 font-mono">{sym.color}</span>
+                      </div>
+                    </label>
+                  </div>
+                {/if}
+              </div>
+            {/each}
+          </div>
+
+          <div class="mt-3 text-xs text-slate-400">
+            X/Y are in keycap units (u): (0,0)=top-left. Max is model size ({modelWidthU}u×{modelHeightU}u).
+          </div>
+        </div>
       </div>
     {/if}
-    </section>
-  </div>
+  </section>
 
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:w-[340px] lg:flex-none">
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <div class="text-sm font-semibold">Template preview</div>
     <div class="mt-3 flex items-center justify-center">
-      <LabelPreview
-        template={tpl}
-        textsBySymbolId={previewTextsBySymbolId}
-        widthU={modelWidthU}
-        heightU={modelHeightU}
-        className="max-w-[340px]"
-      />
+      {#if tpl}
+        <LabelPreview
+          template={tpl}
+          textsBySymbolId={previewTextsBySymbolId}
+          widthU={modelWidthU}
+          heightU={modelHeightU}
+          className="max-w-[340px]"
+        />
+      {:else}
+        <div class="text-sm text-slate-400">Select a template to preview.</div>
+      {/if}
     </div>
-    <div class="mt-3 text-xs text-slate-400">Uses each symbol’s slot name as placeholder text.</div>
+    <div class="mt-3 text-xs text-slate-400">Uses each symbol's slot name as placeholder text.</div>
   </section>
 </div>
 
