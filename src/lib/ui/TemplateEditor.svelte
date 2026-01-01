@@ -90,7 +90,7 @@
           class="w-full rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-1.5 text-sm text-rose-200 hover:bg-rose-950/60"
           on:click={onDeleteTemplate}
         >
-          Delete template{usedByKeyCount > 0 ? ` (and ${usedByKeyCount} key(s))` : ''}
+          Delete template
         </button>
       </div>
     {/if}
