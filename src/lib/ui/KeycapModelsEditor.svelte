@@ -61,9 +61,25 @@
 
     const buf = await file.arrayBuffer()
     stlBuffersByModelId.update((m) => ({ ...m, [model.id]: buf }))
+    
+    // Extract filename without extension for model name
+    const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
+    actions.renameKeycapModel(model.id, fileNameWithoutExt)
+    
     actions.setKeycapModelSource(model.id, {
       kind: 'upload',
       stl: { fileName: file.name, pathHint: (file as any).webkitRelativePath || file.name },
+    })
+  }
+
+  function onSwitchToUpload() {
+    if (!model) return
+    // Switch to upload mode
+    // If we already have an upload source with STL reference, keep it
+    // Otherwise, clear it (user will need to upload again)
+    actions.setKeycapModelSource(model.id, {
+      kind: 'upload',
+      stl: model.source.kind === 'upload' ? model.source.stl : null,
     })
   }
 
@@ -121,13 +137,13 @@
     {/if}
   </section>
 
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-8">
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     {#if !model}
       <div class="text-sm text-slate-400">Create/select a model to edit.</div>
     {:else}
       <div class="text-sm font-semibold">Model configuration</div>
 
-      <div class="mt-3 grid gap-3 sm:grid-cols-2">
+      <div class="mt-3 grid gap-3">
         <label class="grid gap-1 text-xs text-slate-400">
           Name
           <input
@@ -137,83 +153,138 @@
           />
         </label>
 
-        <div class="grid grid-cols-2 gap-3">
-          <label class="grid gap-1 text-xs text-slate-400">
-            Width (u)
-            <input
-              class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-              type="number"
-              min="0.25"
-              step="0.25"
-              value={model.widthU}
-              on:input={(e) => actions.updateKeycapModel(model.id, { widthU: Number((e.currentTarget as HTMLInputElement).value) })}
-            />
-          </label>
+        <div class="mt-2 grid gap-3">
+          <div class="text-xs font-semibold text-slate-300">STL source</div>
 
-          <label class="grid gap-1 text-xs text-slate-400">
-            Height (u)
-            <input
-              class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-              type="number"
-              min="0.25"
-              step="0.25"
-              value={model.heightU}
-              on:input={(e) => actions.updateKeycapModel(model.id, { heightU: Number((e.currentTarget as HTMLInputElement).value) })}
-            />
-          </label>
-        </div>
-      </div>
+          <div class="grid gap-2 rounded-lg border border-slate-800 bg-slate-900/50 p-3">
+            <div class="flex items-center gap-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="stl-source-{model.id}"
+                  class="h-4 w-4 border-slate-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
+                  checked={model.source.kind === 'server'}
+                  on:change={() => {
+                    if (model.source.kind !== 'server' && serverModels.length > 0) {
+                      // Clear uploaded buffer when switching to server mode
+                      if (model.source.kind === 'upload') {
+                        stlBuffersByModelId.update((m) => {
+                          const next = { ...m }
+                          delete next[model.id]
+                          return next
+                        })
+                      }
+                      onSelectServerModel(serverModels[0].id)
+                    }
+                  }}
+                />
+                <span class="text-xs text-slate-300 font-medium">From server</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="stl-source-{model.id}"
+                  class="h-4 w-4 border-slate-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
+                  checked={model.source.kind === 'upload'}
+                  on:change={onSwitchToUpload}
+                />
+                <span class="text-xs text-slate-300 font-medium">Upload file</span>
+              </label>
+            </div>
 
-      <div class="mt-4 grid gap-3">
-        <div class="text-xs font-semibold text-slate-300">STL source</div>
+            {#if model.source.kind === 'server'}
+              <label class="grid gap-1 text-xs text-slate-400">
+                Select model
+                <select
+                  class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                  value={model.source.serverId}
+                  on:change={(e) => onSelectServerModel((e.currentTarget as HTMLSelectElement).value)}
+                >
+                  {#each serverModels as s}
+                    <option value={s.id}>{s.name}</option>
+                  {/each}
+                </select>
+              </label>
+            {:else}
+              <label class="grid gap-1 text-xs text-slate-400">
+                Choose STL file
+                <div class="flex items-center gap-2">
+                  <input
+                    id="file-input-{model.id}"
+                    class="hidden"
+                    type="file"
+                    accept=".stl,model/stl"
+                    on:change={onUploadStl}
+                  />
+                  <button
+                    type="button"
+                    class="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800"
+                    on:click={() => {
+                      const fileInput = document.getElementById(`file-input-${model.id}`) as HTMLInputElement
+                      fileInput?.click()
+                    }}
+                  >
+                    Browse...
+                  </button>
+                  {#if model.source.stl?.fileName}
+                    <span class="text-xs text-slate-300 truncate flex-1">
+                      {model.source.stl.fileName}
+                    </span>
+                  {:else}
+                    <span class="text-xs text-slate-500">No file selected</span>
+                  {/if}
+                </div>
+              </label>
+            {/if}
+          </div>
 
-        <label class="grid gap-1 text-xs text-slate-400">
-          Select from server (placeholder)
-          <select
-            class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-            value={model.source.kind === 'server' ? model.source.serverId : ''}
-            on:change={(e) => onSelectServerModel((e.currentTarget as HTMLSelectElement).value)}
-          >
-            <option value="">—</option>
-            {#each serverModels as s}
-              <option value={s.id}>{s.name} ({s.widthU}u×{s.heightU}u)</option>
-            {/each}
-          </select>
-        </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="grid gap-1 text-xs text-slate-400">
+              Width (u)
+              <input
+                class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="number"
+                min="0.25"
+                step="0.25"
+                value={model.widthU}
+                disabled={model.source.kind === 'server'}
+                on:input={(e) => actions.updateKeycapModel(model.id, { widthU: Number((e.currentTarget as HTMLInputElement).value) })}
+              />
+            </label>
 
-        <label class="grid gap-1 text-xs text-slate-400">
-          Or upload your own STL
-          <input
-            class="block w-full cursor-pointer rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-2 file:text-sm file:text-slate-100 hover:file:bg-slate-700"
-            type="file"
-            accept=".stl,model/stl"
-            on:change={onUploadStl}
-          />
-        </label>
-
-        <div class="text-sm">
-          <div class="text-xs text-slate-400">Current reference</div>
-          <div class="font-mono text-xs text-slate-200">
-            {model.source.kind === 'server'
-              ? `${model.source.stl.fileName} (${model.source.url})`
-              : model.source.stl?.fileName ?? '—'}
+            <label class="grid gap-1 text-xs text-slate-400">
+              Height (u)
+              <input
+                class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="number"
+                min="0.25"
+                step="0.25"
+                value={model.heightU}
+                disabled={model.source.kind === 'server'}
+                on:input={(e) => actions.updateKeycapModel(model.id, { heightU: Number((e.currentTarget as HTMLInputElement).value) })}
+              />
+            </label>
           </div>
         </div>
       </div>
-
-      <div class="mt-4">
-        <div class="text-xs font-semibold text-slate-300 mb-2">3D Preview</div>
-        <div class="h-64 rounded-lg border border-slate-800 overflow-hidden">
-          {#if modelStlUrl || modelStlBuffer}
-            <Model3DViewer stlUrl={modelStlUrl} stlBuffer={modelStlBuffer} />
-          {:else}
-            <div class="flex h-full items-center justify-center text-sm text-slate-400">
-              Upload or select an STL file to preview
-            </div>
-          {/if}
-        </div>
-      </div>
     {/if}
+  </section>
+
+  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
+    <div class="text-sm font-semibold">3D Preview</div>
+    <div class="mt-3 h-96 rounded-lg border border-slate-800 overflow-hidden">
+      {#if !model}
+        <div class="flex h-full items-center justify-center text-sm text-slate-400">
+          Create/select a model to preview
+        </div>
+      {:else if modelStlUrl || modelStlBuffer}
+        <Model3DViewer stlUrl={modelStlUrl} stlBuffer={modelStlBuffer} />
+      {:else}
+        <div class="flex h-full items-center justify-center text-sm text-slate-400">
+          Upload or select an STL file to preview
+        </div>
+      {/if}
+    </div>
   </section>
 </div>
 
