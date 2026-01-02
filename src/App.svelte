@@ -1,12 +1,26 @@
 <script lang="ts">
   import { app } from './lib/state/store'
-  import { downloadStateFile, loadStateFromFile } from './lib/state/persistence'
+  import { downloadStateFile, loadStateFromFile, loadPreset } from './lib/state/persistence'
   import KeycapModelsEditor from './lib/ui/KeycapModelsEditor.svelte'
   import TemplateEditor from './lib/ui/TemplateEditor.svelte'
   import KeyEditor from './lib/ui/KeyEditor.svelte'
   import GeneratePanel from './lib/ui/GeneratePanel.svelte'
 
   let tab: 'models' | 'templates' | 'keys' | 'generate' = 'models'
+  let selectedPreset: string = ''
+
+  const presets = [
+    { value: '60-percent', label: '60% Keyboard' },
+    { value: 'planck', label: 'Planck' },
+  ]
+
+  async function onLoadPreset() {
+    if (!selectedPreset) return
+    if (window.confirm('Loading a preset will replace your current project. Continue?')) {
+      await loadPreset(selectedPreset)
+      selectedPreset = ''
+    }
+  }
 </script>
 
 <div class="min-h-dvh">
@@ -29,6 +43,25 @@
           Load project
           <input class="hidden" type="file" accept="application/json" on:change={loadStateFromFile} />
         </label>
+
+        <div class="flex gap-2">
+          <select
+            class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-slate-100"
+            bind:value={selectedPreset}
+          >
+            <option value="">Select preset...</option>
+            {#each presets as preset}
+              <option value={preset.value}>{preset.label}</option>
+            {/each}
+          </select>
+          <button
+            class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!selectedPreset}
+            on:click={onLoadPreset}
+          >
+            Load preset
+          </button>
+        </div>
       </div>
     </div>
   </header>

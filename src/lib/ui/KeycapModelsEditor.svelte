@@ -238,34 +238,34 @@
             {/if}
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <label class="grid gap-1 text-xs text-slate-400">
-              Width (u)
-              <input
+        <div class="grid grid-cols-2 gap-3">
+          <label class="grid gap-1 text-xs text-slate-400">
+            Width (u)
+            <input
                 class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                type="number"
-                min="0.25"
-                step="0.25"
-                value={model.widthU}
+              type="number"
+              min="0.25"
+              step="0.25"
+              value={model.widthU}
                 disabled={model.source.kind === 'server'}
-                on:input={(e) => actions.updateKeycapModel(model.id, { widthU: Number((e.currentTarget as HTMLInputElement).value) })}
-              />
-            </label>
+              on:input={(e) => actions.updateKeycapModel(model.id, { widthU: Number((e.currentTarget as HTMLInputElement).value) })}
+            />
+          </label>
 
-            <label class="grid gap-1 text-xs text-slate-400">
-              Height (u)
-              <input
+          <label class="grid gap-1 text-xs text-slate-400">
+            Height (u)
+            <input
                 class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                type="number"
-                min="0.25"
-                step="0.25"
-                value={model.heightU}
+              type="number"
+              min="0.25"
+              step="0.25"
+              value={model.heightU}
                 disabled={model.source.kind === 'server'}
-                on:input={(e) => actions.updateKeycapModel(model.id, { heightU: Number((e.currentTarget as HTMLInputElement).value) })}
-              />
-            </label>
-          </div>
+              on:input={(e) => actions.updateKeycapModel(model.id, { heightU: Number((e.currentTarget as HTMLInputElement).value) })}
+            />
+          </label>
         </div>
+      </div>
       </div>
     {/if}
   </section>
@@ -276,15 +276,15 @@
       {#if !model}
         <div class="flex h-full items-center justify-center text-sm text-slate-400">
           Create/select a model to preview
-        </div>
+          </div>
       {:else if modelStlUrl || modelStlBuffer}
-        <Model3DViewer stlUrl={modelStlUrl} stlBuffer={modelStlBuffer} />
-      {:else}
-        <div class="flex h-full items-center justify-center text-sm text-slate-400">
-          Upload or select an STL file to preview
+            <Model3DViewer stlUrl={modelStlUrl} stlBuffer={modelStlBuffer} />
+          {:else}
+            <div class="flex h-full items-center justify-center text-sm text-slate-400">
+              Upload or select an STL file to preview
+            </div>
+          {/if}
         </div>
-      {/if}
-    </div>
   </section>
 </div>
 

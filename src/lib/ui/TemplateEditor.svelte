@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { app, actions, selectedTemplate } from '../state/store'
+  import { app, actions, selectedTemplate, getSlotName, getSlotSymbol } from '../state/store'
   import type { SymbolDef } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
+  import KeyListPreview from './KeyListPreview.svelte'
   import { slide } from 'svelte/transition'
 
   $: tpl = $selectedTemplate
@@ -22,17 +23,27 @@
   const fontFamilies: Array<SymbolDef['fontFamily']> = ['helvetiker']
   const fontWeights: Array<SymbolDef['fontWeight']> = ['regular', 'bold']
 
-  $: previewTextsBySymbolId = tpl ? Object.fromEntries(tpl.symbols.map((s) => [s.id, s.slotName])) : {}
   $: model =
     tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
   $: modelWidthU = model?.widthU ?? 1
   $: modelHeightU = model?.heightU ?? 1
 
+  $: previewTextsBySymbolId = tpl
+    ? Object.fromEntries(tpl.symbols.map((s, index) => [s.id, getSlotSymbol(index)]))
+    : {}
+
   function clamp(n: number, min: number, max: number) {
     return Math.min(max, Math.max(min, n))
   }
 
+  function getTemplateModel(templateId: string) {
+    const t = $app.templates.find((t) => t.id === templateId)
+    if (!t) return null
+    return $app.keycapModels.find((m) => m.id === t.keycapModelId) ?? null
+  }
+
   let collapsedSymbols = new Set<string>()
+  let previousTemplateId: string | null = null
   let previousSymbolIds: Set<string> | null = null
 
   function toggleSymbol(symbolId: string) {
@@ -46,11 +57,16 @@
 
   $: if (tpl) {
     const currentSymbolIds = new Set(tpl.symbols.map(s => s.id))
-    const kept = new Set([...collapsedSymbols].filter(id => currentSymbolIds.has(id)))
-    const newIds = previousSymbolIds
-      ? new Set([...currentSymbolIds].filter(id => !previousSymbolIds!.has(id)))
-      : new Set<string>()
-    collapsedSymbols = new Set([...kept, ...newIds])
+    
+    if (!previousSymbolIds || previousTemplateId !== tpl.id) {
+      collapsedSymbols = new Set(currentSymbolIds)
+    } else {
+      const kept = new Set([...collapsedSymbols].filter(id => currentSymbolIds.has(id)))
+      const newIds = new Set([...currentSymbolIds].filter(id => !previousSymbolIds!.has(id)))
+      collapsedSymbols = new Set([...kept, ...newIds])
+    }
+    
+    previousTemplateId = tpl.id
     previousSymbolIds = currentSymbolIds
   }
 </script>
@@ -69,16 +85,28 @@
 
     <div class="mt-3 grid gap-2">
       {#each $app.templates as t (t.id)}
+        {@const tModel = getTemplateModel(t.id)}
+        {@const previewTexts = Object.fromEntries(t.symbols.map((s, index) => [s.id, getSlotSymbol(index)]))}
         <button
           class="flex w-full items-center justify-between gap-2 rounded-md border border-slate-800 px-3 py-2 text-left hover:bg-slate-900"
           class:bg-slate-900={$app.ui.selectedTemplateId === t.id}
           on:click={() => actions.selectTemplate(t.id)}
         >
-          <div class="min-w-0">
+          <div class="min-w-0 flex-1">
             <div class="truncate text-sm font-medium">{t.name}</div>
             <div class="truncate text-xs text-slate-400">
               {$app.keycapModels.find((m) => m.id === t.keycapModelId)?.name ?? '—'}
             </div>
+          </div>
+          <div class="h-10 w-10 -mr-1 flex-shrink-0 flex items-center justify-center">
+            {#if tModel}
+              <KeyListPreview
+                template={t}
+                textsBySymbolId={previewTexts}
+                widthU={tModel.widthU}
+                heightU={tModel.heightU}
+              />
+            {/if}
           </div>
         </button>
       {/each}
@@ -154,7 +182,7 @@
                     >
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="text-sm font-medium text-slate-200 truncate">{sym.slotName || 'Unnamed symbol'}</span>
+                    <span class="text-sm font-medium text-slate-200 truncate capitalize">{getSlotName(tpl.symbols.indexOf(sym))} ({getSlotSymbol(tpl.symbols.indexOf(sym))})</span>
                   </button>
                   <button
                     class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -167,16 +195,6 @@
 
                 {#if !isCollapsed}
                   <div class="p-3 pt-0 space-y-3" transition:slide={{ duration: 200 }}>
-                    <label class="grid gap-1 text-xs text-slate-400">
-                      Slot name
-                      <input
-                        class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                        value={sym.slotName}
-                        on:input={(e) =>
-                          actions.updateSymbol(tpl.id, sym.id, { slotName: (e.currentTarget as HTMLInputElement).value })}
-                      />
-                    </label>
-
                     <div class="grid grid-cols-2 gap-3">
                   <label class="grid gap-1 text-xs text-slate-400">
                     X (u)
@@ -315,7 +333,6 @@
         <div class="text-sm text-slate-400">Select a template to preview.</div>
       {/if}
     </div>
-    <div class="mt-3 text-xs text-slate-400">Uses each symbol's slot name as placeholder text.</div>
   </section>
 </div>
 

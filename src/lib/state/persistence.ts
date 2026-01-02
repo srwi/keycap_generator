@@ -81,3 +81,26 @@ export async function loadStateFromFile(ev: Event) {
   stlBuffersByModelId.set({})
   app.set(parsed)
 }
+
+export async function loadPreset(presetName: string) {
+  try {
+    const response = await fetch(`/presets/${presetName}.json`)
+    if (!response.ok) {
+      window.alert(`Failed to load preset: ${response.statusText}`)
+      return
+    }
+
+    const text = await response.text()
+    const parsed = parseProjectV1(JSON.parse(text) as unknown)
+    if (!parsed) {
+      window.alert('Invalid preset file.')
+      return
+    }
+
+    // Loaded presets only contain STL references; require re-upload / server fetch for generation.
+    stlBuffersByModelId.set({})
+    app.set(parsed)
+  } catch (error) {
+    window.alert(`Failed to load preset: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
+}

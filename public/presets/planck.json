@@ -1,0 +1,562 @@
+{
+  "version": 1,
+  "keycapModels": [
+    {
+      "id": "model_1u",
+      "name": "1u",
+      "widthU": 1,
+      "heightU": 1,
+      "source": {
+        "kind": "server",
+        "serverId": "1u",
+        "url": "/stls/1u.stl",
+        "stl": {
+          "fileName": "1u.stl",
+          "pathHint": "server:1u"
+        }
+      }
+    },
+    {
+      "id": "model_2u",
+      "name": "2u",
+      "widthU": 2,
+      "heightU": 1,
+      "source": {
+        "kind": "server",
+        "serverId": "2u",
+        "url": "/stls/2u.stl",
+        "stl": {
+          "fileName": "2u.stl",
+          "pathHint": "server:2u"
+        }
+      }
+    }
+  ],
+  "templates": [
+    {
+      "id": "tpl_1u",
+      "name": "1u Key",
+      "keycapModelId": "model_1u",
+      "symbols": [
+        {
+          "id": "sym_1u_primary",
+          "slotName": "Primary",
+          "x": 0.5,
+          "y": 0.7,
+          "fontFamily": "helvetiker",
+          "fontWeight": "regular",
+          "fontSizeMm": 4,
+          "color": "#ffffff",
+          "rotationDeg": 0
+        },
+        {
+          "id": "sym_1u_secondary",
+          "slotName": "Secondary",
+          "x": 0.5,
+          "y": 0.3,
+          "fontFamily": "helvetiker",
+          "fontWeight": "regular",
+          "fontSizeMm": 3.5,
+          "color": "#ffffff",
+          "rotationDeg": 0
+        },
+        {
+          "id": "sym_1u_tertiary",
+          "slotName": "Tertiary",
+          "x": 0.25,
+          "y": 0.7,
+          "fontFamily": "helvetiker",
+          "fontWeight": "regular",
+          "fontSizeMm": 3,
+          "color": "#ffffff",
+          "rotationDeg": 0
+        }
+      ]
+    },
+    {
+      "id": "tpl_1u_single",
+      "name": "1u Single",
+      "keycapModelId": "model_1u",
+      "symbols": [
+        {
+          "id": "sym_1u_single",
+          "slotName": "Main",
+          "x": 0.5,
+          "y": 0.5,
+          "fontFamily": "helvetiker",
+          "fontWeight": "regular",
+          "fontSizeMm": 4,
+          "color": "#ffffff",
+          "rotationDeg": 0
+        }
+      ]
+    },
+    {
+      "id": "tpl_2u_single",
+      "name": "2u Single",
+      "keycapModelId": "model_2u",
+      "symbols": [
+        {
+          "id": "sym_2u_single",
+          "slotName": "Main",
+          "x": 1,
+          "y": 0.5,
+          "fontFamily": "helvetiker",
+          "fontWeight": "regular",
+          "fontSizeMm": 4,
+          "color": "#ffffff",
+          "rotationDeg": 0
+        }
+      ]
+    }
+  ],
+  "keys": [
+    {
+      "id": "key_tab",
+      "name": "Tab",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "Tab"
+      }
+    },
+    {
+      "id": "key_q",
+      "name": "Q",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "Q",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "1"
+      }
+    },
+    {
+      "id": "key_w",
+      "name": "W",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "W",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "2"
+      }
+    },
+    {
+      "id": "key_e",
+      "name": "E",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "E",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "3"
+      }
+    },
+    {
+      "id": "key_r",
+      "name": "R",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "R",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "4"
+      }
+    },
+    {
+      "id": "key_t",
+      "name": "T",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "T",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "5"
+      }
+    },
+    {
+      "id": "key_y",
+      "name": "Y",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "Y",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "6"
+      }
+    },
+    {
+      "id": "key_u",
+      "name": "U",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "U",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "7"
+      }
+    },
+    {
+      "id": "key_i",
+      "name": "I",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "I",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "8"
+      }
+    },
+    {
+      "id": "key_o",
+      "name": "O",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "O",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "9"
+      }
+    },
+    {
+      "id": "key_p",
+      "name": "P",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "P",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "0"
+      }
+    },
+    {
+      "id": "key_bspc",
+      "name": "Backspace",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "Bksp"
+      }
+    },
+    {
+      "id": "key_esc",
+      "name": "Esc",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "Esc"
+      }
+    },
+    {
+      "id": "key_a",
+      "name": "A",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "A",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F1"
+      }
+    },
+    {
+      "id": "key_s",
+      "name": "S",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "S",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F2"
+      }
+    },
+    {
+      "id": "key_d",
+      "name": "D",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "D",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F3"
+      }
+    },
+    {
+      "id": "key_f",
+      "name": "F",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "F",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F4"
+      }
+    },
+    {
+      "id": "key_g",
+      "name": "G",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "G",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F5"
+      }
+    },
+    {
+      "id": "key_h",
+      "name": "H",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "H",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F6"
+      }
+    },
+    {
+      "id": "key_j",
+      "name": "J",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "J",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "_"
+      }
+    },
+    {
+      "id": "key_k",
+      "name": "K",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "K",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "+"
+      }
+    },
+    {
+      "id": "key_l",
+      "name": "L",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "L",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "{"
+      }
+    },
+    {
+      "id": "key_semicolon",
+      "name": ";",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": ";",
+        "sym_1u_secondary": ":",
+        "sym_1u_tertiary": "}"
+      }
+    },
+    {
+      "id": "key_quote",
+      "name": "'",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "'",
+        "sym_1u_secondary": "\"",
+        "sym_1u_tertiary": "|"
+      }
+    },
+    {
+      "id": "key_lshift",
+      "name": "Left Shift",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "Shift"
+      }
+    },
+    {
+      "id": "key_z",
+      "name": "Z",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "Z",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F7"
+      }
+    },
+    {
+      "id": "key_x",
+      "name": "X",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "X",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F8"
+      }
+    },
+    {
+      "id": "key_c",
+      "name": "C",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "C",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F9"
+      }
+    },
+    {
+      "id": "key_v",
+      "name": "V",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "V",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F10"
+      }
+    },
+    {
+      "id": "key_b",
+      "name": "B",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "B",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F11"
+      }
+    },
+    {
+      "id": "key_n",
+      "name": "N",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "N",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "F12"
+      }
+    },
+    {
+      "id": "key_m",
+      "name": "M",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "M",
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "~"
+      }
+    },
+    {
+      "id": "key_comma",
+      "name": ",",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": ",",
+        "sym_1u_secondary": "<",
+        "sym_1u_tertiary": "|"
+      }
+    },
+    {
+      "id": "key_period",
+      "name": ".",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": ".",
+        "sym_1u_secondary": ">",
+        "sym_1u_tertiary": "Home"
+      }
+    },
+    {
+      "id": "key_slash",
+      "name": "/",
+      "templateId": "tpl_1u",
+      "textsBySymbolId": {
+        "sym_1u_primary": "/",
+        "sym_1u_secondary": "?",
+        "sym_1u_tertiary": "End"
+      }
+    },
+    {
+      "id": "key_enter",
+      "name": "Enter",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "Enter"
+      }
+    },
+    {
+      "id": "key_backlit",
+      "name": "Backlit",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "BL"
+      }
+    },
+    {
+      "id": "key_lctrl",
+      "name": "Left Ctrl",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "Ctrl"
+      }
+    },
+    {
+      "id": "key_lalt",
+      "name": "Left Alt",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "Alt"
+      }
+    },
+    {
+      "id": "key_lgui",
+      "name": "Left GUI",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "GUI"
+      }
+    },
+    {
+      "id": "key_lower",
+      "name": "Lower",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "Lower"
+      }
+    },
+    {
+      "id": "key_space",
+      "name": "Space",
+      "templateId": "tpl_2u_single",
+      "textsBySymbolId": {
+        "sym_2u_single": ""
+      }
+    },
+    {
+      "id": "key_raise",
+      "name": "Raise",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "Raise"
+      }
+    },
+    {
+      "id": "key_left",
+      "name": "Left",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "←"
+      }
+    },
+    {
+      "id": "key_down",
+      "name": "Down",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "↓"
+      }
+    },
+    {
+      "id": "key_up",
+      "name": "Up",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "↑"
+      }
+    },
+    {
+      "id": "key_right",
+      "name": "Right",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "→"
+      }
+    }
+  ],
+  "settings": {
+    "extrusionDepthMm": 0.8
+  },
+  "ui": {
+    "selectedKeycapModelId": "model_1u",
+    "selectedTemplateId": "tpl_1u",
+    "selectedKeyId": "key_tab"
+  }
+}
+

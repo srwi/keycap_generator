@@ -2,10 +2,21 @@ import { derived, writable } from 'svelte/store'
 import type { AppState, KeyDef, KeycapModel, SymbolDef, Template } from './types'
 import { newId } from '../utils/id'
 
+export const SLOT_NAMES = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'iota', 'kappa']
+export const SLOT_SYMBOLS = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ']
+
+export function getSlotName(index: number): string {
+  return SLOT_NAMES[index] ?? `slot${index + 1}`
+}
+
+export function getSlotSymbol(index: number): string {
+  return SLOT_SYMBOLS[index] ?? String(index + 1)
+}
+
 function defaultSymbol(x?: number, y?: number): SymbolDef {
   return {
     id: newId('sym'),
-    slotName: 'Symbol',
+    slotName: '',
     x: x ?? 0.5,
     y: y ?? 0.5,
     fontFamily: 'helvetiker',
@@ -236,17 +247,20 @@ export const actions = {
   },
 
   updateSymbol(templateId: string, symbolId: string, patch: Partial<SymbolDef>) {
-    app.update(s => ({
-      ...s,
-      templates: s.templates.map(t =>
-        t.id === templateId
-          ? {
-              ...t,
-              symbols: t.symbols.map(sym => (sym.id === symbolId ? { ...sym, ...patch } : sym)),
-            }
-          : t
-      ),
-    }))
+    app.update(s => {
+      const { slotName, ...restPatch } = patch
+      return {
+        ...s,
+        templates: s.templates.map(t =>
+          t.id === templateId
+            ? {
+                ...t,
+                symbols: t.symbols.map(sym => (sym.id === symbolId ? { ...sym, ...restPatch } : sym)),
+              }
+            : t
+        ),
+      }
+    })
   },
 
   createKey() {
