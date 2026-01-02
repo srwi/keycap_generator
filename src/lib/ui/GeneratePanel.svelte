@@ -7,7 +7,9 @@
   import type { Group } from 'three'
 
   let isGenerating = false
-  let progressText = ''
+  let progressCurrent = 0
+  let progressTotal = 0
+  let currentGeneratingKeyId: string | null = null
   let selectedPreviewKeyId: string | null = null
   let previewModel: Group | null = null
   let isGeneratingPreview = false
@@ -31,37 +33,42 @@
     if (missingUploadModels.length > 0 || isGenerating) return
 
     isGenerating = true
-    progressText = 'Starting generation...'
+    progressCurrent = 0
+    progressTotal = $app.keys.length
+    currentGeneratingKeyId = null
     generateAbortController = new AbortController()
     
     try {
       await generateAll3mfsWithWorker($app, $stlBuffersByModelId, (p) => {
-        progressText = `Generating ${p.current}/${p.total}: ${p.keyName}`
+        progressCurrent = p.current
+        progressTotal = p.total
+        currentGeneratingKeyId = p.keyId
       }, generateAbortController.signal)
-      progressText = `Done. Downloaded keycaps.zip with ${$app.keys.length} file(s).`
       // Keep modal open briefly to show completion, then close
       await new Promise(r => setTimeout(r, 1500))
     } catch (e) {
       console.error(e)
-      if (e instanceof Error && e.message === 'Generation cancelled') {
-        progressText = 'Generation cancelled.'
-      } else {
-        progressText = e instanceof Error ? e.message : 'Generation failed.'
-        window.alert(progressText)
+      if (!(e instanceof Error && e.message === 'Generation cancelled')) {
+        window.alert(e instanceof Error ? e.message : 'Generation failed.')
       }
     } finally {
       isGenerating = false
       generateAbortController = null
-      progressText = ''
+      progressCurrent = 0
+      progressTotal = 0
+      currentGeneratingKeyId = null
     }
   }
+  
+  $: currentKey = currentGeneratingKeyId ? $app.keys.find(k => k.id === currentGeneratingKeyId) : null
+  $: currentTemplate = currentKey ? $app.templates.find(t => t.id === currentKey.templateId) : null
+  $: currentModel = currentTemplate ? $app.keycapModels.find(m => m.id === currentTemplate.keycapModelId) : null
 
   function onCancelGenerate() {
     if (generateAbortController) {
       generateAbortController.abort()
       generateAbortController = null
       isGenerating = false
-      progressText = ''
     }
   }
 
@@ -215,9 +222,13 @@
 {#if isGenerating}
   <ProcessingModal
     title="Generating Keycaps"
-    statusText={progressText}
-    spinnerColor="text-emerald-400"
     onCancel={onCancelGenerate}
+    current={progressCurrent}
+    total={progressTotal}
+    previewTemplate={currentTemplate ?? null}
+    previewTextsBySymbolId={currentKey?.textsBySymbolId ?? {}}
+    previewWidthU={currentModel?.widthU ?? 1}
+    previewHeightU={currentModel?.heightU ?? 1}
   />
 {/if}
 

@@ -95,15 +95,11 @@ self.onmessage = async (e: MessageEvent) => {
         const key = state.keys[i]
         self.postMessage({
           type: 'progress',
-          payload: { current: i + 1, total, keyName: key.name },
+          payload: { current: i + 1, total, keyId: key.id },
         })
 
         const template = getTemplate(state, key)
         if (!template) {
-          self.postMessage({
-            type: 'progress',
-            payload: { current: i + 1, total, keyName: `Skipping key ${i + 1}: template not found` },
-          })
           continue
         }
 
@@ -170,10 +166,6 @@ self.onmessage = async (e: MessageEvent) => {
         }
 
         await yieldAndCheck()
-        self.postMessage({
-          type: 'progress',
-          payload: { current: i + 1, total, keyName: `Performing CSG operations for ${key.name}...` },
-        })
 
         const baseMesh = makeMesh(baseGeom.clone() as BufferGeometry, 0xdddddd)
         const unionExtrusion = csgUnionMeshes(extrusionMeshes)
@@ -191,10 +183,6 @@ self.onmessage = async (e: MessageEvent) => {
         })
 
         await yieldAndCheck()
-        self.postMessage({
-          type: 'progress',
-          payload: { current: i + 1, total, keyName: `Exporting ${key.name}...` },
-        })
 
         const blob = await exportTo3MF(group, { printer_name: 'Bambu Lab A1' })
         const arrayBuffer = await blob.arrayBuffer()

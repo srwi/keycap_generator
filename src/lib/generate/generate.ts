@@ -61,7 +61,7 @@ async function getStlBufferForModel(model: KeycapModel, stlBuffersByModelId: Rec
 export function generateAll3mfsWithWorker(
   state: AppState,
   stlBuffersByModelId: Record<string, ArrayBuffer | null>,
-  onProgress?: (p: { current: number; total: number; keyName: string }) => void,
+  onProgress?: (p: { current: number; total: number; keyId: string }) => void,
   signal?: AbortSignal
 ): Promise<void> {
   return new Promise((resolve, reject) => {
