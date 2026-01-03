@@ -20,7 +20,7 @@ function defaultSymbol(x?: number, y?: number): SymbolDef {
     slotName: '',
     x: x ?? 0, // mm offset from center
     y: y ?? 0, // mm offset from center
-    fontFamily: 'helvetiker',
+    fontFamily: 'roboto',
     fontWeight: 'regular',
     fontSizeMm: 4,
     color: '#ffffff',

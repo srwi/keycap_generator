@@ -1,4 +1,4 @@
-export type FontFamily = 'helvetiker'
+export type FontFamily = 'roboto' | 'notoserif'
 export type FontWeight = 'regular' | 'bold'
 
 // Standard keycap unit size in millimeters (1u = 19.05mm)

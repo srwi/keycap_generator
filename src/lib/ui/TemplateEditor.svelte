@@ -21,7 +21,7 @@
     actions.deleteTemplate(tpl.id)
   }
 
-  const fontFamilies: Array<SymbolDef['fontFamily']> = ['helvetiker']
+  const fontFamilies: Array<SymbolDef['fontFamily']> = ['roboto', 'notoserif']
   const fontWeights: Array<SymbolDef['fontWeight']> = ['regular', 'bold']
 
   $: model =

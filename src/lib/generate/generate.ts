@@ -160,7 +160,8 @@ export async function generatePreviewModel(
     const text = (key.textsBySymbolId[sym.id] ?? '').trim()
     if (!text) continue
 
-    const font = getFont(sym.fontFamily, sym.fontWeight)
+    const fontResult = getFont(sym.fontFamily, sym.fontWeight)
+    const font = fontResult instanceof Promise ? await fontResult : fontResult
     const textGeom = new TextGeometry(text, {
       font,
       size: sym.fontSizeMm,
