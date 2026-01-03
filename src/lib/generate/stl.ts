@@ -22,3 +22,12 @@ export function alignBottomTo(geometry: BufferGeometry, targetZ = 0): void {
   const minZ = geometry.boundingBox!.min.z
   geometry.translate(0, 0, targetZ - minZ)
 }
+
+export async function getStlDimensions(arrayBuffer: ArrayBuffer): Promise<{ widthMm: number; heightMm: number }> {
+  const geometry = await parseSTL(arrayBuffer)
+  geometry.computeBoundingBox()
+  const bb = geometry.boundingBox!
+  const widthMm = bb.max.x - bb.min.x
+  const heightMm = bb.max.y - bb.min.y
+  return { widthMm, heightMm }
+}

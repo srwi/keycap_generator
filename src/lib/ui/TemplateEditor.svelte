@@ -1,8 +1,8 @@
 <script lang="ts">
   import { app, actions, selectedTemplate, getSlotName, getSlotSymbol } from '../state/store'
   import type { SymbolDef } from '../state/types'
+  import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
-  import KeyListPreview from './KeyListPreview.svelte'
   import { slide } from 'svelte/transition'
 
   $: tpl = $selectedTemplate
@@ -25,8 +25,8 @@
 
   $: model =
     tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
-  $: modelWidthU = model?.widthU ?? 1
-  $: modelHeightU = model?.heightU ?? 1
+  $: modelWidthMm = model?.widthMm ?? DEFAULT_KEYCAP_SIZE_MM
+  $: modelHeightMm = model?.heightMm ?? DEFAULT_KEYCAP_SIZE_MM
 
   $: previewTextsBySymbolId = tpl
     ? Object.fromEntries(tpl.symbols.map((s, index) => [s.id, getSlotSymbol(index)]))
@@ -100,11 +100,12 @@
           </div>
           <div class="h-10 w-10 -mr-1 flex-shrink-0 flex items-center justify-center">
             {#if tModel}
-              <KeyListPreview
+              <LabelPreview
                 template={t}
                 textsBySymbolId={previewTexts}
-                widthU={tModel.widthU}
-                heightU={tModel.heightU}
+                widthMm={tModel.widthMm}
+                heightMm={tModel.heightMm}
+                className="rounded"
               />
             {/if}
           </div>
@@ -197,32 +198,28 @@
                   <div class="p-3 pt-0 space-y-3" transition:slide={{ duration: 200 }}>
                     <div class="grid grid-cols-2 gap-3">
                   <label class="grid gap-1 text-xs text-slate-400">
-                    X (u)
+                    X (mm)
                     <input
                       class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
                       type="number"
-                      min="0"
-                      max={modelWidthU}
-                      step="0.01"
+                      step="0.1"
                       value={sym.x}
                       on:input={(e) =>
                         actions.updateSymbol(tpl.id, sym.id, {
-                          x: clamp(Number((e.currentTarget as HTMLInputElement).value), 0, modelWidthU),
+                          x: Number((e.currentTarget as HTMLInputElement).value),
                         })}
                     />
                   </label>
                   <label class="grid gap-1 text-xs text-slate-400">
-                    Y (u)
+                    Y (mm)
                     <input
                       class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
                       type="number"
-                      min="0"
-                      max={modelHeightU}
-                      step="0.01"
+                      step="0.1"
                       value={sym.y}
                       on:input={(e) =>
                         actions.updateSymbol(tpl.id, sym.id, {
-                          y: clamp(Number((e.currentTarget as HTMLInputElement).value), 0, modelHeightU),
+                          y: Number((e.currentTarget as HTMLInputElement).value),
                         })}
                     />
                   </label>
@@ -311,7 +308,7 @@
           </div>
 
           <div class="mt-3 text-xs text-slate-400">
-            X/Y are in keycap units (u): (0,0)=top-left. Max is model size ({modelWidthU}u×{modelHeightU}u).
+            X/Y are mm offsets from center: (0,0)=center. Positive X is right, positive Y is down. Model size: {modelWidthMm.toFixed(1)}mm × {modelHeightMm.toFixed(1)}mm.
           </div>
         </div>
       </div>
@@ -325,8 +322,8 @@
         <LabelPreview
           template={tpl}
           textsBySymbolId={previewTextsBySymbolId}
-          widthU={modelWidthU}
-          heightU={modelHeightU}
+          widthMm={modelWidthMm}
+          heightMm={modelHeightMm}
           className="max-w-[340px]"
         />
       {:else}

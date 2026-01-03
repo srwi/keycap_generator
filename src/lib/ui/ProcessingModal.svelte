@@ -1,6 +1,7 @@
 <script lang="ts">
   import LabelPreview from './LabelPreview.svelte'
   import type { Template } from '../state/types'
+  import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   
   export let title: string
   export let onCancel: () => void
@@ -8,8 +9,8 @@
   export let total: number = 0
   export let previewTemplate: Template | null = null
   export let previewTextsBySymbolId: Record<string, string> = {}
-  export let previewWidthU: number = 1
-  export let previewHeightU: number = 1
+  export let previewWidthMm: number = DEFAULT_KEYCAP_SIZE_MM
+  export let previewHeightMm: number = DEFAULT_KEYCAP_SIZE_MM
   
   $: progressPercent = total > 0 ? (current / total) * 100 : 0
 </script>
@@ -29,8 +30,8 @@
           <LabelPreview
             template={previewTemplate}
             textsBySymbolId={previewTextsBySymbolId}
-            widthU={previewWidthU}
-            heightU={previewHeightU}
+            widthMm={previewWidthMm}
+            heightMm={previewHeightMm}
             className="max-w-[120px]"
           />
         </div>

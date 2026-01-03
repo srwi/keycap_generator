@@ -1,22 +1,24 @@
 <script lang="ts">
   import { app, actions } from '../state/store'
   import { stlBuffersByModelId } from '../state/sessionAssets'
+  import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import Model3DViewer from './Model3DViewer.svelte'
+  import { getStlDimensions } from '../generate/stl'
 
   type ServerModel = {
     id: string
     name: string
-    widthU: number
-    heightU: number
+    widthMm: number
+    heightMm: number
     url: string
   }
 
   // Placeholder server-provided STLs (not actually present yet).
   const serverModels: ServerModel[] = [
-    { id: '1u', name: '1u', widthU: 1, heightU: 1, url: '/stls/1u.stl' },
-    { id: '125u', name: '1.25u', widthU: 1.25, heightU: 1, url: '/stls/1_25u.stl' },
-    { id: '2u', name: '2u', widthU: 2, heightU: 1, url: '/stls/2u.stl' },
-    { id: '625u', name: '6.25u Space', widthU: 6.25, heightU: 1, url: '/stls/6_25u_space.stl' },
+    { id: '1u', name: '1u', widthMm: DEFAULT_KEYCAP_SIZE_MM, heightMm: DEFAULT_KEYCAP_SIZE_MM, url: '/stls/1u.stl' },
+    { id: '125u', name: '1.25u', widthMm: DEFAULT_KEYCAP_SIZE_MM * 1.25, heightMm: DEFAULT_KEYCAP_SIZE_MM, url: '/stls/1_25u.stl' },
+    { id: '2u', name: '2u', widthMm: DEFAULT_KEYCAP_SIZE_MM * 2, heightMm: DEFAULT_KEYCAP_SIZE_MM, url: '/stls/2u.stl' },
+    { id: '625u', name: '6.25u Space', widthMm: DEFAULT_KEYCAP_SIZE_MM * 6.25, heightMm: DEFAULT_KEYCAP_SIZE_MM, url: '/stls/6_25u_space.stl' },
   ]
 
   $: selectedId = $app.ui.selectedKeycapModelId
@@ -66,6 +68,16 @@
     const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
     actions.renameKeycapModel(model.id, fileNameWithoutExt)
     
+    // Auto-detect dimensions from STL
+    try {
+      const { widthMm, heightMm } = await getStlDimensions(buf)
+      actions.updateKeycapModel(model.id, { widthMm, heightMm })
+    } catch (error) {
+      console.error('Failed to detect STL dimensions:', error)
+      // Fallback to default dimensions if detection fails
+      actions.updateKeycapModel(model.id, { widthMm: DEFAULT_KEYCAP_SIZE_MM, heightMm: DEFAULT_KEYCAP_SIZE_MM })
+    }
+    
     actions.setKeycapModelSource(model.id, {
       kind: 'upload',
       stl: { fileName: file.name, pathHint: (file as any).webkitRelativePath || file.name },
@@ -88,7 +100,7 @@
     const entry = serverModels.find((s) => s.id === serverId)
     if (!entry) return
     actions.renameKeycapModel(model.id, entry.name)
-    actions.updateKeycapModel(model.id, { widthU: entry.widthU, heightU: entry.heightU })
+    actions.updateKeycapModel(model.id, { widthMm: entry.widthMm, heightMm: entry.heightMm })
     actions.setKeycapModelSource(model.id, {
       kind: 'server',
       serverId: entry.id,
@@ -119,7 +131,7 @@
         >
           <div class="min-w-0">
             <div class="truncate text-sm font-medium">{m.name}</div>
-            <div class="truncate text-xs text-slate-400">{m.widthU}u × {m.heightU}u</div>
+            <div class="truncate text-xs text-slate-400">{m.widthMm.toFixed(1)}mm × {m.heightMm.toFixed(1)}mm</div>
           </div>
         </button>
       {/each}
@@ -238,33 +250,6 @@
             {/if}
           </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <label class="grid gap-1 text-xs text-slate-400">
-            Width (u)
-            <input
-                class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              type="number"
-              min="0.25"
-              step="0.25"
-              value={model.widthU}
-                disabled={model.source.kind === 'server'}
-              on:input={(e) => actions.updateKeycapModel(model.id, { widthU: Number((e.currentTarget as HTMLInputElement).value) })}
-            />
-          </label>
-
-          <label class="grid gap-1 text-xs text-slate-400">
-            Height (u)
-            <input
-                class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              type="number"
-              min="0.25"
-              step="0.25"
-              value={model.heightU}
-                disabled={model.source.kind === 'server'}
-              on:input={(e) => actions.updateKeycapModel(model.id, { heightU: Number((e.currentTarget as HTMLInputElement).value) })}
-            />
-          </label>
-        </div>
       </div>
       </div>
     {/if}

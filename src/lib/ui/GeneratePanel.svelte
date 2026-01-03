@@ -1,5 +1,6 @@
 <script lang="ts">
   import { app, actions } from '../state/store'
+  import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import { generateAll3mfsWithWorker, generatePreviewModel } from '../generate/generate'
   import { stlBuffersByModelId } from '../state/sessionAssets'
   import Model3DViewer from './Model3DViewer.svelte'
@@ -227,8 +228,8 @@
     total={progressTotal}
     previewTemplate={currentTemplate ?? null}
     previewTextsBySymbolId={currentKey?.textsBySymbolId ?? {}}
-    previewWidthU={currentModel?.widthU ?? 1}
-    previewHeightU={currentModel?.heightU ?? 1}
+    previewWidthMm={currentModel?.widthMm ?? DEFAULT_KEYCAP_SIZE_MM}
+    previewHeightMm={currentModel?.heightMm ?? DEFAULT_KEYCAP_SIZE_MM}
   />
 {/if}
 

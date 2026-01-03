@@ -172,16 +172,12 @@ export async function generatePreviewModel(
     textGeom.computeVertexNormals()
     centerGeometryXY(textGeom)
 
-    // Calculate position based on symbol coordinates
-    const width = baseGeom.boundingBox!.max.x - baseGeom.boundingBox!.min.x
-    const height = baseGeom.boundingBox!.max.y - baseGeom.boundingBox!.min.y
-    const wU = model.widthU || 1
-    const hU = model.heightU || 1
-
-    const xNorm = sym.x / wU
-    const yNorm = sym.y / hU
-    const tx = baseGeom.boundingBox!.min.x + xNorm * width
-    const ty = baseGeom.boundingBox!.max.y - yNorm * height
+    // Calculate position based on symbol coordinates (mm offsets from center)
+    // Since the base geometry is centered at (0,0), we can directly use the offsets
+    // x: left is negative, right is positive
+    // y: top is negative, bottom is positive (matches SVG coordinate system)
+    const tx = sym.x
+    const ty = sym.y
 
     const rz = MathUtils.degToRad(sym.rotationDeg)
     if (rz !== 0) textGeom.rotateZ(rz)

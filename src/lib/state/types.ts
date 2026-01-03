@@ -1,13 +1,14 @@
 export type FontFamily = 'helvetiker'
 export type FontWeight = 'regular' | 'bold'
 
-export const U_MM = 19.05
+// Standard keycap unit size in millimeters (1u = 19.05mm)
+export const DEFAULT_KEYCAP_SIZE_MM = 19.05
 
 export type SymbolDef = {
   id: string
   slotName: string
-  x: number // in u (left..right)
-  y: number // in u (top..bottom)
+  x: number // mm offset from center (left is negative, right is positive)
+  y: number // mm offset from center (top is negative, bottom is positive)
   fontFamily: FontFamily
   fontWeight: FontWeight
   fontSizeMm: number
@@ -27,8 +28,8 @@ export type KeycapModelSource =
 export type KeycapModel = {
   id: string
   name: string
-  widthU: number
-  heightU: number
+  widthMm: number
+  heightMm: number
   source: KeycapModelSource
 }
 

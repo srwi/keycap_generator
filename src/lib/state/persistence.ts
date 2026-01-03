@@ -33,8 +33,6 @@ function parseProjectV1(raw: unknown): AppState | null {
   const settingsRaw = isRecord(raw.settings) ? raw.settings : null
   const uiRaw = isRecord(raw.ui) ? raw.ui : null
 
-  // Note: templates/keys are kept as-is (already app-internal shape) but we still
-  // guard the outer envelope so project loading is predictable.
   return {
     version: 1,
     keycapModels: (raw as any).keycapModels as AppState['keycapModels'],

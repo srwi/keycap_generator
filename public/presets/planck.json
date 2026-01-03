@@ -4,8 +4,8 @@
     {
       "id": "model_1u",
       "name": "1u",
-      "widthU": 1,
-      "heightU": 1,
+      "widthMm": 19.05,
+      "heightMm": 19.05,
       "source": {
         "kind": "server",
         "serverId": "1u",
@@ -19,8 +19,8 @@
     {
       "id": "model_2u",
       "name": "2u",
-      "widthU": 2,
-      "heightU": 1,
+      "widthMm": 38.1,
+      "heightMm": 19.05,
       "source": {
         "kind": "server",
         "serverId": "2u",
@@ -41,8 +41,8 @@
         {
           "id": "sym_1u_primary",
           "slotName": "Primary",
-          "x": 0.5,
-          "y": 0.7,
+          "x": 0,
+          "y": -3.81,
           "fontFamily": "helvetiker",
           "fontWeight": "regular",
           "fontSizeMm": 4,
@@ -52,8 +52,8 @@
         {
           "id": "sym_1u_secondary",
           "slotName": "Secondary",
-          "x": 0.5,
-          "y": 0.3,
+          "x": 0,
+          "y": 3.81,
           "fontFamily": "helvetiker",
           "fontWeight": "regular",
           "fontSizeMm": 3.5,
@@ -63,8 +63,8 @@
         {
           "id": "sym_1u_tertiary",
           "slotName": "Tertiary",
-          "x": 0.25,
-          "y": 0.7,
+          "x": -4.7625,
+          "y": -3.81,
           "fontFamily": "helvetiker",
           "fontWeight": "regular",
           "fontSizeMm": 3,
@@ -81,8 +81,8 @@
         {
           "id": "sym_1u_single",
           "slotName": "Main",
-          "x": 0.5,
-          "y": 0.5,
+          "x": 0,
+          "y": 0,
           "fontFamily": "helvetiker",
           "fontWeight": "regular",
           "fontSizeMm": 4,
@@ -99,8 +99,8 @@
         {
           "id": "sym_2u_single",
           "slotName": "Main",
-          "x": 1,
-          "y": 0.5,
+          "x": 0,
+          "y": 0,
           "fontFamily": "helvetiker",
           "fontWeight": "regular",
           "fontSizeMm": 4,

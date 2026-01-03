@@ -1,15 +1,15 @@
 <script lang="ts">
   import { app, actions, selectedKey, getSlotName, getSlotSymbol } from '../state/store'
+  import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
-  import KeyListPreview from './KeyListPreview.svelte'
 
   $: key = $selectedKey
   $: tpl =
     key == null ? null : $app.templates.find((t) => t.id === key.templateId) ?? null
   $: model =
     tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
-  $: modelWidthU = model?.widthU ?? 1
-  $: modelHeightU = model?.heightU ?? 1
+  $: modelWidthMm = model?.widthMm ?? DEFAULT_KEYCAP_SIZE_MM
+  $: modelHeightMm = model?.heightMm ?? DEFAULT_KEYCAP_SIZE_MM
 
   function onDeleteKey() {
     if (!key) return
@@ -58,11 +58,12 @@
           </div>
           <div class="h-10 w-10 -mr-1 flex-shrink-0 flex items-center justify-center">
             {#if kTpl && kModel}
-              <KeyListPreview
+              <LabelPreview
                 template={kTpl}
                 textsBySymbolId={k.textsBySymbolId}
-                widthU={kModel.widthU}
-                heightU={kModel.heightU}
+                widthMm={kModel.widthMm}
+                heightMm={kModel.heightMm}
+                className="rounded"
               />
             {/if}
           </div>
@@ -142,8 +143,8 @@
         <LabelPreview
           template={tpl}
           textsBySymbolId={key.textsBySymbolId}
-          widthU={modelWidthU}
-          heightU={modelHeightU}
+          widthMm={modelWidthMm}
+          heightMm={modelHeightMm}
           className="max-w-[340px]"
         />
       {:else}

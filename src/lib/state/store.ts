@@ -1,5 +1,6 @@
 import { derived, writable } from 'svelte/store'
 import type { AppState, KeyDef, KeycapModel, SymbolDef, Template } from './types'
+import { DEFAULT_KEYCAP_SIZE_MM } from './types'
 import { newId } from '../utils/id'
 
 export const SLOT_NAMES = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'iota', 'kappa']
@@ -17,8 +18,8 @@ function defaultSymbol(x?: number, y?: number): SymbolDef {
   return {
     id: newId('sym'),
     slotName: '',
-    x: x ?? 0.5,
-    y: y ?? 0.5,
+    x: x ?? 0, // mm offset from center
+    y: y ?? 0, // mm offset from center
     fontFamily: 'helvetiker',
     fontWeight: 'regular',
     fontSizeMm: 4,
@@ -31,8 +32,8 @@ function defaultKeycapModel(): KeycapModel {
   return {
     id: newId('model'),
     name: '1u',
-    widthU: 1,
-    heightU: 1,
+    widthMm: DEFAULT_KEYCAP_SIZE_MM,
+    heightMm: DEFAULT_KEYCAP_SIZE_MM,
     source: { kind: 'upload', stl: null },
   }
 }
@@ -162,7 +163,7 @@ export const actions = {
     }))
   },
 
-  updateKeycapModel(modelId: string, patch: Partial<Pick<KeycapModel, 'widthU' | 'heightU'>>) {
+  updateKeycapModel(modelId: string, patch: Partial<Pick<KeycapModel, 'widthMm' | 'heightMm'>>) {
     app.update(s => ({
       ...s,
       keycapModels: s.keycapModels.map(m => (m.id === modelId ? { ...m, ...patch } : m)),
@@ -215,8 +216,9 @@ export const actions = {
       if (!tpl) return s
 
       const model = s.keycapModels.find(m => m.id === tpl.keycapModelId)
-      const x = model ? model.widthU / 2 : 0.5
-      const y = model ? model.heightU / 2 : 0.5
+      // Default to center (0, 0) in mm offset from center
+      const x = 0
+      const y = 0
       const sym = defaultSymbol(x, y)
 
       const nextTemplates = s.templates.map(t => (t.id === templateId ? { ...t, symbols: [...t.symbols, sym] } : t))
