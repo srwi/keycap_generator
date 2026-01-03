@@ -3,6 +3,7 @@
   import type { SymbolDef } from '../state/types'
   import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
+  import KeycapPreview from './KeycapPreview.svelte'
   import { slide } from 'svelte/transition'
 
   $: tpl = $selectedTemplate
@@ -316,20 +317,17 @@
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    <div class="text-sm font-semibold">Template preview</div>
-    <div class="mt-3 flex items-center justify-center">
-      {#if tpl}
-        <LabelPreview
-          template={tpl}
-          textsBySymbolId={previewTextsBySymbolId}
-          widthMm={modelWidthMm}
-          heightMm={modelHeightMm}
-          className="max-w-[340px]"
-        />
-      {:else}
-        <div class="text-sm text-slate-400">Select a template to preview.</div>
-      {/if}
-    </div>
+    {#if tpl}
+      <KeycapPreview
+        template={tpl}
+        textsBySymbolId={previewTextsBySymbolId}
+        widthMm={modelWidthMm}
+        heightMm={modelHeightMm}
+        keyId={null}
+      />
+    {:else}
+      <div class="text-sm text-slate-400">Select a template to preview.</div>
+    {/if}
   </section>
 </div>
 

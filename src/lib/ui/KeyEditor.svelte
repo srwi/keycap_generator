@@ -2,6 +2,7 @@
   import { app, actions, selectedKey, getSlotName, getSlotSymbol } from '../state/store'
   import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
+  import KeycapPreview from './KeycapPreview.svelte'
 
   $: key = $selectedKey
   $: tpl =
@@ -137,23 +138,17 @@
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    <div class="text-sm font-semibold">Preview</div>
-    <div class="mt-3 flex items-center justify-center">
-      {#if key}
-        <LabelPreview
-          template={tpl}
-          textsBySymbolId={key.textsBySymbolId}
-          widthMm={modelWidthMm}
-          heightMm={modelHeightMm}
-          className="max-w-[340px]"
-        />
-      {:else}
-        <div class="text-sm text-slate-400">Select a key to preview.</div>
-      {/if}
-    </div>
-    <div class="mt-3 text-xs text-slate-400">
-      Preview is schematic; generation uses the same normalized X/Y anchors on the STL face plane.
-    </div>
+    {#if key}
+      <KeycapPreview
+        template={tpl}
+        textsBySymbolId={key.textsBySymbolId}
+        widthMm={modelWidthMm}
+        heightMm={modelHeightMm}
+        keyId={key.id}
+      />
+    {:else}
+      <div class="text-sm text-slate-400">Select a key to preview.</div>
+    {/if}
   </section>
 </div>
 

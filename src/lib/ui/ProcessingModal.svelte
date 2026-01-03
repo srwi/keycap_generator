@@ -23,7 +23,7 @@
 >
   <div class="rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-xl max-w-md w-full mx-4">
     <div class="flex flex-col items-center">
-      <h3 id="modal-title" class="text-sm font-semibold text-slate-200 mb-6">{title}</h3>
+      <h3 id="modal-title" class="text-lg font-semibold text-slate-200 mb-6">{title}</h3>
       
       {#if previewTemplate}
         <div class="flex justify-center mb-6">
