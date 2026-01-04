@@ -1,11 +1,12 @@
 import { app } from './store'
-import type { AppState } from './types'
+import type { AppState, KeyDef, KeycapModel, Template } from './types'
 import { stlBuffersByModelId } from './sessionAssets'
 
-function sanitizeForExport(state: AppState): AppState {
-  // Never embed STL bytes in the project file. Only keep refs on models.
+function prepareForExport(state: AppState): Omit<AppState, 'ui'> {
+  // UI state is runtime-only and not exported.
+  const { ui, ...rest } = state
   return {
-    ...state,
+    ...rest,
     keycapModels: state.keycapModels.map(m => {
       if (m.source.kind === 'upload') {
         return { ...m, source: { ...m.source, stl: m.source.stl ? { ...m.source.stl } : null } }
@@ -15,42 +16,46 @@ function sanitizeForExport(state: AppState): AppState {
   }
 }
 
-function asNumber(v: unknown, fallback: number): number {
-  const n = typeof v === 'number' ? v : Number(v)
-  return Number.isFinite(n) ? n : fallback
-}
-
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null
+type RawProjectV1 = {
+  version: 1
+  keycapModels: KeycapModel[]
+  templates: Template[]
+  keys: KeyDef[]
+  settings: {
+    extrusionDepthMm: number
+  }
 }
 
 function parseProjectV1(raw: unknown): AppState | null {
-  if (!isRecord(raw)) return null
-  if (raw.version !== 1) return null
-  if (!Array.isArray((raw as any).keycapModels) || !Array.isArray(raw.templates) || !Array.isArray(raw.keys))
-    return null
+  if (typeof raw !== 'object' || raw === null) return null
 
-  const settingsRaw = isRecord(raw.settings) ? raw.settings : null
-  const uiRaw = isRecord(raw.ui) ? raw.ui : null
+  const project = raw as RawProjectV1
+
+  if (project.version !== 1) return null
+  if (!Array.isArray(project.keycapModels) || !Array.isArray(project.templates) || !Array.isArray(project.keys))
+    return null
+  if (typeof project.settings !== 'object' || project.settings === null) return null
+  if (typeof project.settings.extrusionDepthMm !== 'number') return null
 
   return {
     version: 1,
-    keycapModels: (raw as any).keycapModels as AppState['keycapModels'],
-    templates: raw.templates as AppState['templates'],
-    keys: raw.keys as AppState['keys'],
-    settings: { extrusionDepthMm: asNumber(settingsRaw?.extrusionDepthMm, 0.8) },
+    keycapModels: project.keycapModels,
+    templates: project.templates,
+    keys: project.keys,
+    settings: {
+      extrusionDepthMm: project.settings.extrusionDepthMm,
+    },
     ui: {
-      selectedKeycapModelId:
-        typeof (uiRaw as any)?.selectedKeycapModelId === 'string' ? (uiRaw as any).selectedKeycapModelId : null,
-      selectedTemplateId: typeof uiRaw?.selectedTemplateId === 'string' ? uiRaw.selectedTemplateId : null,
-      selectedKeyId: typeof uiRaw?.selectedKeyId === 'string' ? uiRaw.selectedKeyId : null,
+      selectedKeycapModelId: project.keycapModels[0]?.id ?? null,
+      selectedTemplateId: project.templates[0]?.id ?? null,
+      selectedKeyId: project.keys[0]?.id ?? null,
     },
   }
 }
 
 export function downloadStateFile(state: AppState) {
-  const safe = sanitizeForExport(state)
-  const json = JSON.stringify(safe, null, 2)
+  const prepared = prepareForExport(state)
+  const json = JSON.stringify(prepared, null, 2)
   const blob = new Blob([json], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
 
@@ -62,6 +67,18 @@ export function downloadStateFile(state: AppState) {
   setTimeout(() => URL.revokeObjectURL(url), 500)
 }
 
+async function loadStateFromJson(jsonText: string, errorContext: string) {
+  const parsed = parseProjectV1(JSON.parse(jsonText) as unknown)
+  if (!parsed) {
+    window.alert(`Invalid ${errorContext}.`)
+    return false
+  }
+
+  stlBuffersByModelId.set({})
+  app.set(parsed)
+  return true
+}
+
 export async function loadStateFromFile(ev: Event) {
   const input = ev.currentTarget as HTMLInputElement
   const file = input.files?.[0]
@@ -69,15 +86,7 @@ export async function loadStateFromFile(ev: Event) {
   if (!file) return
 
   const text = await file.text()
-  const parsed = parseProjectV1(JSON.parse(text) as unknown)
-  if (!parsed) {
-    window.alert('Invalid project file.')
-    return
-  }
-
-  // Loaded projects only contain STL references; require re-upload / server fetch for generation.
-  stlBuffersByModelId.set({})
-  app.set(parsed)
+  await loadStateFromJson(text, 'project file')
 }
 
 export async function loadPreset(presetName: string) {
@@ -89,15 +98,7 @@ export async function loadPreset(presetName: string) {
     }
 
     const text = await response.text()
-    const parsed = parseProjectV1(JSON.parse(text) as unknown)
-    if (!parsed) {
-      window.alert('Invalid preset file.')
-      return
-    }
-
-    // Loaded presets only contain STL references; require re-upload / server fetch for generation.
-    stlBuffersByModelId.set({})
-    app.set(parsed)
+    await loadStateFromJson(text, 'preset file')
   } catch (error) {
     window.alert(`Failed to load preset: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
