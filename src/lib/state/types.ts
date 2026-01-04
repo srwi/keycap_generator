@@ -37,6 +37,7 @@ export type Template = {
   name: string
   keycapModelId: string
   symbols: SymbolDef[]
+  extrusionDepthMm: number
 }
 
 export type KeyDef = {
@@ -44,10 +45,6 @@ export type KeyDef = {
   name: string
   templateId: string
   textsBySymbolId: Record<string, string>
-}
-
-export type AppSettings = {
-  extrusionDepthMm: number
 }
 
 export type AppUiState = {
@@ -61,6 +58,5 @@ export type AppState = {
   keycapModels: KeycapModel[]
   templates: Template[]
   keys: KeyDef[]
-  settings: AppSettings
   ui: AppUiState
 }

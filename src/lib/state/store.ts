@@ -62,6 +62,7 @@ function defaultTemplate(keycapModelId: string): Template {
     name: 'Regular key',
     keycapModelId,
     symbols: [defaultSymbol()],
+    extrusionDepthMm: 0.4,
   }
 }
 
@@ -80,9 +81,6 @@ function defaultState(): AppState {
     keycapModels: [model],
     templates: [tpl],
     keys: [key],
-    settings: {
-      extrusionDepthMm: 0.4,
-    },
     ui: {
       selectedKeycapModelId: model.id,
       selectedTemplateId: tpl.id,
@@ -338,7 +336,10 @@ export const actions = {
     }))
   },
 
-  setExtrusionDepthMm(extrusionDepthMm: number) {
-    app.update(s => ({ ...s, settings: { ...s.settings, extrusionDepthMm } }))
+  setTemplateExtrusionDepthMm(templateId: string, extrusionDepthMm: number) {
+    app.update(s => ({
+      ...s,
+      templates: s.templates.map(t => (t.id === templateId ? { ...t, extrusionDepthMm } : t)),
+    }))
   },
 }

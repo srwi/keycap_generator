@@ -21,9 +21,6 @@ type RawProjectV1 = {
   keycapModels: KeycapModel[]
   templates: Template[]
   keys: KeyDef[]
-  settings: {
-    extrusionDepthMm: number
-  }
 }
 
 function parseProjectV1(raw: unknown): AppState | null {
@@ -34,17 +31,12 @@ function parseProjectV1(raw: unknown): AppState | null {
   if (project.version !== 1) return null
   if (!Array.isArray(project.keycapModels) || !Array.isArray(project.templates) || !Array.isArray(project.keys))
     return null
-  if (typeof project.settings !== 'object' || project.settings === null) return null
-  if (typeof project.settings.extrusionDepthMm !== 'number') return null
 
   return {
     version: 1,
     keycapModels: project.keycapModels,
     templates: project.templates,
     keys: project.keys,
-    settings: {
-      extrusionDepthMm: project.settings.extrusionDepthMm,
-    },
     ui: {
       selectedKeycapModelId: project.keycapModels[0]?.id ?? null,
       selectedTemplateId: project.templates[0]?.id ?? null,

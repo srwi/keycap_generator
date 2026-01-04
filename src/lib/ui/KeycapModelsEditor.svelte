@@ -20,7 +20,6 @@
   $: selectedId = $app.ui.selectedKeycapModelId
   $: model = selectedId ? ($app.keycapModels.find(m => m.id === selectedId) ?? null) : null
 
-  // Automatically load dimensions for server models that haven't been loaded yet (0 indicates not loaded)
   $: if (model?.source.kind === 'server' && (model.widthMm === 0 || model.heightMm === 0)) {
     fetch(model.source.url)
       .then(res => res.arrayBuffer())
