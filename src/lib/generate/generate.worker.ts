@@ -2,7 +2,7 @@
 
 import type { AppState } from '../state/types'
 import { parseSTL, centerGeometryXY, alignBottomTo } from './stl'
-import { exportTo3MF } from './3mf'
+import { exportTo3MF } from 'three-3mf-exporter'
 import { generateKeycapModel, getTemplate, getModel, getStlBufferForModel, safeFileName } from './generate'
 import { BufferGeometry } from 'three'
 import { zipSync } from 'fflate'
@@ -70,7 +70,8 @@ self.onmessage = async (e: MessageEvent) => {
 
         const group = await generateKeycapModel(state, key, template, baseGeom, yieldAndCheck)
 
-        const blob = await exportTo3MF(group, { printer_name: 'Bambu Lab A1' })
+        const blob = await exportTo3MF(group)
+        
         const arrayBuffer = await blob.arrayBuffer()
         files[`${safeFileName(key.name)}.3mf`] = new Uint8Array(arrayBuffer)
       }

@@ -30,6 +30,7 @@
     "fflate": "^0.8.2",
     "opentype.js": "^1.3.4",
     "three": "^0.182.0",
+    "three-3mf-exporter": "45.0.0",
     "three-bvh-csg": "^0.0.17",
     "three-mesh-bvh": "^0.9.4"
   }
