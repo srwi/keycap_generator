@@ -81,19 +81,12 @@
     const buf = await file.arrayBuffer()
     stlBuffersByModelId.update(m => ({ ...m, [model.id]: buf }))
 
-    // Extract filename without extension for model name
     const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
     actions.renameKeycapModel(model.id, fileNameWithoutExt)
+    actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0 })
 
-    // Auto-detect dimensions from STL
-    try {
-      const { widthMm, heightMm } = await getStlDimensions(buf)
-      actions.updateKeycapModel(model.id, { widthMm, heightMm })
-    } catch (error) {
-      console.error('Failed to detect STL dimensions:', error)
-      // Fallback to default dimensions if detection fails
-      actions.updateKeycapModel(model.id, { widthMm: DEFAULT_KEYCAP_SIZE_MM, heightMm: DEFAULT_KEYCAP_SIZE_MM })
-    }
+    const { widthMm, heightMm } = await getStlDimensions(buf)
+    actions.updateKeycapModel(model.id, { widthMm, heightMm })
 
     actions.setKeycapModelSource(model.id, {
       kind: 'upload',
@@ -110,6 +103,8 @@
       kind: 'upload',
       stl: model.source.kind === 'upload' ? model.source.stl : null,
     })
+    // Reset rotation when switching to upload (new file may need different orientation)
+    actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0 })
   }
 
   function onSelectServerModel(serverId: string) {
@@ -202,6 +197,8 @@
                           delete next[model.id]
                           return next
                         })
+                        // Reset rotation when switching to server (server models are pre-oriented)
+                        actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0 })
                       }
                       onSelectServerModel(serverModels[0].id)
                     }
@@ -267,6 +264,89 @@
             {/if}
           </div>
         </div>
+
+        {#if model.source.kind === 'upload' && model.source.stl}
+          <div class="mt-2 grid gap-3">
+            <div class="text-xs font-semibold text-slate-300">Model Orientation</div>
+            <div class="grid gap-2 rounded-lg border border-slate-800 bg-slate-900/50 p-3">
+              <div class="text-xs text-slate-400 mb-1">Rotate the model until the face points towards the camera.</div>
+              <div class="grid grid-cols-3 gap-2">
+                <div class="grid gap-1">
+                  <div class="text-xs text-slate-400 text-center">X-axis</div>
+                  <div class="flex gap-1">
+                    <button
+                      class="flex-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200 hover:bg-slate-800"
+                      on:click={() => {
+                        const current = model.rotationX
+                        actions.updateKeycapModel(model.id, { rotationX: (current - 90 + 360) % 360 })
+                      }}
+                    >
+                      -90°
+                    </button>
+                    <button
+                      class="flex-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200 hover:bg-slate-800"
+                      on:click={() => {
+                        const current = model.rotationX
+                        actions.updateKeycapModel(model.id, { rotationX: (current + 90) % 360 })
+                      }}
+                    >
+                      +90°
+                    </button>
+                  </div>
+                  <div class="text-xs text-slate-500 text-center">{model.rotationX}°</div>
+                </div>
+                <div class="grid gap-1">
+                  <div class="text-xs text-slate-400 text-center">Y-axis</div>
+                  <div class="flex gap-1">
+                    <button
+                      class="flex-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200 hover:bg-slate-800"
+                      on:click={() => {
+                        const current = model.rotationY
+                        actions.updateKeycapModel(model.id, { rotationY: (current - 90 + 360) % 360 })
+                      }}
+                    >
+                      -90°
+                    </button>
+                    <button
+                      class="flex-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200 hover:bg-slate-800"
+                      on:click={() => {
+                        const current = model.rotationY
+                        actions.updateKeycapModel(model.id, { rotationY: (current + 90) % 360 })
+                      }}
+                    >
+                      +90°
+                    </button>
+                  </div>
+                  <div class="text-xs text-slate-500 text-center">{model.rotationY}°</div>
+                </div>
+                <div class="grid gap-1">
+                  <div class="text-xs text-slate-400 text-center">Z-axis</div>
+                  <div class="flex gap-1">
+                    <button
+                      class="flex-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200 hover:bg-slate-800"
+                      on:click={() => {
+                        const current = model.rotationZ
+                        actions.updateKeycapModel(model.id, { rotationZ: (current - 90 + 360) % 360 })
+                      }}
+                    >
+                      -90°
+                    </button>
+                    <button
+                      class="flex-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200 hover:bg-slate-800"
+                      on:click={() => {
+                        const current = model.rotationZ
+                        actions.updateKeycapModel(model.id, { rotationZ: (current + 90) % 360 })
+                      }}
+                    >
+                      +90°
+                    </button>
+                  </div>
+                  <div class="text-xs text-slate-500 text-center">{model.rotationZ}°</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {/if}
       </div>
     {/if}
   </section>
@@ -279,7 +359,13 @@
           Create/select a model to preview
         </div>
       {:else if modelStlUrl || modelStlBuffer}
-        <Model3DViewer stlUrl={modelStlUrl} stlBuffer={modelStlBuffer} />
+        <Model3DViewer
+          stlUrl={modelStlUrl}
+          stlBuffer={modelStlBuffer}
+          rotationX={model.rotationX}
+          rotationY={model.rotationY}
+          rotationZ={model.rotationZ}
+        />
       {:else}
         <div class="flex h-full items-center justify-center text-sm text-slate-400">
           Upload or select an STL file to preview

@@ -1,5 +1,5 @@
 import type { AppState, KeyDef, KeycapModel, Template } from '../state/types'
-import { parseSTL, centerGeometryXY, alignBottomTo } from './stl'
+import { processStlForModel, centerGeometryXY, alignBottomTo } from './stl'
 import { makeMesh, csgIntersect, csgSubtract, csgUnionMeshes } from './csg'
 import { getFont } from './fonts'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
@@ -218,10 +218,8 @@ export async function generatePreviewModel(
   await yieldAndCheck()
   const stlBuf = await getStlBufferForModel(model, stlBuffersByModelId)
   await yieldAndCheck()
-  const baseGeom = await parseSTL(stlBuf)
-  centerGeometryXY(baseGeom)
-  alignBottomTo(baseGeom, 0)
-  baseGeom.computeBoundingBox()
+
+  const baseGeom = await processStlForModel(stlBuf, model.rotationX, model.rotationY, model.rotationZ)
 
   await yieldAndCheck()
 

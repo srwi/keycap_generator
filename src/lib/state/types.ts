@@ -30,6 +30,9 @@ export type KeycapModel = {
   widthMm: number
   heightMm: number
   source: KeycapModelSource
+  rotationX: number
+  rotationY: number
+  rotationZ: number
 }
 
 export type Template = {

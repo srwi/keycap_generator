@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
 import type { AppState } from '../state/types'
-import { parseSTL, centerGeometryXY, alignBottomTo } from './stl'
+import { processStlForModel } from './stl'
 import { exportTo3MF } from 'three-3mf-exporter'
 import { generateKeycapModel, getTemplate, getModel, getStlBufferForModel, safeFileName } from './generate'
 import { BufferGeometry } from 'three'
@@ -61,10 +61,7 @@ self.onmessage = async (e: MessageEvent) => {
         if (!baseGeom) {
           await yieldAndCheck()
           const stlBuf = await getStlBufferForModel(model.id, stlBuffersByModelId, state)
-          baseGeom = await parseSTL(stlBuf)
-          centerGeometryXY(baseGeom)
-          alignBottomTo(baseGeom, 0)
-          baseGeom.computeBoundingBox()
+          baseGeom = await processStlForModel(stlBuf, model.rotationX, model.rotationY, model.rotationZ)
           baseGeomByModelId.set(model.id, baseGeom)
         }
 

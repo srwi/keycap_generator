@@ -8,6 +8,9 @@
   export let stlUrl: string | null = null
   export let stlBuffer: ArrayBuffer | null = null
   export let modelGroup: Group | null = null
+  export let rotationX: number = 0
+  export let rotationY: number = 0
+  export let rotationZ: number = 0
 
   let container: HTMLDivElement | null = null
   let scene: THREE.Scene | null = null
@@ -24,8 +27,7 @@
     scene.background = new THREE.Color(0x0f172a) // slate-950
 
     camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000)
-    // Initial position: bottom perspective (camera below, looking up)
-    camera.position.set(0, -80, 0)
+    camera.position.set(0, 0, 80)
     camera.lookAt(0, 0, 0)
 
     renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -34,8 +36,6 @@
     container.appendChild(renderer.domElement)
 
     controls = new OrbitControls(camera, renderer.domElement)
-    controls.enableDamping = true
-    controls.dampingFactor = 0.05
     controls.minDistance = 20
     controls.maxDistance = 200
     controls.target.set(0, 0, 0)
@@ -45,7 +45,7 @@
     scene.add(ambientLight)
 
     const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.4)
-    directionalLight1.position.set(50, 50, 50)
+    directionalLight1.position.set(0, 50, 50)
     scene.add(directionalLight1)
 
     const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.3)
@@ -82,7 +82,7 @@
     // Remove all meshes (for STL-based models)
     const objectsToRemove: THREE.Object3D[] = []
     scene.traverse(child => {
-      if (child instanceof THREE.Mesh && child !== currentModelGroup) {
+      if (child instanceof THREE.Mesh) {
         objectsToRemove.push(child)
       }
     })
@@ -119,7 +119,7 @@
       const distance = maxDim * 2.5
 
       // Position camera below the model, looking up (bottom perspective)
-      camera.position.set(center.x, center.y - distance, center.z)
+      camera.position.set(center.x, center.y, center.z - distance)
       camera.lookAt(center)
       controls.target.copy(center)
       controls.update()
@@ -151,6 +151,16 @@
     geometry.computeVertexNormals()
     geometry.center()
 
+    // Apply rotation if specified (after centering so rotation is around the model's center)
+    if (rotationX !== 0 || rotationY !== 0 || rotationZ !== 0) {
+      const rx = (rotationX * Math.PI) / 180
+      const ry = (rotationY * Math.PI) / 180
+      const rz = (rotationZ * Math.PI) / 180
+      if (rx !== 0) geometry.rotateX(rx)
+      if (ry !== 0) geometry.rotateY(ry)
+      if (rz !== 0) geometry.rotateZ(rz)
+    }
+
     const material = new THREE.MeshStandardMaterial({
       color: 0x64748b, // slate-500
       metalness: 0.3,
@@ -168,7 +178,7 @@
     const distance = maxDim * 2.5
 
     // Position camera below the model, looking up (bottom perspective)
-    camera.position.set(center.x, center.y - distance, center.z)
+    camera.position.set(center.x, center.y, center.z - distance)
     camera.lookAt(center)
     controls.target.copy(center)
     controls.update()
@@ -212,6 +222,9 @@
   $: if (stlUrl !== null || stlBuffer !== null || modelGroup !== null) {
     loadModel()
   }
+
+  // Reload when rotation changes
+  $: (rotationX, rotationY, rotationZ, (stlUrl !== null || stlBuffer !== null) && loadModel())
 </script>
 
 <div bind:this={container} class="h-full w-full rounded-lg bg-slate-950" style="min-height: 300px;"></div>

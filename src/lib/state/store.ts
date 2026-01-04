@@ -46,6 +46,9 @@ function defaultKeycapModel(): KeycapModel {
     widthMm: DEFAULT_KEYCAP_SIZE_MM,
     heightMm: DEFAULT_KEYCAP_SIZE_MM,
     source: { kind: 'upload', stl: null },
+    rotationX: 0,
+    rotationY: 0,
+    rotationZ: 0,
   }
 }
 
@@ -174,7 +177,10 @@ export const actions = {
     }))
   },
 
-  updateKeycapModel(modelId: string, patch: Partial<Pick<KeycapModel, 'widthMm' | 'heightMm'>>) {
+  updateKeycapModel(
+    modelId: string,
+    patch: Partial<Pick<KeycapModel, 'widthMm' | 'heightMm' | 'rotationX' | 'rotationY' | 'rotationZ'>>
+  ) {
     app.update(s => ({
       ...s,
       keycapModels: s.keycapModels.map(m => (m.id === modelId ? { ...m, ...patch } : m)),
