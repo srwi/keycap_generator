@@ -2,7 +2,7 @@ import type { BufferGeometry } from 'three'
 import * as THREE from 'three'
 import { zipSync, strToU8 } from 'fflate'
 
-function esc(s: string): string {
+function escapeName(s: string): string {
   return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 }
 
@@ -39,12 +39,10 @@ export async function exportTo3MF(group: THREE.Group, options?: { printer_name?:
   const buildItems: string[] = []
   let objectId = 1
 
-  // Traverse the group and collect all meshes
   group.traverse(child => {
     if (child instanceof THREE.Mesh && child.geometry) {
       const geometry = child.geometry.clone()
 
-      // Apply mesh matrix to geometry (safe even if identity)
       if (child.matrix) {
         geometry.applyMatrix4(child.matrix)
       }
@@ -52,7 +50,7 @@ export async function exportTo3MF(group: THREE.Group, options?: { printer_name?:
       const name = child.name || `object_${objectId}`
       const meshXml = geometryToMeshXml(geometry)
       resources.push(
-        `<object id="${objectId}" type="model"><metadata name="name">${esc(name)}</metadata>${meshXml}</object>`
+        `<object id="${objectId}" type="model"><metadata name="name">${escapeName(name)}</metadata>${meshXml}</object>`
       )
       buildItems.push(`<item objectid="${objectId}"/>`)
       objectId++
@@ -86,5 +84,5 @@ export async function exportTo3MF(group: THREE.Group, options?: { printer_name?:
     '3D/3dmodel.model': strToU8(modelXml),
   })
 
-  return new Blob([zipBytes], { type: 'model/3mf' })
+  return new Blob([new Uint8Array(zipBytes)], { type: 'model/3mf' })
 }

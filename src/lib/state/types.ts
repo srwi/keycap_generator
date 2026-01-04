@@ -1,4 +1,3 @@
-// Re-export FontName from fonts.ts (single source of truth)
 import type { FontName } from '../generate/fonts'
 export type { FontName }
 
@@ -8,11 +7,11 @@ export const DEFAULT_KEYCAP_SIZE_MM = 19.05
 export type SymbolDef = {
   id: string
   slotName: string
-  x: number // mm offset from center (left is negative, right is positive)
-  y: number // mm offset from center (top is negative, bottom is positive)
+  x: number
+  y: number
   fontName: FontName
   fontSizeMm: number
-  color: string // hex
+  color: string
   rotationDeg: number
 }
 

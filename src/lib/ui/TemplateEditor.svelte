@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { app, actions, selectedTemplate, getSlotName, getSlotSymbol } from '../state/store'
+  import { app, actions, selectedTemplate, getSlotName, getSlotSymbol, MAX_SLOTS } from '../state/store'
   import type { SymbolDef } from '../state/types'
   import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
@@ -158,7 +158,8 @@
           <div class="flex items-center justify-between gap-3">
             <div class="text-xs font-semibold text-slate-300">Symbols</div>
             <button
-              class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
+              class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={tpl.symbols.length >= MAX_SLOTS}
               on:click={() => actions.addSymbol(tpl.id)}
             >
               Add symbol
@@ -186,8 +187,7 @@
                     <span class="text-sm font-medium text-slate-200 truncate capitalize">{getSlotName(tpl.symbols.indexOf(sym))} ({getSlotSymbol(tpl.symbols.indexOf(sym))})</span>
                   </button>
                   <button
-                    class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={tpl.symbols.length <= 1}
+                    class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 hover:bg-slate-900"
                     on:click={() => actions.deleteSymbol(tpl.id, sym.id)}
                   >
                     Remove

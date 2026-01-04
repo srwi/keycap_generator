@@ -2,7 +2,7 @@
 
 import type { AppState } from '../state/types'
 import { parseSTL, centerGeometryXY, alignBottomTo } from './stl'
-import { exportTo3MF } from './threeTo3mf'
+import { exportTo3MF } from './3mf'
 import { generateKeycapModel, getTemplate, getModel, getStlBufferForModel, safeFileName } from './generate'
 import { BufferGeometry } from 'three'
 import { zipSync } from 'fflate'
@@ -32,7 +32,6 @@ self.onmessage = async (e: MessageEvent) => {
         throw new Error('No keys configured')
       }
 
-      // Helper to yield and check for cancellation
       const yieldAndCheck = async () => {
         await new Promise(r => setTimeout(r, 0))
         if (cancelled) {
@@ -58,7 +57,6 @@ self.onmessage = async (e: MessageEvent) => {
         const model = getModel(state, template)
         if (!model) throw new Error(`Template "${template.name}" references a missing keycap model.`)
 
-        // Get or create base geometry for this model
         let baseGeom = baseGeomByModelId.get(model.id)
         if (!baseGeom) {
           await yieldAndCheck()
@@ -70,7 +68,6 @@ self.onmessage = async (e: MessageEvent) => {
           baseGeomByModelId.set(model.id, baseGeom)
         }
 
-        // Use the shared core generation function
         const group = await generateKeycapModel(state, key, template, baseGeom, yieldAndCheck)
 
         const blob = await exportTo3MF(group, { printer_name: 'Bambu Lab A1' })
@@ -80,10 +77,8 @@ self.onmessage = async (e: MessageEvent) => {
 
       await yieldAndCheck()
 
-      // Create a single ZIP file containing all 3MF files
       const allFilesZip = zipSync(files)
 
-      // Send the result back
       if (!cancelled) {
         self.postMessage({
           type: 'complete',

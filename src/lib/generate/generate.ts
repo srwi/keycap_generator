@@ -5,7 +5,6 @@ import { getFont } from './fonts'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { MathUtils, Group, Mesh, BufferGeometry } from 'three'
 
-// Shared helper functions
 export function safeFileName(name: string): string {
   return (
     name
@@ -68,10 +67,6 @@ export async function getStlBufferForModel(
   return buf
 }
 
-/**
- * Core function to generate a keycap model from a base geometry and template.
- * This is the shared implementation used by both preview and batch generation.
- */
 export async function generateKeycapModel(
   state: AppState,
   key: KeyDef,
@@ -85,7 +80,6 @@ export async function generateKeycapModel(
   const textMeshes: { mesh: Mesh; color: number; name?: string }[] = []
   const extrusionMeshes: Mesh[] = []
 
-  // Process each symbol in the template
   for (const sym of template.symbols) {
     if (yieldAndCheck) await yieldAndCheck()
 
@@ -105,10 +99,6 @@ export async function generateKeycapModel(
     textGeom.computeVertexNormals()
     centerGeometryXY(textGeom)
 
-    // Calculate position based on symbol coordinates (mm offsets from center)
-    // Since the base geometry is centered at (0,0), we can directly use the offsets
-    // x: left is negative, right is positive
-    // y: top is negative, bottom is positive (matches SVG coordinate system)
     const tx = sym.x
     const ty = sym.y
 
@@ -147,7 +137,6 @@ export async function generateKeycapModel(
   return group
 }
 
-// Worker-based generation for better performance
 export function generateAll3mfsWithWorker(
   state: AppState,
   stlBuffersByModelId: Record<string, ArrayBuffer | null>,
@@ -210,7 +199,6 @@ export async function generatePreviewModel(
   stlBuffersByModelId: Record<string, ArrayBuffer | null>,
   signal?: AbortSignal
 ): Promise<Group | null> {
-  // Helper to yield and check for cancellation
   const yieldAndCheck = async () => {
     await new Promise(r => setTimeout(r, 0))
     if (signal?.aborted) {
@@ -239,6 +227,5 @@ export async function generatePreviewModel(
 
   await yieldAndCheck()
 
-  // Use the shared core generation function
   return await generateKeycapModel(state, key, template, baseGeom, yieldAndCheck)
 }

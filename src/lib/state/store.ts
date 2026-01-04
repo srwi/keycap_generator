@@ -3,23 +3,35 @@ import type { AppState, KeyDef, KeycapModel, SymbolDef, Template } from './types
 import { DEFAULT_KEYCAP_SIZE_MM } from './types'
 import { newId } from '../utils/id'
 
-export const SLOT_NAMES = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'iota', 'kappa']
-export const SLOT_SYMBOLS = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ']
+export const SLOTS = [
+  { name: 'alpha', symbol: 'Α' },
+  { name: 'beta', symbol: 'Β' },
+  { name: 'gamma', symbol: 'Γ' },
+  { name: 'delta', symbol: 'Δ' },
+  { name: 'epsilon', symbol: 'Ε' },
+  { name: 'zeta', symbol: 'Ζ' },
+  { name: 'eta', symbol: 'Η' },
+  { name: 'theta', symbol: 'Θ' },
+  { name: 'iota', symbol: 'Ι' },
+  { name: 'kappa', symbol: 'Κ' },
+] as const
+
+export const MAX_SLOTS = SLOTS.length
 
 export function getSlotName(index: number): string {
-  return SLOT_NAMES[index] ?? `slot${index + 1}`
+  return SLOTS[index]?.name ?? `slot${index + 1}`
 }
 
 export function getSlotSymbol(index: number): string {
-  return SLOT_SYMBOLS[index] ?? String(index + 1)
+  return SLOTS[index]?.symbol ?? String(index + 1)
 }
 
-function defaultSymbol(x?: number, y?: number): SymbolDef {
+function defaultSymbol(): SymbolDef {
   return {
     id: newId('sym'),
     slotName: '',
-    x: x ?? 0, // mm offset from center
-    y: y ?? 0, // mm offset from center
+    x: 0,
+    y: 0,
     fontName: 'DejaVuSans',
     fontSizeMm: 8,
     color: '#ffffff',
@@ -62,7 +74,7 @@ function defaultState(): AppState {
     templates: [tpl],
     keys: [key],
     settings: {
-      extrusionDepthMm: 0.8,
+      extrusionDepthMm: 0.4,
     },
     ui: {
       selectedKeycapModelId: model.id,
@@ -213,12 +225,9 @@ export const actions = {
     app.update(s => {
       const tpl = s.templates.find(t => t.id === templateId)
       if (!tpl) return s
+      if (tpl.symbols.length >= MAX_SLOTS) return s
 
-      const model = s.keycapModels.find(m => m.id === tpl.keycapModelId)
-      // Default to center (0, 0) in mm offset from center
-      const x = 0
-      const y = 0
-      const sym = defaultSymbol(x, y)
+      const sym = defaultSymbol()
 
       const nextTemplates = s.templates.map(t => (t.id === templateId ? { ...t, symbols: [...t.symbols, sym] } : t))
       const nextKeys = s.keys.map(k => {
@@ -233,7 +242,6 @@ export const actions = {
     app.update(s => {
       const tpl = s.templates.find(t => t.id === templateId)
       if (!tpl) return s
-      if (tpl.symbols.length <= 1) return s
 
       const nextTemplates = s.templates.map(t =>
         t.id === templateId ? { ...t, symbols: t.symbols.filter(sym => sym.id !== symbolId) } : t
