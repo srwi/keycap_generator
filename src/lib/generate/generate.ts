@@ -89,7 +89,7 @@ export async function generateKeycapModel(
     const textGeom = new TextGeometry(text, {
       font,
       size: sym.fontSizeMm,
-      height: state.settings.extrusionDepthMm,
+      depth: state.settings.extrusionDepthMm,
       curveSegments: 6,
       bevelEnabled: false,
     } as any)
