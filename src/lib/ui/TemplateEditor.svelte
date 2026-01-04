@@ -21,8 +21,7 @@
     actions.deleteTemplate(tpl.id)
   }
 
-  const fontFamilies: Array<SymbolDef['fontFamily']> = ['roboto', 'notoserif']
-  const fontWeights: Array<SymbolDef['fontWeight']> = ['regular', 'bold']
+  import { AVAILABLE_FONTS } from '../generate/fonts'
 
   $: model =
     tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
@@ -226,34 +225,19 @@
                   </label>
                 </div>
 
-                <div class="mt-3 grid grid-cols-2 gap-3">
+                <div class="mt-3">
                   <label class="grid gap-1 text-xs text-slate-400">
                     Font
                     <select
                       class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                      value={sym.fontFamily}
+                      value={sym.fontName}
                       on:change={(e) =>
                         actions.updateSymbol(tpl.id, sym.id, {
-                          fontFamily: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontFamily'],
+                          fontName: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontName'],
                         })}
                     >
-                      {#each fontFamilies as ff}
-                        <option value={ff}>{ff}</option>
-                      {/each}
-                    </select>
-                  </label>
-                  <label class="grid gap-1 text-xs text-slate-400">
-                    Weight
-                    <select
-                      class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                      value={sym.fontWeight}
-                      on:change={(e) =>
-                        actions.updateSymbol(tpl.id, sym.id, {
-                          fontWeight: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontWeight'],
-                        })}
-                    >
-                      {#each fontWeights as fw}
-                        <option value={fw}>{fw}</option>
+                      {#each AVAILABLE_FONTS as fontName}
+                        <option value={fontName}>{fontName}</option>
                       {/each}
                     </select>
                   </label>

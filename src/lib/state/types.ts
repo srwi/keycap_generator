@@ -1,5 +1,6 @@
-export type FontFamily = 'roboto' | 'notoserif'
-export type FontWeight = 'regular' | 'bold'
+// Re-export FontName from fonts.ts (single source of truth)
+import type { FontName } from '../generate/fonts'
+export type { FontName }
 
 // Standard keycap unit size in millimeters (1u = 19.05mm)
 export const DEFAULT_KEYCAP_SIZE_MM = 19.05
@@ -9,8 +10,7 @@ export type SymbolDef = {
   slotName: string
   x: number // mm offset from center (left is negative, right is positive)
   y: number // mm offset from center (top is negative, bottom is positive)
-  fontFamily: FontFamily
-  fontWeight: FontWeight
+  fontName: FontName
   fontSizeMm: number
   color: string // hex
   rotationDeg: number

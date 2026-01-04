@@ -23,7 +23,7 @@
           if (!text) return { symbol: sym, pathData: null, text: '' }
           
           try {
-            const pathData = await getTextPath(text, sym.fontFamily, sym.fontWeight, sym.fontSizeMm)
+            const pathData = await getTextPath(text, sym.fontName, sym.fontSizeMm)
             return { symbol: sym, pathData, text }
           } catch (error) {
             console.error('Failed to load text path:', error)

@@ -1,16 +1,24 @@
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { TTFLoader } from 'three/addons/loaders/TTFLoader.js'
 import type { Font } from 'three/examples/jsm/loaders/FontLoader.js'
-import type { FontFamily, FontWeight } from '../state/types'
 import * as opentype from 'opentype.js'
 
-// Font file registry - maps font family/weight to TTF file paths
-const FONT_REGISTRY: Record<string, string> = {
-  'roboto:regular': '/fonts/Roboto/Roboto-Regular.ttf',
-  'roboto:bold': '/fonts/Roboto/Roboto-Bold.ttf',
-  'notoserif:regular': '/fonts/NotoSerif/NotoSerif-Regular.ttf',
-  'notoserif:bold': '/fonts/NotoSerif/NotoSerif-Bold.ttf',
-}
+// Single source of truth: font name -> file path mapping
+// To add a new font, just add an entry here
+const FONTS = {
+  'DejaVuSans': '/fonts/DejaVu/DejaVuSans.ttf',
+  'DejaVuSans-Bold': '/fonts/DejaVu/DejaVuSans-Bold.ttf',
+  'DejaVuSansMono': '/fonts/DejaVu/DejaVuSansMono.ttf',
+  'DejaVuSansMono-Bold': '/fonts/DejaVu/DejaVuSansMono-Bold.ttf',
+  'DejaVuSerif': '/fonts/DejaVu/DejaVuSerif.ttf',
+  'DejaVuSerif-Bold': '/fonts/DejaVu/DejaVuSerif-Bold.ttf',
+  'DejaVuSerif-Italic': '/fonts/DejaVu/DejaVuSerif-Italic.ttf',
+} as const
+
+// Derived types and arrays - no need to maintain separately
+export type FontName = keyof typeof FONTS
+export const AVAILABLE_FONTS: readonly FontName[] = Object.keys(FONTS) as FontName[]
+const FONT_REGISTRY: Record<FontName, string> = FONTS
 
 // Cache for Three.js Font objects (for 3D rendering)
 const fontCache = new Map<string, Font>()
@@ -22,22 +30,13 @@ const opentypeFontCache = new Map<string, opentype.Font>()
 const loadingPromises = new Map<string, Promise<void>>()
 
 /**
- * Get the font key for caching
+ * Get the TTF file path for a font name
  */
-function getFontKey(family: FontFamily, weight: FontWeight): string {
-  return `${family}:${weight}`
-}
-
-/**
- * Get the TTF file path for a font family and weight
- */
-function getFontPath(family: FontFamily, weight: FontWeight): string {
-  const key = getFontKey(family, weight)
-  const path = FONT_REGISTRY[key]
+function getFontPath(fontName: FontName): string {
+  const path = FONT_REGISTRY[fontName]
   if (!path) {
-    // Fallback to regular if not found
-    const fallbackKey = getFontKey(family, 'regular')
-    return FONT_REGISTRY[fallbackKey] || FONT_REGISTRY['roboto:regular']
+    // Fallback to first available font
+    return FONT_REGISTRY[AVAILABLE_FONTS[0]]
   }
   return path
 }
@@ -45,31 +44,29 @@ function getFontPath(family: FontFamily, weight: FontWeight): string {
 /**
  * Load a TTF file and convert it to a Three.js Font object (for 3D rendering)
  */
-async function loadThreeFont(family: FontFamily, weight: FontWeight): Promise<Font> {
-  const key = getFontKey(family, weight)
-  
+async function loadThreeFont(fontName: FontName): Promise<Font> {
   // Check cache
-  const cached = fontCache.get(key)
+  const cached = fontCache.get(fontName)
   if (cached) return cached
 
   // Check if already loading
-  let loadPromise = loadingPromises.get(key)
+  let loadPromise = loadingPromises.get(fontName)
   if (!loadPromise) {
-    const fontPath = getFontPath(family, weight)
+    const fontPath = getFontPath(fontName)
     loadPromise = (async () => {
       const ttfLoader = new TTFLoader()
       const fontJson = await ttfLoader.loadAsync(fontPath)
       const fontLoader = new FontLoader()
       const font = fontLoader.parse(fontJson)
-      fontCache.set(key, font)
+      fontCache.set(fontName, font)
     })()
-    loadingPromises.set(key, loadPromise)
+    loadingPromises.set(fontName, loadPromise)
   }
 
   await loadPromise
-  const font = fontCache.get(key)
+  const font = fontCache.get(fontName)
   if (!font) {
-    throw new Error(`Font ${key} failed to load from ${getFontPath(family, weight)}`)
+    throw new Error(`Font ${fontName} failed to load from ${getFontPath(fontName)}`)
   }
   return font
 }
@@ -77,28 +74,27 @@ async function loadThreeFont(family: FontFamily, weight: FontWeight): Promise<Fo
 /**
  * Load a TTF file using opentype.js (for 2D SVG rendering)
  */
-async function loadOpenTypeFont(family: FontFamily, weight: FontWeight): Promise<opentype.Font> {
-  const key = getFontKey(family, weight)
-  
+async function loadOpenTypeFont(fontName: FontName): Promise<opentype.Font> {
   // Check cache
-  const cached = opentypeFontCache.get(key)
+  const cached = opentypeFontCache.get(fontName)
   if (cached) return cached
 
   // Check if already loading
-  let loadPromise = loadingPromises.get(`opentype:${key}`)
+  const loadingKey = `opentype:${fontName}`
+  let loadPromise = loadingPromises.get(loadingKey)
   if (!loadPromise) {
-    const fontPath = getFontPath(family, weight)
+    const fontPath = getFontPath(fontName)
     loadPromise = (async () => {
       const font = await opentype.load(fontPath)
-      opentypeFontCache.set(key, font)
+      opentypeFontCache.set(fontName, font)
     })()
-    loadingPromises.set(`opentype:${key}`, loadPromise)
+    loadingPromises.set(loadingKey, loadPromise)
   }
 
   await loadPromise
-  const font = opentypeFontCache.get(key)
+  const font = opentypeFontCache.get(fontName)
   if (!font) {
-    throw new Error(`OpenType font ${key} failed to load from ${getFontPath(family, weight)}`)
+    throw new Error(`OpenType font ${fontName} failed to load from ${getFontPath(fontName)}`)
   }
   return font
 }
@@ -108,20 +104,19 @@ async function loadOpenTypeFont(family: FontFamily, weight: FontWeight): Promise
  * This is the main function used by the 3D generation code
  * Can be used synchronously if fonts are preloaded, or asynchronously
  */
-export function getFont(family: FontFamily, weight: FontWeight): Font | Promise<Font> {
-  const key = getFontKey(family, weight)
-  const cached = fontCache.get(key)
+export function getFont(fontName: FontName): Font | Promise<Font> {
+  const cached = fontCache.get(fontName)
   if (cached) return cached
   
   // Not cached, need to load asynchronously
-  return loadThreeFont(family, weight)
+  return loadThreeFont(fontName)
 }
 
 /**
  * Get an opentype.js Font object for 2D SVG rendering
  */
-export async function getOpenTypeFont(family: FontFamily, weight: FontWeight): Promise<opentype.Font> {
-  return loadOpenTypeFont(family, weight)
+export async function getOpenTypeFont(fontName: FontName): Promise<opentype.Font> {
+  return loadOpenTypeFont(fontName)
 }
 
 /**
@@ -131,11 +126,10 @@ export async function getOpenTypeFont(family: FontFamily, weight: FontWeight): P
  */
 export async function getTextPath(
   text: string,
-  family: FontFamily,
-  weight: FontWeight,
+  fontName: FontName,
   fontSizeMm: number
 ): Promise<{ path: string; width: number; height: number; x: number; y: number }> {
-  const font = await getOpenTypeFont(family, weight)
+  const font = await getOpenTypeFont(fontName)
   const THREE_TTFLOADER_SIZE_FACTOR = 100 / 72
   const fontSize = Math.max(0.01, fontSizeMm * THREE_TTFLOADER_SIZE_FACTOR)
   
@@ -168,24 +162,19 @@ export async function getTextPath(
  * Call this at app startup
  */
 export async function preloadFonts(): Promise<void> {
-  const families: FontFamily[] = ['roboto', 'notoserif']
-  const weights: FontWeight[] = ['regular', 'bold']
-  
   const promises: Promise<void>[] = []
-  for (const family of families) {
-    for (const weight of weights) {
-      promises.push(
-        loadThreeFont(family, weight)
-          .then(async () => {
-            // Also preload opentype version
-            await loadOpenTypeFont(family, weight)
-          })
-          .catch((error) => {
-            console.error(`Failed to preload font ${family}:${weight}:`, error)
-            throw error
-          })
-      )
-    }
+  for (const fontName of AVAILABLE_FONTS) {
+    promises.push(
+      loadThreeFont(fontName)
+        .then(async () => {
+          // Also preload opentype version
+          await loadOpenTypeFont(fontName)
+        })
+        .catch((error) => {
+          console.error(`Failed to preload font ${fontName}:`, error)
+          throw error
+        })
+    )
   }
   
   await Promise.all(promises)
