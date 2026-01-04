@@ -1,7 +1,6 @@
 <script lang="ts">
   import { app, actions, selectedTemplate, getSlotName, getSlotSymbol, MAX_SLOTS } from '../state/store'
   import type { SymbolDef } from '../state/types'
-  import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
   import KeycapPreview from './KeycapPreview.svelte'
   import { slide } from 'svelte/transition'
@@ -23,8 +22,8 @@
   import { AVAILABLE_FONTS } from '../generate/fonts'
 
   $: model = tpl == null ? null : ($app.keycapModels.find(m => m.id === tpl.keycapModelId) ?? null)
-  $: modelWidthMm = model?.widthMm ?? DEFAULT_KEYCAP_SIZE_MM
-  $: modelHeightMm = model?.heightMm ?? DEFAULT_KEYCAP_SIZE_MM
+  $: modelWidthMm = model?.widthMm ?? 0
+  $: modelHeightMm = model?.heightMm ?? 0
 
   $: previewTextsBySymbolId = tpl ? Object.fromEntries(tpl.symbols.map((s, index) => [s.id, getSlotSymbol(index)])) : {}
 

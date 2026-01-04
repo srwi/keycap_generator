@@ -1,6 +1,5 @@
 import { derived, writable } from 'svelte/store'
 import type { AppState, KeyDef, KeycapModel, SymbolDef, Template } from './types'
-import { DEFAULT_KEYCAP_SIZE_MM } from './types'
 import { newId } from '../utils/id'
 
 export const SLOTS = [
@@ -43,9 +42,14 @@ function defaultKeycapModel(): KeycapModel {
   return {
     id: newId('model'),
     name: '1u',
-    widthMm: DEFAULT_KEYCAP_SIZE_MM,
-    heightMm: DEFAULT_KEYCAP_SIZE_MM,
-    source: { kind: 'upload', stl: null },
+    widthMm: 0, // 0 indicates dimensions not yet loaded
+    heightMm: 0,
+    source: {
+      kind: 'server',
+      serverId: '1u',
+      url: '/stls/1u.stl',
+      stl: { fileName: '1u.stl', pathHint: 'server:1u' },
+    },
     rotationX: 0,
     rotationY: 0,
     rotationZ: 0,

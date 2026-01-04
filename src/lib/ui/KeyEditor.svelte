@@ -1,14 +1,13 @@
 <script lang="ts">
   import { app, actions, selectedKey, getSlotName, getSlotSymbol } from '../state/store'
-  import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
   import KeycapPreview from './KeycapPreview.svelte'
 
   $: key = $selectedKey
   $: tpl = key == null ? null : ($app.templates.find(t => t.id === key.templateId) ?? null)
   $: model = tpl == null ? null : ($app.keycapModels.find(m => m.id === tpl.keycapModelId) ?? null)
-  $: modelWidthMm = model?.widthMm ?? DEFAULT_KEYCAP_SIZE_MM
-  $: modelHeightMm = model?.heightMm ?? DEFAULT_KEYCAP_SIZE_MM
+  $: modelWidthMm = model?.widthMm ?? 0
+  $: modelHeightMm = model?.heightMm ?? 0
 
   function onDeleteKey() {
     if (!key) return

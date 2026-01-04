@@ -1,9 +1,6 @@
 import type { FontName } from '../generate/fonts'
 export type { FontName }
 
-// Standard keycap unit size in millimeters (1u = 19.05mm)
-export const DEFAULT_KEYCAP_SIZE_MM = 19.05
-
 export type SymbolDef = {
   id: string
   slotName: string

@@ -1,13 +1,12 @@
 <script lang="ts">
   import type { Template } from '../state/types'
-  import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
   import { getTextPath } from '../generate/fonts'
 
   export let template: Template | null
   export let textsBySymbolId: Record<string, string> = {}
   export let className = ''
-  export let widthMm = DEFAULT_KEYCAP_SIZE_MM
-  export let heightMm = DEFAULT_KEYCAP_SIZE_MM
+  export let widthMm = 0
+  export let heightMm = 0
 
   $: w = Math.max(0.01, widthMm)
   $: h = Math.max(0.01, heightMm)

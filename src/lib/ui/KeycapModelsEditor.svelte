@@ -1,46 +1,33 @@
 <script lang="ts">
   import { app, actions } from '../state/store'
   import { stlBuffersByModelId } from '../state/sessionAssets'
-  import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
-  import Model3DViewer from './Model3DViewer.svelte'
   import { getStlDimensions } from '../generate/stl'
+  import Model3DViewer from './Model3DViewer.svelte'
 
   type ServerModel = {
     id: string
     name: string
-    widthMm: number
-    heightMm: number
     url: string
   }
 
-  // Placeholder server-provided STLs (not actually present yet).
   const serverModels: ServerModel[] = [
-    { id: '1u', name: '1u', widthMm: DEFAULT_KEYCAP_SIZE_MM, heightMm: DEFAULT_KEYCAP_SIZE_MM, url: '/stls/1u.stl' },
-    {
-      id: '125u',
-      name: '1.25u',
-      widthMm: DEFAULT_KEYCAP_SIZE_MM * 1.25,
-      heightMm: DEFAULT_KEYCAP_SIZE_MM,
-      url: '/stls/1_25u.stl',
-    },
-    {
-      id: '2u',
-      name: '2u',
-      widthMm: DEFAULT_KEYCAP_SIZE_MM * 2,
-      heightMm: DEFAULT_KEYCAP_SIZE_MM,
-      url: '/stls/2u.stl',
-    },
-    {
-      id: '625u',
-      name: '6.25u Space',
-      widthMm: DEFAULT_KEYCAP_SIZE_MM * 6.25,
-      heightMm: DEFAULT_KEYCAP_SIZE_MM,
-      url: '/stls/6_25u_space.stl',
-    },
+    { id: '1u', name: '1u', url: '/stls/1u.stl' },
+    { id: '125u', name: '1.25u', url: '/stls/1_25u.stl' },
+    { id: '2u', name: '2u', url: '/stls/2u.stl' },
+    { id: '625u', name: '6.25u Space', url: '/stls/6_25u_space.stl' },
   ]
 
   $: selectedId = $app.ui.selectedKeycapModelId
   $: model = selectedId ? ($app.keycapModels.find(m => m.id === selectedId) ?? null) : null
+
+  // Automatically load dimensions for server models that haven't been loaded yet (0 indicates not loaded)
+  $: if (model?.source.kind === 'server' && (model.widthMm === 0 || model.heightMm === 0)) {
+    fetch(model.source.url)
+      .then(res => res.arrayBuffer())
+      .then(buf => getStlDimensions(buf))
+      .then(({ widthMm, heightMm }) => actions.updateKeycapModel(model.id, { widthMm, heightMm }))
+      .catch(err => console.error('Failed to load server STL dimensions:', err))
+  }
 
   $: modelStlUrl = model?.source.kind === 'server' ? model.source.url : null
   $: modelStlBuffer = model?.source.kind === 'upload' && model ? ($stlBuffersByModelId[model.id] ?? null) : null
@@ -107,18 +94,22 @@
     actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0 })
   }
 
-  function onSelectServerModel(serverId: string) {
+  async function onSelectServerModel(serverId: string) {
     if (!model) return
     const entry = serverModels.find(s => s.id === serverId)
     if (!entry) return
+
     actions.renameKeycapModel(model.id, entry.name)
-    actions.updateKeycapModel(model.id, { widthMm: entry.widthMm, heightMm: entry.heightMm })
+    actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0 })
     actions.setKeycapModelSource(model.id, {
       kind: 'server',
       serverId: entry.id,
       url: entry.url,
       stl: { fileName: `${entry.name}.stl`, pathHint: `server:${entry.id}` },
     })
+
+    // Reset to 0 so reactive statement will reload dimensions
+    actions.updateKeycapModel(model.id, { widthMm: 0, heightMm: 0 })
   }
 </script>
 
