@@ -1,4 +1,4 @@
-import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js'
 import { BufferGeometry } from 'three'
 
 export async function parseSTL(arrayBuffer: ArrayBuffer): Promise<BufferGeometry> {

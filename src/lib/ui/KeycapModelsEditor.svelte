@@ -16,24 +16,41 @@
   // Placeholder server-provided STLs (not actually present yet).
   const serverModels: ServerModel[] = [
     { id: '1u', name: '1u', widthMm: DEFAULT_KEYCAP_SIZE_MM, heightMm: DEFAULT_KEYCAP_SIZE_MM, url: '/stls/1u.stl' },
-    { id: '125u', name: '1.25u', widthMm: DEFAULT_KEYCAP_SIZE_MM * 1.25, heightMm: DEFAULT_KEYCAP_SIZE_MM, url: '/stls/1_25u.stl' },
-    { id: '2u', name: '2u', widthMm: DEFAULT_KEYCAP_SIZE_MM * 2, heightMm: DEFAULT_KEYCAP_SIZE_MM, url: '/stls/2u.stl' },
-    { id: '625u', name: '6.25u Space', widthMm: DEFAULT_KEYCAP_SIZE_MM * 6.25, heightMm: DEFAULT_KEYCAP_SIZE_MM, url: '/stls/6_25u_space.stl' },
+    {
+      id: '125u',
+      name: '1.25u',
+      widthMm: DEFAULT_KEYCAP_SIZE_MM * 1.25,
+      heightMm: DEFAULT_KEYCAP_SIZE_MM,
+      url: '/stls/1_25u.stl',
+    },
+    {
+      id: '2u',
+      name: '2u',
+      widthMm: DEFAULT_KEYCAP_SIZE_MM * 2,
+      heightMm: DEFAULT_KEYCAP_SIZE_MM,
+      url: '/stls/2u.stl',
+    },
+    {
+      id: '625u',
+      name: '6.25u Space',
+      widthMm: DEFAULT_KEYCAP_SIZE_MM * 6.25,
+      heightMm: DEFAULT_KEYCAP_SIZE_MM,
+      url: '/stls/6_25u_space.stl',
+    },
   ]
 
   $: selectedId = $app.ui.selectedKeycapModelId
-  $: model = selectedId ? $app.keycapModels.find((m) => m.id === selectedId) ?? null : null
+  $: model = selectedId ? ($app.keycapModels.find(m => m.id === selectedId) ?? null) : null
 
   $: modelStlUrl = model?.source.kind === 'server' ? model.source.url : null
-  $: modelStlBuffer =
-    model?.source.kind === 'upload' && model ? $stlBuffersByModelId[model.id] ?? null : null
+  $: modelStlBuffer = model?.source.kind === 'upload' && model ? ($stlBuffersByModelId[model.id] ?? null) : null
 
-  $: usedByTemplateCount = model ? $app.templates.filter((t) => t.keycapModelId === model.id).length : 0
+  $: usedByTemplateCount = model ? $app.templates.filter(t => t.keycapModelId === model.id).length : 0
   $: usedByKeyCount =
     model == null
       ? 0
-      : $app.keys.filter((k) => {
-          const t = $app.templates.find((tpl) => tpl.id === k.templateId)
+      : $app.keys.filter(k => {
+          const t = $app.templates.find(tpl => tpl.id === k.templateId)
           return t?.keycapModelId === model.id
         }).length
 
@@ -41,12 +58,12 @@
     if (!model) return
     if (usedByTemplateCount > 0) {
       const ok = window.confirm(
-        `Model "${model.name}" is used by ${usedByTemplateCount} template(s) and ${usedByKeyCount} key(s).\n\nDeleting it will remove those templates and keys.\n\nDelete model?`,
+        `Model "${model.name}" is used by ${usedByTemplateCount} template(s) and ${usedByKeyCount} key(s).\n\nDeleting it will remove those templates and keys.\n\nDelete model?`
       )
       if (!ok) return
     }
 
-    stlBuffersByModelId.update((m) => {
+    stlBuffersByModelId.update(m => {
       const next = { ...m }
       delete next[model.id]
       return next
@@ -62,12 +79,12 @@
     if (!file) return
 
     const buf = await file.arrayBuffer()
-    stlBuffersByModelId.update((m) => ({ ...m, [model.id]: buf }))
-    
+    stlBuffersByModelId.update(m => ({ ...m, [model.id]: buf }))
+
     // Extract filename without extension for model name
     const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
     actions.renameKeycapModel(model.id, fileNameWithoutExt)
-    
+
     // Auto-detect dimensions from STL
     try {
       const { widthMm, heightMm } = await getStlDimensions(buf)
@@ -77,7 +94,7 @@
       // Fallback to default dimensions if detection fails
       actions.updateKeycapModel(model.id, { widthMm: DEFAULT_KEYCAP_SIZE_MM, heightMm: DEFAULT_KEYCAP_SIZE_MM })
     }
-    
+
     actions.setKeycapModelSource(model.id, {
       kind: 'upload',
       stl: { fileName: file.name, pathHint: (file as any).webkitRelativePath || file.name },
@@ -97,7 +114,7 @@
 
   function onSelectServerModel(serverId: string) {
     if (!model) return
-    const entry = serverModels.find((s) => s.id === serverId)
+    const entry = serverModels.find(s => s.id === serverId)
     if (!entry) return
     actions.renameKeycapModel(model.id, entry.name)
     actions.updateKeycapModel(model.id, { widthMm: entry.widthMm, heightMm: entry.heightMm })
@@ -161,7 +178,7 @@
           <input
             class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
             value={model.name}
-            on:input={(e) => actions.renameKeycapModel(model.id, (e.currentTarget as HTMLInputElement).value)}
+            on:input={e => actions.renameKeycapModel(model.id, (e.currentTarget as HTMLInputElement).value)}
           />
         </label>
 
@@ -180,7 +197,7 @@
                     if (model.source.kind !== 'server' && serverModels.length > 0) {
                       // Clear uploaded buffer when switching to server mode
                       if (model.source.kind === 'upload') {
-                        stlBuffersByModelId.update((m) => {
+                        stlBuffersByModelId.update(m => {
                           const next = { ...m }
                           delete next[model.id]
                           return next
@@ -210,7 +227,7 @@
                 <select
                   class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
                   value={model.source.serverId}
-                  on:change={(e) => onSelectServerModel((e.currentTarget as HTMLSelectElement).value)}
+                  on:change={e => onSelectServerModel((e.currentTarget as HTMLSelectElement).value)}
                 >
                   {#each serverModels as s}
                     <option value={s.id}>{s.name}</option>
@@ -249,8 +266,7 @@
               </label>
             {/if}
           </div>
-
-      </div>
+        </div>
       </div>
     {/if}
   </section>
@@ -261,16 +277,14 @@
       {#if !model}
         <div class="flex h-full items-center justify-center text-sm text-slate-400">
           Create/select a model to preview
-          </div>
-      {:else if modelStlUrl || modelStlBuffer}
-            <Model3DViewer stlUrl={modelStlUrl} stlBuffer={modelStlBuffer} />
-          {:else}
-            <div class="flex h-full items-center justify-center text-sm text-slate-400">
-              Upload or select an STL file to preview
-            </div>
-          {/if}
         </div>
+      {:else if modelStlUrl || modelStlBuffer}
+        <Model3DViewer stlUrl={modelStlUrl} stlBuffer={modelStlBuffer} />
+      {:else}
+        <div class="flex h-full items-center justify-center text-sm text-slate-400">
+          Upload or select an STL file to preview
+        </div>
+      {/if}
+    </div>
   </section>
 </div>
-
-

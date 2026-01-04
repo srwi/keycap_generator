@@ -14,14 +14,14 @@
   $: requiredModelIds = Array.from(
     new Set(
       $app.keys
-        .map((k) => $app.templates.find((t) => t.id === k.templateId)?.keycapModelId)
-        .filter((x): x is string => typeof x === 'string'),
-    ),
+        .map(k => $app.templates.find(t => t.id === k.templateId)?.keycapModelId)
+        .filter((x): x is string => typeof x === 'string')
+    )
   )
   $: missingUploadModels = requiredModelIds
-    .map((id) => $app.keycapModels.find((m) => m.id === id))
+    .map(id => $app.keycapModels.find(m => m.id === id))
     .filter((m): m is NonNullable<typeof m> => !!m)
-    .filter((m) => m.source.kind === 'upload' && !$stlBuffersByModelId[m.id])
+    .filter(m => m.source.kind === 'upload' && !$stlBuffersByModelId[m.id])
 
   async function onGenerate() {
     if (missingUploadModels.length > 0 || isGenerating) return
@@ -31,13 +31,18 @@
     progressTotal = $app.keys.length
     currentGeneratingKeyId = null
     generateAbortController = new AbortController()
-    
+
     try {
-      await generateAll3mfsWithWorker($app, $stlBuffersByModelId, (p) => {
-        progressCurrent = p.current
-        progressTotal = p.total
-        currentGeneratingKeyId = p.keyId
-      }, generateAbortController.signal)
+      await generateAll3mfsWithWorker(
+        $app,
+        $stlBuffersByModelId,
+        p => {
+          progressCurrent = p.current
+          progressTotal = p.total
+          currentGeneratingKeyId = p.keyId
+        },
+        generateAbortController.signal
+      )
       // Keep modal open briefly to show completion, then close
       await new Promise(r => setTimeout(r, 1500))
     } catch (e) {
@@ -53,7 +58,7 @@
       currentGeneratingKeyId = null
     }
   }
-  
+
   $: currentKey = currentGeneratingKeyId ? $app.keys.find(k => k.id === currentGeneratingKeyId) : null
   $: currentTemplate = currentKey ? $app.templates.find(t => t.id === currentKey.templateId) : null
   $: currentModel = currentTemplate ? $app.keycapModels.find(m => m.id === currentTemplate.keycapModelId) : null
@@ -83,7 +88,7 @@
               min="0.1"
               step="0.1"
               value={$app.settings.extrusionDepthMm}
-              on:input={(e) => actions.setExtrusionDepthMm(Number((e.currentTarget as HTMLInputElement).value))}
+              on:input={e => actions.setExtrusionDepthMm(Number((e.currentTarget as HTMLInputElement).value))}
             />
           </label>
 
@@ -99,7 +104,8 @@
             <div class="text-xs text-amber-300/90">Create at least one key first.</div>
           {:else if missingUploadModels.length > 0}
             <div class="text-xs text-amber-300/90">
-              Missing STL uploads for: {missingUploadModels.map((m) => m.name).join(', ')}. Upload them in the Models step.
+              Missing STL uploads for: {missingUploadModels.map(m => m.name).join(', ')}. Upload them in the Models
+              step.
             </div>
           {/if}
         </div>
@@ -121,5 +127,3 @@
     previewHeightMm={currentModel?.heightMm ?? DEFAULT_KEYCAP_SIZE_MM}
   />
 {/if}
-
-

@@ -41,10 +41,8 @@ export async function getStlBufferForModel(
   stlBuffersByModelId: Record<string, ArrayBuffer | null>,
   state?: AppState
 ): Promise<ArrayBuffer> {
-  const modelObj = typeof model === 'string' 
-    ? (state?.keycapModels.find(m => m.id === model) ?? null)
-    : model
-  
+  const modelObj = typeof model === 'string' ? (state?.keycapModels.find(m => m.id === model) ?? null) : model
+
   if (!modelObj) {
     throw new Error(typeof model === 'string' ? `Model not found: ${model}` : `Invalid model`)
   }
@@ -157,7 +155,7 @@ export function generateAll3mfsWithWorker(
       })
     }
 
-    worker.onmessage = (e) => {
+    worker.onmessage = e => {
       const { type, payload } = e.data
 
       if (type === 'progress') {
@@ -179,7 +177,7 @@ export function generateAll3mfsWithWorker(
       }
     }
 
-    worker.onerror = (error) => {
+    worker.onerror = error => {
       if (!cancelled) {
         worker.terminate()
         reject(error)

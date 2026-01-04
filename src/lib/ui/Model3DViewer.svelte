@@ -57,18 +57,18 @@
 
   function clearScene() {
     if (!scene) return
-    
+
     // Remove the current model group if it exists
     if (currentModelGroup) {
       // Dispose of all geometries and materials in the group
-      currentModelGroup.traverse((child) => {
+      currentModelGroup.traverse(child => {
         if (child instanceof THREE.Mesh) {
           if (child.geometry) {
             child.geometry.dispose()
           }
           if (child.material) {
             if (Array.isArray(child.material)) {
-              child.material.forEach((mat) => mat.dispose())
+              child.material.forEach(mat => mat.dispose())
             } else {
               child.material.dispose()
             }
@@ -78,15 +78,15 @@
       scene.remove(currentModelGroup)
       currentModelGroup = null
     }
-    
+
     // Remove all meshes (for STL-based models)
     const objectsToRemove: THREE.Object3D[] = []
-    scene.traverse((child) => {
+    scene.traverse(child => {
       if (child instanceof THREE.Mesh && child !== currentModelGroup) {
         objectsToRemove.push(child)
       }
     })
-    objectsToRemove.forEach((obj) => {
+    objectsToRemove.forEach(obj => {
       if (scene) {
         scene.remove(obj)
       }
@@ -214,9 +214,4 @@
   }
 </script>
 
-<div
-  bind:this={container}
-  class="h-full w-full rounded-lg bg-slate-950"
-  style="min-height: 300px;"
-></div>
-
+<div bind:this={container} class="h-full w-full rounded-lg bg-slate-950" style="min-height: 300px;"></div>

@@ -33,23 +33,27 @@
   // Compute hash of template symbol properties for change detection
   function getTemplateHash(tpl: Template | null): string {
     if (!tpl) return ''
-    return JSON.stringify(tpl.symbols.map(s => ({
-      id: s.id,
-      x: s.x,
-      y: s.y,
-      fontName: s.fontName,
-      fontSizeMm: s.fontSizeMm,
-      color: s.color,
-      rotationDeg: s.rotationDeg,
-    })).sort((a, b) => a.id.localeCompare(b.id)))
+    return JSON.stringify(
+      tpl.symbols
+        .map(s => ({
+          id: s.id,
+          x: s.x,
+          y: s.y,
+          fontName: s.fontName,
+          fontSizeMm: s.fontSizeMm,
+          color: s.color,
+          rotationDeg: s.rotationDeg,
+        }))
+        .sort((a, b) => a.id.localeCompare(b.id))
+    )
   }
 
   // Check if 3D preview is out of date
-  $: isOutOfDate = viewMode === '3d' && (
-    lastGeneratedKeyId !== keyId ||
-    lastGeneratedTemplateHash !== getTemplateHash(template) ||
-    lastGeneratedTextsHash !== getTextsHash(textsBySymbolId)
-  )
+  $: isOutOfDate =
+    viewMode === '3d' &&
+    (lastGeneratedKeyId !== keyId ||
+      lastGeneratedTemplateHash !== getTemplateHash(template) ||
+      lastGeneratedTextsHash !== getTextsHash(textsBySymbolId))
 
   async function generate3DPreview() {
     if (!template || isGeneratingPreview) return
@@ -62,10 +66,10 @@
 
     isGeneratingPreview = true
     previewAbortController = new AbortController()
-    
+
     try {
       let effectiveKeyId = keyId
-      
+
       // If no keyId (template preview), create a temporary key
       if (!effectiveKeyId) {
         tempKeyId = newId('temp-key')
@@ -85,7 +89,12 @@
         effectiveKeyId = tempKeyId
       }
 
-      const model = await generatePreviewModel($app, effectiveKeyId, $stlBuffersByModelId, previewAbortController.signal)
+      const model = await generatePreviewModel(
+        $app,
+        effectiveKeyId,
+        $stlBuffersByModelId,
+        previewAbortController.signal
+      )
       previewModel = model
       // Store the actual keyId (not tempKeyId) for comparison
       lastGeneratedKeyId = keyId ?? null
@@ -108,7 +117,7 @@
         window.alert(e instanceof Error ? e.message : 'Preview generation failed.')
       }
       previewModel = null
-      
+
       // Clean up temporary key on error
       if (tempKeyId) {
         app.update(s => ({
@@ -142,7 +151,11 @@
   }
 
   // Reset preview when keyId or template changes (but not during generation)
-  $: if (!isGeneratingPreview && isInitialized && (keyId !== lastGeneratedKeyId || getTemplateHash(template) !== lastGeneratedTemplateHash)) {
+  $: if (
+    !isGeneratingPreview &&
+    isInitialized &&
+    (keyId !== lastGeneratedKeyId || getTemplateHash(template) !== lastGeneratedTemplateHash)
+  ) {
     previewModel = null
     lastGeneratedKeyId = null
     lastGeneratedTemplateHash = ''
@@ -183,14 +196,16 @@
     >
       <span class="relative flex w-full items-center">
         <span
-          class="relative z-10 flex-1 rounded px-2 py-1.5 text-xs font-medium transition-colors text-center {viewMode === '2d'
+          class="relative z-10 flex-1 rounded px-2 py-1.5 text-xs font-medium transition-colors text-center {viewMode ===
+          '2d'
             ? 'text-slate-200'
             : 'text-slate-400'}"
         >
           2D
         </span>
         <span
-          class="relative z-10 flex-1 rounded px-2 py-1.5 text-xs font-medium transition-colors text-center {viewMode === '3d'
+          class="relative z-10 flex-1 rounded px-2 py-1.5 text-xs font-medium transition-colors text-center {viewMode ===
+          '3d'
             ? 'text-slate-200'
             : 'text-slate-400'}"
         >
@@ -198,7 +213,8 @@
         </span>
       </span>
       <span
-        class="absolute top-0.5 bottom-0.5 left-0.5 w-[calc(50%)] rounded bg-slate-800 transition-all duration-200 ease-in-out {viewMode === '3d'
+        class="absolute top-0.5 bottom-0.5 left-0.5 w-[calc(50%)] rounded bg-slate-800 transition-all duration-200 ease-in-out {viewMode ===
+        '3d'
           ? 'translate-x-[calc(100%-0.25rem)]'
           : 'translate-x-0'}"
       ></span>
@@ -207,31 +223,32 @@
 
   <div class="relative">
     {#if !template}
-      <div class="flex items-center justify-center h-64 text-sm text-slate-400">
-        Select a template to preview.
-      </div>
+      <div class="flex items-center justify-center h-64 text-sm text-slate-400">Select a template to preview.</div>
     {:else if viewMode === '2d'}
       <div class="flex items-center justify-center">
-        <LabelPreview
-          template={template}
-          textsBySymbolId={textsBySymbolId}
-          widthMm={widthMm}
-          heightMm={heightMm}
-          className="max-w-[340px]"
-        />
+        <LabelPreview {template} {textsBySymbolId} {widthMm} {heightMm} className="max-w-[340px]" />
       </div>
     {:else}
       <!-- 3D View -->
       <div class="h-96 rounded-lg border border-slate-800 overflow-hidden relative">
         <Model3DViewer modelGroup={previewModel} />
-        
+
         {#if isGeneratingPreview}
           <!-- Loading overlay -->
           <div class="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-10">
             <div class="flex flex-col items-center gap-3">
-              <svg class="animate-spin h-8 w-8 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg
+                class="animate-spin h-8 w-8 text-blue-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
               <div class="text-sm text-slate-300">Generating preview…</div>
               <button
@@ -252,12 +269,17 @@
         {:else if !previewModel || isOutOfDate}
           <!-- No preview or out of date - show refresh button overlay -->
           <div class="absolute inset-0 bg-slate-950/60 flex items-center justify-center z-10 backdrop-blur-sm">
-              <button
-                class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg font-medium"
-                on:click={onRefresh3D}
-              >
+            <button
+              class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg font-medium"
+              on:click={onRefresh3D}
+            >
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
               </svg>
               {previewModel ? 'Refresh 3D Preview' : 'Generate 3D Preview'}
             </button>
@@ -267,4 +289,3 @@
     {/if}
   </div>
 </div>
-

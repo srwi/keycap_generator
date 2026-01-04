@@ -4,7 +4,7 @@ import App from './App.svelte'
 import { preloadFonts } from './lib/generate/fonts'
 
 // Preload fonts at startup for better performance
-preloadFonts().catch((error) => {
+preloadFonts().catch(error => {
   console.error('Failed to preload fonts:', error)
 })
 

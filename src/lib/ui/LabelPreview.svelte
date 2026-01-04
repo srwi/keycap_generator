@@ -18,10 +18,10 @@
   // Load paths for all symbols (getTextPath handles caching internally)
   $: symbolPaths = template
     ? Promise.all(
-        template.symbols.map(async (sym) => {
+        template.symbols.map(async sym => {
           const text = textsBySymbolId[sym.id] ?? ''
           if (!text) return { symbol: sym, pathData: null, text: '' }
-          
+
           try {
             const pathData = await getTextPath(text, sym.fontName, sym.fontSizeMm)
             return { symbol: sym, pathData, text }
@@ -73,11 +73,7 @@
           {@const centerOffsetX = -pathData.width / 2 - pathData.x}
           {@const centerOffsetY = -pathData.height / 2 - pathData.y}
           <g transform={`translate(${x} ${y}) rotate(${sym.rotationDeg})`}>
-            <path
-              d={pathData.path}
-              fill={sym.color}
-              transform={`translate(${centerOffsetX}, ${centerOffsetY})`}
-            />
+            <path d={pathData.path} fill={sym.color} transform={`translate(${centerOffsetX}, ${centerOffsetY})`} />
           </g>
         {/if}
       {/each}

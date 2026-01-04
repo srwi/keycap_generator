@@ -4,11 +4,11 @@ import type { Font } from 'three/examples/jsm/loaders/FontLoader.js'
 import * as opentype from 'opentype.js'
 
 const FONT_REGISTRY = {
-  'DejaVuSans': '/fonts/DejaVu/DejaVuSans.ttf',
+  DejaVuSans: '/fonts/DejaVu/DejaVuSans.ttf',
   'DejaVuSans-Bold': '/fonts/DejaVu/DejaVuSans-Bold.ttf',
-  'DejaVuSansMono': '/fonts/DejaVu/DejaVuSansMono.ttf',
+  DejaVuSansMono: '/fonts/DejaVu/DejaVuSansMono.ttf',
   'DejaVuSansMono-Bold': '/fonts/DejaVu/DejaVuSansMono-Bold.ttf',
-  'DejaVuSerif': '/fonts/DejaVu/DejaVuSerif.ttf',
+  DejaVuSerif: '/fonts/DejaVu/DejaVuSerif.ttf',
   'DejaVuSerif-Bold': '/fonts/DejaVu/DejaVuSerif-Bold.ttf',
   'DejaVuSerif-Italic': '/fonts/DejaVu/DejaVuSerif-Italic.ttf',
 } as const
@@ -75,7 +75,7 @@ async function loadOpenTypeFont(fontName: FontName): Promise<opentype.Font> {
 export function getFont(fontName: FontName): Font | Promise<Font> {
   const cached = fontCache.get(fontName)
   if (cached) return cached
-  
+
   return loadThreeFont(fontName)
 }
 
@@ -87,19 +87,19 @@ export async function getTextPath(
   const font = await loadOpenTypeFont(fontName)
   const THREE_TTFLOADER_SIZE_FACTOR = 100 / 72
   const fontSize = Math.max(0.01, fontSizeMm * THREE_TTFLOADER_SIZE_FACTOR)
-  
+
   const path = font.getPath(text, 0, 0, fontSize)
-  
+
   const bbox = path.getBoundingBox()
   const width = bbox.x2 - bbox.x1
   const height = bbox.y2 - bbox.y1
-  
+
   const pathData = path.toSVG(2) // 2 decimal places
-  
+
   // Extract just the path data (remove any transform attributes)
   const match = pathData.match(/d="([^"]+)"/)
   const d = match ? match[1] : ''
-  
+
   return {
     path: d,
     width,
@@ -117,12 +117,12 @@ export async function preloadFonts(): Promise<void> {
         .then(async () => {
           await loadOpenTypeFont(fontName)
         })
-        .catch((error) => {
+        .catch(error => {
           console.error(`Failed to preload font ${fontName}:`, error)
           throw error
         })
     )
   }
-  
+
   await Promise.all(promises)
 }

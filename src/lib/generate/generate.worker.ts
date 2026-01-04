@@ -71,7 +71,7 @@ self.onmessage = async (e: MessageEvent) => {
         const group = await generateKeycapModel(state, key, template, baseGeom, yieldAndCheck)
 
         const blob = await exportTo3MF(group)
-        
+
         const arrayBuffer = await blob.arrayBuffer()
         files[`${safeFileName(key.name)}.3mf`] = new Uint8Array(arrayBuffer)
       }
@@ -96,4 +96,3 @@ self.onmessage = async (e: MessageEvent) => {
     }
   }
 }
-

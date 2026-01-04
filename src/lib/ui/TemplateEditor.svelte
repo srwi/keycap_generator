@@ -7,14 +7,13 @@
   import { slide } from 'svelte/transition'
 
   $: tpl = $selectedTemplate
-  $: usedByKeyCount =
-    tpl == null ? 0 : $app.keys.filter((k) => k.templateId === tpl.id).length
+  $: usedByKeyCount = tpl == null ? 0 : $app.keys.filter(k => k.templateId === tpl.id).length
 
   function onDeleteTemplate() {
     if (!tpl) return
     if (usedByKeyCount > 0) {
       const ok = window.confirm(
-        `Template "${tpl.name}" is used by ${usedByKeyCount} key(s).\n\nIf you delete it, those keys will be removed as well.\n\nDelete template?`,
+        `Template "${tpl.name}" is used by ${usedByKeyCount} key(s).\n\nIf you delete it, those keys will be removed as well.\n\nDelete template?`
       )
       if (!ok) return
     }
@@ -23,23 +22,20 @@
 
   import { AVAILABLE_FONTS } from '../generate/fonts'
 
-  $: model =
-    tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
+  $: model = tpl == null ? null : ($app.keycapModels.find(m => m.id === tpl.keycapModelId) ?? null)
   $: modelWidthMm = model?.widthMm ?? DEFAULT_KEYCAP_SIZE_MM
   $: modelHeightMm = model?.heightMm ?? DEFAULT_KEYCAP_SIZE_MM
 
-  $: previewTextsBySymbolId = tpl
-    ? Object.fromEntries(tpl.symbols.map((s, index) => [s.id, getSlotSymbol(index)]))
-    : {}
+  $: previewTextsBySymbolId = tpl ? Object.fromEntries(tpl.symbols.map((s, index) => [s.id, getSlotSymbol(index)])) : {}
 
   function clamp(n: number, min: number, max: number) {
     return Math.min(max, Math.max(min, n))
   }
 
   function getTemplateModel(templateId: string) {
-    const t = $app.templates.find((t) => t.id === templateId)
+    const t = $app.templates.find(t => t.id === templateId)
     if (!t) return null
-    return $app.keycapModels.find((m) => m.id === t.keycapModelId) ?? null
+    return $app.keycapModels.find(m => m.id === t.keycapModelId) ?? null
   }
 
   let collapsedSymbols = new Set<string>()
@@ -57,7 +53,7 @@
 
   $: if (tpl) {
     const currentSymbolIds = new Set(tpl.symbols.map(s => s.id))
-    
+
     if (!previousSymbolIds || previousTemplateId !== tpl.id) {
       collapsedSymbols = new Set(currentSymbolIds)
     } else {
@@ -65,7 +61,7 @@
       const newIds = new Set([...currentSymbolIds].filter(id => !previousSymbolIds!.has(id)))
       collapsedSymbols = new Set([...kept, ...newIds])
     }
-    
+
     previousTemplateId = tpl.id
     previousSymbolIds = currentSymbolIds
   }
@@ -95,7 +91,7 @@
           <div class="min-w-0 flex-1">
             <div class="truncate text-sm font-medium">{t.name}</div>
             <div class="truncate text-xs text-slate-400">
-              {$app.keycapModels.find((m) => m.id === t.keycapModelId)?.name ?? '—'}
+              {$app.keycapModels.find(m => m.id === t.keycapModelId)?.name ?? '—'}
             </div>
           </div>
           <div class="h-10 w-10 -mr-1 flex-shrink-0 flex items-center justify-center">
@@ -137,7 +133,7 @@
           <input
             class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
             value={tpl.name}
-            on:input={(e) => actions.renameTemplate(tpl.id, (e.currentTarget as HTMLInputElement).value)}
+            on:input={e => actions.renameTemplate(tpl.id, (e.currentTarget as HTMLInputElement).value)}
           />
         </label>
 
@@ -146,7 +142,7 @@
           <select
             class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
             value={tpl.keycapModelId}
-            on:change={(e) => actions.setTemplateKeycapModel(tpl.id, (e.currentTarget as HTMLSelectElement).value)}
+            on:change={e => actions.setTemplateKeycapModel(tpl.id, (e.currentTarget as HTMLSelectElement).value)}
           >
             {#each $app.keycapModels as km (km.id)}
               <option value={km.id}>{km.name}</option>
@@ -184,7 +180,9 @@
                     >
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="text-sm font-medium text-slate-200 truncate capitalize">{getSlotName(tpl.symbols.indexOf(sym))} ({getSlotSymbol(tpl.symbols.indexOf(sym))})</span>
+                    <span class="text-sm font-medium text-slate-200 truncate capitalize"
+                      >{getSlotName(tpl.symbols.indexOf(sym))} ({getSlotSymbol(tpl.symbols.indexOf(sym))})</span
+                    >
                   </button>
                   <button
                     class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 hover:bg-slate-900"
@@ -197,81 +195,81 @@
                 {#if !isCollapsed}
                   <div class="p-3 pt-0 space-y-3" transition:slide={{ duration: 200 }}>
                     <div class="grid grid-cols-2 gap-3">
-                  <label class="grid gap-1 text-xs text-slate-400">
-                    X (mm)
-                    <input
-                      class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                      type="number"
-                      step="0.1"
-                      value={sym.x}
-                      on:input={(e) =>
-                        actions.updateSymbol(tpl.id, sym.id, {
-                          x: Number((e.currentTarget as HTMLInputElement).value),
-                        })}
-                    />
-                  </label>
-                  <label class="grid gap-1 text-xs text-slate-400">
-                    Y (mm)
-                    <input
-                      class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                      type="number"
-                      step="0.1"
-                      value={sym.y}
-                      on:input={(e) =>
-                        actions.updateSymbol(tpl.id, sym.id, {
-                          y: Number((e.currentTarget as HTMLInputElement).value),
-                        })}
-                    />
-                  </label>
-                </div>
+                      <label class="grid gap-1 text-xs text-slate-400">
+                        X (mm)
+                        <input
+                          class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                          type="number"
+                          step="0.1"
+                          value={sym.x}
+                          on:input={e =>
+                            actions.updateSymbol(tpl.id, sym.id, {
+                              x: Number((e.currentTarget as HTMLInputElement).value),
+                            })}
+                        />
+                      </label>
+                      <label class="grid gap-1 text-xs text-slate-400">
+                        Y (mm)
+                        <input
+                          class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                          type="number"
+                          step="0.1"
+                          value={sym.y}
+                          on:input={e =>
+                            actions.updateSymbol(tpl.id, sym.id, {
+                              y: Number((e.currentTarget as HTMLInputElement).value),
+                            })}
+                        />
+                      </label>
+                    </div>
 
-                <div class="mt-3">
-                  <label class="grid gap-1 text-xs text-slate-400">
-                    Font
-                    <select
-                      class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                      value={sym.fontName}
-                      on:change={(e) =>
-                        actions.updateSymbol(tpl.id, sym.id, {
-                          fontName: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontName'],
-                        })}
-                    >
-                      {#each AVAILABLE_FONTS as fontName}
-                        <option value={fontName}>{fontName}</option>
-                      {/each}
-                    </select>
-                  </label>
-                </div>
+                    <div class="mt-3">
+                      <label class="grid gap-1 text-xs text-slate-400">
+                        Font
+                        <select
+                          class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                          value={sym.fontName}
+                          on:change={e =>
+                            actions.updateSymbol(tpl.id, sym.id, {
+                              fontName: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontName'],
+                            })}
+                        >
+                          {#each AVAILABLE_FONTS as fontName}
+                            <option value={fontName}>{fontName}</option>
+                          {/each}
+                        </select>
+                      </label>
+                    </div>
 
-                <div class="mt-3 grid grid-cols-2 gap-3">
-                  <label class="grid gap-1 text-xs text-slate-400">
-                    Size (mm)
-                    <input
-                      class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                      type="number"
-                      min="0.1"
-                      step="0.1"
-                      value={sym.fontSizeMm}
-                      on:input={(e) =>
-                        actions.updateSymbol(tpl.id, sym.id, {
-                          fontSizeMm: Number((e.currentTarget as HTMLInputElement).value),
-                        })}
-                    />
-                  </label>
-                  <label class="grid gap-1 text-xs text-slate-400">
-                    Rotation (deg)
-                    <input
-                      class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                      type="number"
-                      step="1"
-                      value={sym.rotationDeg}
-                      on:input={(e) =>
-                        actions.updateSymbol(tpl.id, sym.id, {
-                          rotationDeg: Number((e.currentTarget as HTMLInputElement).value),
-                        })}
-                    />
-                  </label>
-                </div>
+                    <div class="mt-3 grid grid-cols-2 gap-3">
+                      <label class="grid gap-1 text-xs text-slate-400">
+                        Size (mm)
+                        <input
+                          class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                          type="number"
+                          min="0.1"
+                          step="0.1"
+                          value={sym.fontSizeMm}
+                          on:input={e =>
+                            actions.updateSymbol(tpl.id, sym.id, {
+                              fontSizeMm: Number((e.currentTarget as HTMLInputElement).value),
+                            })}
+                        />
+                      </label>
+                      <label class="grid gap-1 text-xs text-slate-400">
+                        Rotation (deg)
+                        <input
+                          class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                          type="number"
+                          step="1"
+                          value={sym.rotationDeg}
+                          on:input={e =>
+                            actions.updateSymbol(tpl.id, sym.id, {
+                              rotationDeg: Number((e.currentTarget as HTMLInputElement).value),
+                            })}
+                        />
+                      </label>
+                    </div>
 
                     <label class="grid gap-1 text-xs text-slate-400">
                       Color
@@ -280,8 +278,10 @@
                           class="h-9 w-20 rounded-md border border-slate-700 bg-slate-900"
                           type="color"
                           value={sym.color}
-                          on:input={(e) =>
-                            actions.updateSymbol(tpl.id, sym.id, { color: (e.currentTarget as HTMLInputElement).value })}
+                          on:input={e =>
+                            actions.updateSymbol(tpl.id, sym.id, {
+                              color: (e.currentTarget as HTMLInputElement).value,
+                            })}
                         />
                         <span class="text-xs text-slate-500 font-mono">{sym.color}</span>
                       </div>
@@ -293,7 +293,9 @@
           </div>
 
           <div class="mt-3 text-xs text-slate-400">
-            X/Y are mm offsets from center: (0,0)=center. Positive X is right, positive Y is down. Model size: {modelWidthMm.toFixed(1)}mm × {modelHeightMm.toFixed(1)}mm.
+            X/Y are mm offsets from center: (0,0)=center. Positive X is right, positive Y is down. Model size: {modelWidthMm.toFixed(
+              1
+            )}mm × {modelHeightMm.toFixed(1)}mm.
           </div>
         </div>
       </div>
@@ -314,5 +316,3 @@
     {/if}
   </section>
 </div>
-
-

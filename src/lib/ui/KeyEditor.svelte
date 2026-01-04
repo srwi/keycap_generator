@@ -5,10 +5,8 @@
   import KeycapPreview from './KeycapPreview.svelte'
 
   $: key = $selectedKey
-  $: tpl =
-    key == null ? null : $app.templates.find((t) => t.id === key.templateId) ?? null
-  $: model =
-    tpl == null ? null : $app.keycapModels.find((m) => m.id === tpl.keycapModelId) ?? null
+  $: tpl = key == null ? null : ($app.templates.find(t => t.id === key.templateId) ?? null)
+  $: model = tpl == null ? null : ($app.keycapModels.find(m => m.id === tpl.keycapModelId) ?? null)
   $: modelWidthMm = model?.widthMm ?? DEFAULT_KEYCAP_SIZE_MM
   $: modelHeightMm = model?.heightMm ?? DEFAULT_KEYCAP_SIZE_MM
 
@@ -18,15 +16,15 @@
   }
 
   function getKeyTemplate(keyId: string) {
-    const k = $app.keys.find((k) => k.id === keyId)
+    const k = $app.keys.find(k => k.id === keyId)
     if (!k) return null
-    return $app.templates.find((t) => t.id === k.templateId) ?? null
+    return $app.templates.find(t => t.id === k.templateId) ?? null
   }
 
   function getKeyModel(keyId: string) {
     const t = getKeyTemplate(keyId)
     if (!t) return null
-    return $app.keycapModels.find((m) => m.id === t.keycapModelId) ?? null
+    return $app.keycapModels.find(m => m.id === t.keycapModelId) ?? null
   }
 </script>
 
@@ -54,7 +52,7 @@
           <div class="min-w-0 flex-1">
             <div class="truncate text-sm font-medium">{k.name}</div>
             <div class="truncate text-xs text-slate-400">
-              {$app.templates.find((t) => t.id === k.templateId)?.name ?? '—'}
+              {$app.templates.find(t => t.id === k.templateId)?.name ?? '—'}
             </div>
           </div>
           <div class="h-10 w-10 -mr-1 flex-shrink-0 flex items-center justify-center">
@@ -96,7 +94,7 @@
           <input
             class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
             value={key.name}
-            on:input={(e) => actions.renameKey(key.id, (e.currentTarget as HTMLInputElement).value)}
+            on:input={e => actions.renameKey(key.id, (e.currentTarget as HTMLInputElement).value)}
           />
         </label>
 
@@ -105,7 +103,7 @@
           <select
             class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
             value={key.templateId}
-            on:change={(e) => actions.setKeyTemplate(key.id, (e.currentTarget as HTMLSelectElement).value)}
+            on:change={e => actions.setKeyTemplate(key.id, (e.currentTarget as HTMLSelectElement).value)}
           >
             {#each $app.templates as t (t.id)}
               <option value={t.id}>{t.name}</option>
@@ -121,12 +119,14 @@
             <div class="space-y-2">
               {#each tpl.symbols as sym, index (sym.id)}
                 <div class="rounded-md border border-slate-800 bg-slate-900/30 p-2.5">
-                  <div class="text-xs font-medium text-slate-300 mb-1.5 capitalize">{getSlotName(index)} ({getSlotSymbol(index)})</div>
+                  <div class="text-xs font-medium text-slate-300 mb-1.5 capitalize">
+                    {getSlotName(index)} ({getSlotSymbol(index)})
+                  </div>
                   <input
                     class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-600"
                     placeholder="Enter text..."
                     value={key.textsBySymbolId[sym.id] ?? ''}
-                    on:input={(e) => actions.setKeyText(key.id, sym.id, (e.currentTarget as HTMLInputElement).value)}
+                    on:input={e => actions.setKeyText(key.id, sym.id, (e.currentTarget as HTMLInputElement).value)}
                   />
                 </div>
               {/each}
@@ -151,5 +151,3 @@
     {/if}
   </section>
 </div>
-
-

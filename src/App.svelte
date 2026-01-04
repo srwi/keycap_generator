@@ -39,7 +39,9 @@
           Save project
         </button>
 
-        <label class="cursor-pointer rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800">
+        <label
+          class="cursor-pointer rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
+        >
           Load project
           <input class="hidden" type="file" accept="application/json" on:change={loadStateFromFile} />
         </label>

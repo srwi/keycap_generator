@@ -2,7 +2,7 @@
   import LabelPreview from './LabelPreview.svelte'
   import type { Template } from '../state/types'
   import { DEFAULT_KEYCAP_SIZE_MM } from '../state/types'
-  
+
   export let title: string
   export let onCancel: () => void
   export let current: number = 0
@@ -11,7 +11,7 @@
   export let previewTextsBySymbolId: Record<string, string> = {}
   export let previewWidthMm: number = DEFAULT_KEYCAP_SIZE_MM
   export let previewHeightMm: number = DEFAULT_KEYCAP_SIZE_MM
-  
+
   $: progressPercent = total > 0 ? (current / total) * 100 : 0
 </script>
 
@@ -24,7 +24,7 @@
   <div class="rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-xl max-w-md w-full mx-4">
     <div class="flex flex-col items-center">
       <h3 id="modal-title" class="text-lg font-semibold text-slate-200 mb-6">{title}</h3>
-      
+
       {#if previewTemplate}
         <div class="flex justify-center mb-6">
           <LabelPreview
@@ -36,7 +36,7 @@
           />
         </div>
       {/if}
-      
+
       {#if total > 0}
         <div class="w-full mb-6">
           <div class="flex justify-between text-xs text-slate-400 mb-2">
@@ -51,7 +51,7 @@
           </div>
         </div>
       {/if}
-      
+
       <button
         class="rounded-md border border-red-900/60 bg-red-950/30 px-4 py-2 text-sm text-red-200 hover:bg-red-950/60 transition-colors"
         on:click={onCancel}
@@ -61,4 +61,3 @@
     </div>
   </div>
 </div>
-

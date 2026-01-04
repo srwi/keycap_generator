@@ -19,6 +19,7 @@
     "autoprefixer": "^10.4.23",
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
+    "prettier-plugin-svelte": "^3.2.6",
     "svelte": "^5.43.8",
     "svelte-check": "^4.3.4",
     "tailwindcss": "3.4.17",
