@@ -5,6 +5,7 @@
   import Model3DViewer from './Model3DViewer.svelte'
   import { showConfirm } from '../state/modalStore'
   import { Trash2, Plus } from 'lucide-svelte'
+  import { getPublicPath } from '../utils/paths'
 
   type ServerModel = {
     id: string
@@ -13,10 +14,10 @@
   }
 
   const serverModels: ServerModel[] = [
-    { id: '1u', name: '1u', url: '/stls/1u.stl' },
-    { id: '125u', name: '1.25u', url: '/stls/1_25u.stl' },
-    { id: '2u', name: '2u', url: '/stls/2u.stl' },
-    { id: '625u', name: '6.25u Space', url: '/stls/6_25u_space.stl' },
+    { id: '1u', name: '1u', url: getPublicPath('stls/1u.stl') },
+    { id: '125u', name: '1.25u', url: getPublicPath('stls/1_25u.stl') },
+    { id: '2u', name: '2u', url: getPublicPath('stls/2u.stl') },
+    { id: '625u', name: '6.25u Space', url: getPublicPath('stls/6_25u_space.stl') },
   ]
 
   $: selectedId = $app.ui.selectedKeycapModelId

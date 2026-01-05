@@ -2,15 +2,16 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { TTFLoader } from 'three/addons/loaders/TTFLoader.js'
 import type { Font } from 'three/examples/jsm/loaders/FontLoader.js'
 import * as opentype from 'opentype.js'
+import { getPublicPath } from '../utils/paths'
 
 const FONT_REGISTRY = {
-  DejaVuSans: '/fonts/DejaVu/DejaVuSans.ttf',
-  'DejaVuSans-Bold': '/fonts/DejaVu/DejaVuSans-Bold.ttf',
-  DejaVuSansMono: '/fonts/DejaVu/DejaVuSansMono.ttf',
-  'DejaVuSansMono-Bold': '/fonts/DejaVu/DejaVuSansMono-Bold.ttf',
-  DejaVuSerif: '/fonts/DejaVu/DejaVuSerif.ttf',
-  'DejaVuSerif-Bold': '/fonts/DejaVu/DejaVuSerif-Bold.ttf',
-  'DejaVuSerif-Italic': '/fonts/DejaVu/DejaVuSerif-Italic.ttf',
+  DejaVuSans: getPublicPath('fonts/DejaVu/DejaVuSans.ttf'),
+  'DejaVuSans-Bold': getPublicPath('fonts/DejaVu/DejaVuSans-Bold.ttf'),
+  DejaVuSansMono: getPublicPath('fonts/DejaVu/DejaVuSansMono.ttf'),
+  'DejaVuSansMono-Bold': getPublicPath('fonts/DejaVu/DejaVuSansMono-Bold.ttf'),
+  DejaVuSerif: getPublicPath('fonts/DejaVu/DejaVuSerif.ttf'),
+  'DejaVuSerif-Bold': getPublicPath('fonts/DejaVu/DejaVuSerif-Bold.ttf'),
+  'DejaVuSerif-Italic': getPublicPath('fonts/DejaVu/DejaVuSerif-Italic.ttf'),
 } as const
 
 export type FontName = keyof typeof FONT_REGISTRY

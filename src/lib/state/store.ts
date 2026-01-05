@@ -1,6 +1,7 @@
 import { derived, writable } from 'svelte/store'
 import type { AppState, KeyDef, KeycapModel, SymbolDef, Template } from './types'
 import { newId } from '../utils/id'
+import { getPublicPath } from '../utils/paths'
 
 export const SLOTS = [
   { name: 'alpha', symbol: 'Α' },
@@ -47,7 +48,7 @@ function defaultKeycapModel(): KeycapModel {
     source: {
       kind: 'server',
       serverId: '1u',
-      url: '/stls/1u.stl',
+      url: getPublicPath('stls/1u.stl'),
       stl: { fileName: '1u.stl', pathHint: 'server:1u' },
     },
     rotationX: 0,

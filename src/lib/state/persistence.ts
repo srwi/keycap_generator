@@ -1,6 +1,23 @@
 import { app } from './store'
 import type { AppState, KeyDef, KeycapModel, Template } from './types'
 import { stlBuffersByModelId } from './sessionAssets'
+import { getPublicPath } from '../utils/paths'
+
+function normalizeModelUrls(keycapModels: KeycapModel[]): KeycapModel[] {
+  return keycapModels.map(m => {
+    if (m.source.kind === 'server' && m.source.url.startsWith('/')) {
+      const pathWithoutLeadingSlash = m.source.url.slice(1)
+      return {
+        ...m,
+        source: {
+          ...m.source,
+          url: getPublicPath(pathWithoutLeadingSlash),
+        },
+      }
+    }
+    return m
+  })
+}
 
 function prepareForExport(state: AppState): Omit<AppState, 'ui'> {
   // UI state is runtime-only and not exported.
@@ -32,13 +49,16 @@ function parseProjectV1(raw: unknown): AppState | null {
   if (!Array.isArray(project.keycapModels) || !Array.isArray(project.templates) || !Array.isArray(project.keys))
     return null
 
+  // Normalize URLs in keycap models to handle preset files
+  const normalizedModels = normalizeModelUrls(project.keycapModels)
+
   return {
     version: 1,
-    keycapModels: project.keycapModels,
+    keycapModels: normalizedModels,
     templates: project.templates,
     keys: project.keys,
     ui: {
-      selectedKeycapModelId: project.keycapModels[0]?.id ?? null,
+      selectedKeycapModelId: normalizedModels[0]?.id ?? null,
       selectedTemplateId: project.templates[0]?.id ?? null,
       selectedKeyId: project.keys[0]?.id ?? null,
     },
@@ -82,7 +102,7 @@ export async function loadStateFromFile(ev: Event): Promise<string | null> {
 
 export async function loadPreset(presetName: string): Promise<string | null> {
   try {
-    const response = await fetch(`/presets/${presetName}.json`)
+    const response = await fetch(getPublicPath(`presets/${presetName}.json`))
     if (!response.ok) {
       return `Failed to load preset: ${response.statusText}`
     }
