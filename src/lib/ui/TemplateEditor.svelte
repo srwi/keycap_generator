@@ -3,6 +3,7 @@
   import type { SymbolDef } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
   import KeycapPreview from './KeycapPreview.svelte'
+  import { showConfirm } from '../state/modalStore'
   import { slide } from 'svelte/transition'
   import { Trash2, Plus, ChevronRight } from 'lucide-svelte'
 
@@ -12,10 +13,13 @@
   function onDeleteTemplate() {
     if (!tpl) return
     if (usedByKeyCount > 0) {
-      const ok = window.confirm(
-        `Template "${tpl.name}" is used by ${usedByKeyCount} key(s).\n\nIf you delete it, those keys will be removed as well.\n\nDelete template?`
+      showConfirm(
+        `Template "${tpl.name}" is used by ${usedByKeyCount} key(s).\n\nIf you delete it, those keys will be removed as well.\n\nDelete template?`,
+        () => {
+          actions.deleteTemplate(tpl.id)
+        }
       )
-      if (!ok) return
+      return
     }
     actions.deleteTemplate(tpl.id)
   }

@@ -59,39 +59,37 @@ export function downloadStateFile(state: AppState) {
   setTimeout(() => URL.revokeObjectURL(url), 500)
 }
 
-async function loadStateFromJson(jsonText: string, errorContext: string) {
+async function loadStateFromJson(jsonText: string, errorContext: string): Promise<string | null> {
   const parsed = parseProjectV1(JSON.parse(jsonText) as unknown)
   if (!parsed) {
-    window.alert(`Invalid ${errorContext}.`)
-    return false
+    return `Invalid ${errorContext}.`
   }
 
   stlBuffersByModelId.set({})
   app.set(parsed)
-  return true
+  return null
 }
 
-export async function loadStateFromFile(ev: Event) {
+export async function loadStateFromFile(ev: Event): Promise<string | null> {
   const input = ev.currentTarget as HTMLInputElement
   const file = input.files?.[0]
   input.value = ''
-  if (!file) return
+  if (!file) return null
 
   const text = await file.text()
-  await loadStateFromJson(text, 'project file')
+  return await loadStateFromJson(text, 'project file')
 }
 
-export async function loadPreset(presetName: string) {
+export async function loadPreset(presetName: string): Promise<string | null> {
   try {
     const response = await fetch(`/presets/${presetName}.json`)
     if (!response.ok) {
-      window.alert(`Failed to load preset: ${response.statusText}`)
-      return
+      return `Failed to load preset: ${response.statusText}`
     }
 
     const text = await response.text()
-    await loadStateFromJson(text, 'preset file')
+    return await loadStateFromJson(text, 'preset file')
   } catch (error) {
-    window.alert(`Failed to load preset: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    return `Failed to load preset: ${error instanceof Error ? error.message : 'Unknown error'}`
   }
 }

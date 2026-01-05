@@ -7,6 +7,8 @@
   import TemplateEditor from './lib/ui/TemplateEditor.svelte'
   import KeyEditor from './lib/ui/KeyEditor.svelte'
   import ProcessingModal from './lib/ui/ProcessingModal.svelte'
+  import ModalContainer from './lib/ui/ModalContainer.svelte'
+  import { showMessage, showConfirm } from './lib/state/modalStore'
   import { clickOutside } from './lib/ui/actions/clickOutside'
   import { Download, Upload, BookOpen, ChevronDown, Trash2 } from 'lucide-svelte'
 
@@ -19,15 +21,18 @@
     { value: 'planck', label: 'Planck' },
   ]
 
-  async function onLoadPreset(presetValue: string) {
-    if (window.confirm('Loading a preset will replace your current project. Continue?')) {
-      await loadPreset(presetValue)
-    }
+  function onLoadPreset(presetValue: string) {
     presetsMenuOpen = false
+    showConfirm('Loading a preset will replace your current project. Continue?', async () => {
+      const error = await loadPreset(presetValue)
+      if (error) {
+        showMessage(error)
+      }
+    })
   }
 
   function onClear() {
-    if (window.confirm('This will delete all models, templates, and keys. Continue?')) {
+    showConfirm('This will delete all models, templates, and keys. Continue?', () => {
       stlBuffersByModelId.set({})
       app.set({
         version: 1,
@@ -40,7 +45,7 @@
           selectedKeyId: null,
         },
       })
-    }
+    })
   }
 
   let isGenerating = false
@@ -86,7 +91,7 @@
     } catch (e) {
       console.error(e)
       if (!(e instanceof Error && e.message === 'Generation cancelled')) {
-        window.alert(e instanceof Error ? e.message : 'Generation failed.')
+        showMessage(e instanceof Error ? e.message : 'Generation failed.')
       }
     } finally {
       isGenerating = false
@@ -134,7 +139,17 @@
         >
           <Upload class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span class="hidden sm:inline">Load</span>
-          <input class="hidden" type="file" accept="application/json" on:change={loadStateFromFile} />
+          <input
+            class="hidden"
+            type="file"
+            accept="application/json"
+            on:change={async e => {
+              const error = await loadStateFromFile(e)
+              if (error) {
+                showMessage(error)
+              }
+            }}
+          />
         </label>
 
         <div class="relative" bind:this={presetsMenuRef} use:clickOutside={() => (presetsMenuOpen = false)}>
@@ -231,4 +246,6 @@
       previewHeightMm={currentModel?.heightMm ?? 0}
     />
   {/if}
+
+  <ModalContainer />
 </div>

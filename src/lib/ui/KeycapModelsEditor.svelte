@@ -3,6 +3,7 @@
   import { stlBuffersByModelId } from '../state/sessionAssets'
   import { getStlDimensions } from '../generate/stl'
   import Model3DViewer from './Model3DViewer.svelte'
+  import { showConfirm } from '../state/modalStore'
   import { Trash2, Plus } from 'lucide-svelte'
 
   type ServerModel = {
@@ -44,10 +45,18 @@
   function onDeleteModel() {
     if (!model) return
     if (usedByTemplateCount > 0) {
-      const ok = window.confirm(
-        `Model "${model.name}" is used by ${usedByTemplateCount} template(s) and ${usedByKeyCount} key(s).\n\nDeleting it will remove those templates and keys.\n\nDelete model?`
+      showConfirm(
+        `Model "${model.name}" is used by ${usedByTemplateCount} template(s) and ${usedByKeyCount} key(s).\n\nDeleting it will remove those templates and keys.\n\nDelete model?`,
+        () => {
+          stlBuffersByModelId.update(m => {
+            const next = { ...m }
+            delete next[model.id]
+            return next
+          })
+          actions.deleteKeycapModel(model.id)
+        }
       )
-      if (!ok) return
+      return
     }
 
     stlBuffersByModelId.update(m => {

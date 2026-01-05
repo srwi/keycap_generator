@@ -6,6 +6,7 @@
   import { newId } from '../utils/id'
   import LabelPreview from './LabelPreview.svelte'
   import Model3DViewer from './Model3DViewer.svelte'
+  import { showMessage } from '../state/modalStore'
   import type { Template } from '../state/types'
   import type { Group } from 'three'
   import { RefreshCw } from 'lucide-svelte'
@@ -115,7 +116,7 @@
     } catch (e) {
       console.error(e)
       if (!(e instanceof Error && e.message === 'Preview generation cancelled')) {
-        window.alert(e instanceof Error ? e.message : 'Preview generation failed.')
+        showMessage(e instanceof Error ? e.message : 'Preview generation failed.')
       }
       previewModel = null
 
