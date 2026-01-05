@@ -7,20 +7,38 @@
   import TemplateEditor from './lib/ui/TemplateEditor.svelte'
   import KeyEditor from './lib/ui/KeyEditor.svelte'
   import ProcessingModal from './lib/ui/ProcessingModal.svelte'
+  import { clickOutside } from './lib/ui/actions/clickOutside'
 
   let tab: 'models' | 'templates' | 'keys' = 'models'
-  let selectedPreset: string = ''
+  let presetsMenuOpen = false
+  let presetsMenuRef: HTMLElement
 
   const presets = [
     { value: '60-percent', label: '60% Keyboard' },
     { value: 'planck', label: 'Planck' },
   ]
 
-  async function onLoadPreset() {
-    if (!selectedPreset) return
+  async function onLoadPreset(presetValue: string) {
     if (window.confirm('Loading a preset will replace your current project. Continue?')) {
-      await loadPreset(selectedPreset)
-      selectedPreset = ''
+      await loadPreset(presetValue)
+    }
+    presetsMenuOpen = false
+  }
+
+  function onClear() {
+    if (window.confirm('This will delete all models, templates, and keys. Continue?')) {
+      stlBuffersByModelId.set({})
+      app.set({
+        version: 1,
+        keycapModels: [],
+        templates: [],
+        keys: [],
+        ui: {
+          selectedKeycapModelId: null,
+          selectedTemplateId: null,
+          selectedKeyId: null,
+        },
+      })
     }
   }
 
@@ -99,39 +117,90 @@
         <div class="text-xs text-slate-400">Custom keycap model generator for multi-color 3D printing</div>
       </div>
 
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
         <button
-          class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
+          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs hover:bg-slate-800 sm:px-2.5 sm:text-sm"
           on:click={() => downloadStateFile($app)}
+          title="Save project"
         >
-          Save project
+          <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+            />
+          </svg>
+          <span class="hidden sm:inline">Save</span>
         </button>
 
         <label
-          class="cursor-pointer rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
+          class="flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs hover:bg-slate-800 sm:px-2.5 sm:text-sm"
+          title="Load project"
         >
-          Load project
+          <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            />
+          </svg>
+          <span class="hidden sm:inline">Load</span>
           <input class="hidden" type="file" accept="application/json" on:change={loadStateFromFile} />
         </label>
 
-        <div class="flex gap-2">
-          <select
-            class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-slate-100"
-            bind:value={selectedPreset}
-          >
-            <option value="">Select preset...</option>
-            {#each presets as preset}
-              <option value={preset.value}>{preset.label}</option>
-            {/each}
-          </select>
+        <div class="relative" bind:this={presetsMenuRef} use:clickOutside={() => (presetsMenuOpen = false)}>
           <button
-            class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!selectedPreset}
-            on:click={onLoadPreset}
+            class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs hover:bg-slate-800 sm:px-2.5 sm:text-sm"
+            on:click={() => (presetsMenuOpen = !presetsMenuOpen)}
+            title="Load preset"
           >
-            Load preset
+            <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
+            </svg>
+            <span class="sm:hidden">Presets</span>
+            <span class="hidden sm:inline">Load preset</span>
+            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
+          {#if presetsMenuOpen}
+            <div
+              class="absolute left-0 top-full z-50 mt-1 min-w-[160px] rounded-md border border-slate-700 bg-slate-900 shadow-lg sm:right-0 sm:left-auto"
+            >
+              {#each presets as preset}
+                <button
+                  class="w-full px-3 py-2 text-left text-xs text-slate-100 hover:bg-slate-800 first:rounded-t-md last:rounded-b-md sm:text-sm"
+                  on:click={() => onLoadPreset(preset.value)}
+                >
+                  {preset.label}
+                </button>
+              {/each}
+            </div>
+          {/if}
         </div>
+
+        <button
+          class="flex items-center gap-1.5 rounded-md border border-red-700/60 bg-red-950/30 px-2 py-1.5 text-xs text-red-200 hover:bg-red-950/60 sm:px-2.5 sm:text-sm"
+          on:click={onClear}
+          title="Clear all"
+        >
+          <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+          <span class="hidden sm:inline">Clear</span>
+        </button>
       </div>
     </div>
   </header>
