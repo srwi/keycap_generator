@@ -3,6 +3,7 @@
   import { stlBuffersByModelId } from '../state/sessionAssets'
   import { getStlDimensions } from '../generate/stl'
   import Model3DViewer from './Model3DViewer.svelte'
+  import { Trash2, Plus } from 'lucide-svelte'
 
   type ServerModel = {
     id: string
@@ -116,12 +117,25 @@
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <div class="flex items-center justify-between gap-3">
       <div class="text-sm font-semibold">Models</div>
-      <button
-        class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
-        on:click={actions.createKeycapModel}
-      >
-        New
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!model}
+          on:click={onDeleteModel}
+          title="Delete model"
+        >
+          <Trash2 class="h-4 w-4" />
+          <span>Delete</span>
+        </button>
+        <button
+          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
+          on:click={actions.createKeycapModel}
+          title="New model"
+        >
+          <Plus class="h-4 w-4" />
+          <span>New</span>
+        </button>
+      </div>
     </div>
 
     <div class="mt-3 grid gap-2">
@@ -138,17 +152,6 @@
         </button>
       {/each}
     </div>
-
-    {#if model}
-      <div class="mt-3">
-        <button
-          class="w-full rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-1.5 text-sm text-rose-200 hover:bg-rose-950/60"
-          on:click={onDeleteModel}
-        >
-          Delete model
-        </button>
-      </div>
-    {/if}
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">

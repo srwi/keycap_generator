@@ -2,6 +2,7 @@
   import { app, actions, selectedKey, getSlotName, getSlotSymbol } from '../state/store'
   import LabelPreview from './LabelPreview.svelte'
   import KeycapPreview from './KeycapPreview.svelte'
+  import { Trash2, Plus } from 'lucide-svelte'
 
   $: key = $selectedKey
   $: tpl = key == null ? null : ($app.templates.find(t => t.id === key.templateId) ?? null)
@@ -31,12 +32,25 @@
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <div class="flex items-center justify-between gap-3">
       <div class="text-sm font-semibold">Keys</div>
-      <button
-        class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
-        on:click={actions.createKey}
-      >
-        New
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!key}
+          on:click={onDeleteKey}
+          title="Delete key"
+        >
+          <Trash2 class="h-4 w-4" />
+          <span>Delete</span>
+        </button>
+        <button
+          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
+          on:click={actions.createKey}
+          title="New key"
+        >
+          <Plus class="h-4 w-4" />
+          <span>New</span>
+        </button>
+      </div>
     </div>
 
     <div class="mt-3 grid gap-2">
@@ -68,17 +82,6 @@
         </button>
       {/each}
     </div>
-
-    {#if key}
-      <div class="mt-3">
-        <button
-          class="w-full rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-1.5 text-sm text-rose-200 hover:bg-rose-950/60"
-          on:click={onDeleteKey}
-        >
-          Delete key
-        </button>
-      </div>
-    {/if}
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">

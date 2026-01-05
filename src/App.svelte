@@ -8,6 +8,7 @@
   import KeyEditor from './lib/ui/KeyEditor.svelte'
   import ProcessingModal from './lib/ui/ProcessingModal.svelte'
   import { clickOutside } from './lib/ui/actions/clickOutside'
+  import { Download, Upload, BookOpen, ChevronDown, Trash2 } from 'lucide-svelte'
 
   let tab: 'models' | 'templates' | 'keys' = 'models'
   let presetsMenuOpen = false
@@ -123,14 +124,7 @@
           on:click={() => downloadStateFile($app)}
           title="Save project"
         >
-          <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            />
-          </svg>
+          <Download class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span class="hidden sm:inline">Save</span>
         </button>
 
@@ -138,14 +132,7 @@
           class="flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs hover:bg-slate-800 sm:px-2.5 sm:text-sm"
           title="Load project"
         >
-          <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-            />
-          </svg>
+          <Upload class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span class="hidden sm:inline">Load</span>
           <input class="hidden" type="file" accept="application/json" on:change={loadStateFromFile} />
         </label>
@@ -156,19 +143,10 @@
             on:click={() => (presetsMenuOpen = !presetsMenuOpen)}
             title="Load preset"
           >
-            <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
-            </svg>
+            <BookOpen class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span class="sm:hidden">Presets</span>
             <span class="hidden sm:inline">Load preset</span>
-            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
+            <ChevronDown class="h-3 w-3" />
           </button>
           {#if presetsMenuOpen}
             <div
@@ -191,14 +169,7 @@
           on:click={onClear}
           title="Clear all"
         >
-          <svg class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-            />
-          </svg>
+          <Trash2 class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span class="hidden sm:inline">Clear</span>
         </button>
       </div>

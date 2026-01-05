@@ -8,6 +8,7 @@
   import Model3DViewer from './Model3DViewer.svelte'
   import type { Template } from '../state/types'
   import type { Group } from 'three'
+  import { RefreshCw } from 'lucide-svelte'
 
   export let template: Template | null = null
   export let textsBySymbolId: Record<string, string> = {}
@@ -273,14 +274,7 @@
               class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg font-medium"
               on:click={onRefresh3D}
             >
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
+              <RefreshCw class="h-4 w-4" />
               {previewModel ? 'Refresh 3D Preview' : 'Generate 3D Preview'}
             </button>
           </div>

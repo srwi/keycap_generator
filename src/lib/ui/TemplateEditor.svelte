@@ -4,6 +4,7 @@
   import LabelPreview from './LabelPreview.svelte'
   import KeycapPreview from './KeycapPreview.svelte'
   import { slide } from 'svelte/transition'
+  import { Trash2, Plus, ChevronRight } from 'lucide-svelte'
 
   $: tpl = $selectedTemplate
   $: usedByKeyCount = tpl == null ? 0 : $app.keys.filter(k => k.templateId === tpl.id).length
@@ -70,12 +71,25 @@
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <div class="flex items-center justify-between gap-3">
       <div class="text-sm font-semibold">Templates</div>
-      <button
-        class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
-        on:click={actions.createTemplate}
-      >
-        New
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!tpl}
+          on:click={onDeleteTemplate}
+          title="Delete template"
+        >
+          <Trash2 class="h-4 w-4" />
+          <span>Delete</span>
+        </button>
+        <button
+          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
+          on:click={actions.createTemplate}
+          title="New template"
+        >
+          <Plus class="h-4 w-4" />
+          <span>New</span>
+        </button>
+      </div>
     </div>
 
     <div class="mt-3 grid gap-2">
@@ -107,17 +121,6 @@
         </button>
       {/each}
     </div>
-
-    {#if tpl}
-      <div class="mt-3">
-        <button
-          class="w-full rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-1.5 text-sm text-rose-200 hover:bg-rose-950/60"
-          on:click={onDeleteTemplate}
-        >
-          Delete template
-        </button>
-      </div>
-    {/if}
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
@@ -184,14 +187,9 @@
                     class="flex items-center gap-2 flex-1 min-w-0 hover:bg-slate-900/50 transition-colors rounded px-2 py-1 -mx-2 -my-1"
                     on:click={() => toggleSymbol(sym.id)}
                   >
-                    <svg
+                    <ChevronRight
                       class="h-4 w-4 text-slate-400 transition-transform {isCollapsed ? '' : 'rotate-90'}"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
+                    />
                     <span class="text-sm font-medium text-slate-200 truncate capitalize"
                       >{getSlotName(tpl.symbols.indexOf(sym))} ({getSlotSymbol(tpl.symbols.indexOf(sym))})</span
                     >
