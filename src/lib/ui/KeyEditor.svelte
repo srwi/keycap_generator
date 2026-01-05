@@ -10,6 +10,9 @@
   $: model = tpl == null ? null : ($app.keycapModels.find(m => m.id === tpl.keycapModelId) ?? null)
   $: modelWidthMm = model?.widthMm ?? 0
   $: modelHeightMm = model?.heightMm ?? 0
+  $: hasTemplates = $app.templates.length > 0
+
+  let showTooltip = false
 
   function onDeleteKey() {
     if (!key) return
@@ -34,7 +37,9 @@
     <div class="flex items-center justify-between gap-3 min-h-[2rem]">
       <div class="flex items-center gap-2">
         <div class="text-sm font-semibold">Keys</div>
-        <HelpTooltip text="A key is a specific instance of a keycap that uses a template and contains actual text values. Each key represents one physical keycap you'll generate. Keys share the layout and styling from their template but have unique text for each symbol position (e.g., 'Q', 'Shift', 'Enter')." />
+        <HelpTooltip
+          text="A key is a specific instance of a keycap that uses a template and contains actual text values. Each key represents one physical keycap you'll generate. Keys share the layout and styling from their template but have unique text for each symbol position (e.g., 'Q', 'Shift', 'Enter')."
+        />
       </div>
       <div class="flex items-center gap-2">
         <button
@@ -46,14 +51,34 @@
           <Trash2 class="h-4 w-4" />
           <span>Delete</span>
         </button>
-        <button
-          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
-          on:click={actions.createKey}
-          title="New key"
-        >
-          <Plus class="h-4 w-4" />
-          <span>New</span>
-        </button>
+        <div class="relative inline-flex items-center">
+          <button
+            class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!hasTemplates}
+            on:click={actions.createKey}
+            on:mouseenter={() => !hasTemplates && (showTooltip = true)}
+            on:mouseleave={() => (showTooltip = false)}
+            title={hasTemplates ? 'New key' : ''}
+          >
+            <Plus class="h-4 w-4" />
+            <span>New</span>
+          </button>
+          {#if !hasTemplates && showTooltip}
+            <div
+              class="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 z-50 w-64 p-3 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-200 shadow-lg"
+              role="tooltip"
+            >
+              <div class="whitespace-normal">
+                Create at least one template before creating a key. Keys require a template to define their layout and
+                styling.
+              </div>
+              <!-- Arrow -->
+              <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+                <div class="w-2 h-2 border-l border-b border-slate-700 bg-slate-900 rotate-[-45deg]"></div>
+              </div>
+            </div>
+          {/if}
+        </div>
       </div>
     </div>
 

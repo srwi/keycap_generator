@@ -10,6 +10,9 @@
 
   $: tpl = $selectedTemplate
   $: usedByKeyCount = tpl == null ? 0 : $app.keys.filter(k => k.templateId === tpl.id).length
+  $: hasModels = $app.keycapModels.length > 0
+
+  let showTooltip = false
 
   function onDeleteTemplate() {
     if (!tpl) return
@@ -91,14 +94,34 @@
           <Trash2 class="h-4 w-4" />
           <span>Delete</span>
         </button>
-        <button
-          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800"
-          on:click={actions.createTemplate}
-          title="New template"
-        >
-          <Plus class="h-4 w-4" />
-          <span>New</span>
-        </button>
+        <div class="relative inline-flex items-center">
+          <button
+            class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!hasModels}
+            on:click={actions.createTemplate}
+            on:mouseenter={() => !hasModels && (showTooltip = true)}
+            on:mouseleave={() => (showTooltip = false)}
+            title={hasModels ? 'New template' : ''}
+          >
+            <Plus class="h-4 w-4" />
+            <span>New</span>
+          </button>
+          {#if !hasModels && showTooltip}
+            <div
+              class="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 z-50 w-64 p-3 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-200 shadow-lg"
+              role="tooltip"
+            >
+              <div class="whitespace-normal">
+                Create at least one model before creating a template. Templates require a keycap model to define their
+                size and shape.
+              </div>
+              <!-- Arrow -->
+              <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+                <div class="w-2 h-2 border-l border-b border-slate-700 bg-slate-900 rotate-[-45deg]"></div>
+              </div>
+            </div>
+          {/if}
+        </div>
       </div>
     </div>
 
@@ -139,7 +162,9 @@
     </div>
 
     {#if !tpl}
-      <div class="mt-3 flex items-center justify-center h-64 text-sm text-slate-400">Create/select a template to edit.</div>
+      <div class="mt-3 flex items-center justify-center h-64 text-sm text-slate-400">
+        Create/select a template to edit.
+      </div>
     {:else}
       <div class="mt-3 grid gap-3">
         <label class="grid gap-1 text-xs text-slate-400">
