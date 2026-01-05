@@ -54,6 +54,7 @@ function defaultKeycapModel(): KeycapModel {
     rotationX: 0,
     rotationY: 0,
     rotationZ: 0,
+    extrusionDepthMm: 0.4,
   }
 }
 
@@ -63,7 +64,6 @@ function defaultTemplate(keycapModelId: string): Template {
     name: 'Regular key',
     keycapModelId,
     symbols: [defaultSymbol()],
-    extrusionDepthMm: 0.4,
   }
 }
 
@@ -173,7 +173,9 @@ export const actions = {
 
   updateKeycapModel(
     modelId: string,
-    patch: Partial<Pick<KeycapModel, 'widthMm' | 'heightMm' | 'rotationX' | 'rotationY' | 'rotationZ'>>
+    patch: Partial<
+      Pick<KeycapModel, 'widthMm' | 'heightMm' | 'rotationX' | 'rotationY' | 'rotationZ' | 'extrusionDepthMm'>
+    >
   ) {
     app.update(s => ({
       ...s,
@@ -325,13 +327,6 @@ export const actions = {
       keys: s.keys.map(k =>
         k.id === keyId ? { ...k, textsBySymbolId: { ...k.textsBySymbolId, [symbolId]: text } } : k
       ),
-    }))
-  },
-
-  setTemplateExtrusionDepthMm(templateId: string, extrusionDepthMm: number) {
-    app.update(s => ({
-      ...s,
-      templates: s.templates.map(t => (t.id === templateId ? { ...t, extrusionDepthMm } : t)),
     }))
   },
 }

@@ -190,6 +190,24 @@
           />
         </label>
 
+        <label class="grid gap-1 text-xs text-slate-400">
+          <div class="flex items-center gap-2">
+            <span>Symbol extrusion depth (mm)</span>
+            <HelpTooltip
+              text="The depth at which text symbols are extruded into the keycap surface. This determines how deep the engraved or embossed text appears on the keycap. A larger value creates deeper text, while a smaller value creates shallower text. This affects the visual appearance and tactile feel of the keycap labels."
+            />
+          </div>
+          <input
+            class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+            type="number"
+            min="0.1"
+            step="0.1"
+            value={model.extrusionDepthMm}
+            on:input={e =>
+              actions.updateKeycapModel(model.id, { extrusionDepthMm: Number((e.currentTarget as HTMLInputElement).value) })}
+          />
+        </label>
+
         <div class="mt-2 grid gap-3">
           <div class="text-xs font-semibold text-slate-300">STL source</div>
 

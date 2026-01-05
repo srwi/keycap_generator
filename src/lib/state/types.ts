@@ -30,6 +30,7 @@ export type KeycapModel = {
   rotationX: number
   rotationY: number
   rotationZ: number
+  extrusionDepthMm: number
 }
 
 export type Template = {
@@ -37,7 +38,6 @@ export type Template = {
   name: string
   keycapModelId: string
   symbols: SymbolDef[]
-  extrusionDepthMm: number
 }
 
 export type KeyDef = {

@@ -189,19 +189,6 @@
           </select>
         </label>
 
-        <label class="grid gap-1 text-xs text-slate-400">
-          Symbol extrusion depth (mm)
-          <input
-            class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-            type="number"
-            min="0.1"
-            step="0.1"
-            value={tpl.extrusionDepthMm}
-            on:input={e =>
-              actions.setTemplateExtrusionDepthMm(tpl.id, Number((e.currentTarget as HTMLInputElement).value))}
-          />
-        </label>
-
         <div class="mt-2">
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">

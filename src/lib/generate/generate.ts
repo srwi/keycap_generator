@@ -74,6 +74,9 @@ export async function generateKeycapModel(
 ): Promise<Group> {
   if (yieldAndCheck) await yieldAndCheck()
 
+  const model = getModel(state, template)
+  if (!model) throw new Error(`Template "${template.name}" references a missing keycap model.`)
+
   const baseMinZ = baseGeom.boundingBox!.min.z
   const textMeshes: { mesh: Mesh; color: number; name?: string }[] = []
   const extrusionMeshes: Mesh[] = []
@@ -89,7 +92,7 @@ export async function generateKeycapModel(
     const textGeom = new TextGeometry(text, {
       font,
       size: sym.fontSizeMm,
-      depth: template.extrusionDepthMm,
+      depth: model.extrusionDepthMm,
       curveSegments: 6,
       bevelEnabled: false,
     } as any)
