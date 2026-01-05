@@ -187,7 +187,7 @@
 </script>
 
 <div class="flex flex-col gap-3">
-  <div class="flex items-center justify-between">
+  <div class="flex items-center justify-between min-h-[2rem]">
     <div class="text-sm font-semibold">Preview</div>
     <button
       class="relative inline-flex items-center rounded-md border border-slate-700 bg-slate-900 p-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -225,7 +225,7 @@
 
   <div class="relative">
     {#if !template}
-      <div class="flex items-center justify-center h-64 text-sm text-slate-400">Select a template to preview.</div>
+      <div class="flex items-center justify-center h-64 text-sm text-slate-400">Select a key to preview</div>
     {:else if viewMode === '2d'}
       <div class="flex items-center justify-center">
         <LabelPreview {template} {textsBySymbolId} {widthMm} {heightMm} className="max-w-[340px]" />

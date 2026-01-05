@@ -74,7 +74,7 @@
 
 <div class="grid gap-4 lg:grid-cols-12">
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center justify-between gap-3 min-h-[2rem]">
       <div class="flex items-center gap-2">
         <div class="text-sm font-semibold">Templates</div>
         <HelpTooltip
@@ -134,11 +134,13 @@
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    {#if !tpl}
-      <div class="text-sm text-slate-400">Create/select a template to edit.</div>
-    {:else}
+    <div class="flex items-center min-h-[2rem]">
       <div class="text-sm font-semibold">Template configuration</div>
+    </div>
 
+    {#if !tpl}
+      <div class="mt-3 flex items-center justify-center h-64 text-sm text-slate-400">Create/select a template to edit.</div>
+    {:else}
       <div class="mt-3 grid gap-3">
         <label class="grid gap-1 text-xs text-slate-400">
           Name
@@ -328,16 +330,12 @@
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    {#if tpl}
-      <KeycapPreview
-        template={tpl}
-        textsBySymbolId={previewTextsBySymbolId}
-        widthMm={modelWidthMm}
-        heightMm={modelHeightMm}
-        keyId={null}
-      />
-    {:else}
-      <div class="text-sm text-slate-400">Select a template to preview.</div>
-    {/if}
+    <KeycapPreview
+      template={tpl}
+      textsBySymbolId={previewTextsBySymbolId}
+      widthMm={modelWidthMm}
+      heightMm={modelHeightMm}
+      keyId={null}
+    />
   </section>
 </div>

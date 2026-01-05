@@ -68,24 +68,15 @@ function defaultTemplate(keycapModelId: string): Template {
 }
 
 function defaultState(): AppState {
-  const model = defaultKeycapModel()
-  const tpl = defaultTemplate(model.id)
-  const key: KeyDef = {
-    id: newId('key'),
-    name: 'Key 1',
-    templateId: tpl.id,
-    textsBySymbolId: { [tpl.symbols[0].id]: '' },
-  }
-
   return {
     version: 1,
-    keycapModels: [model],
-    templates: [tpl],
-    keys: [key],
+    keycapModels: [],
+    templates: [],
+    keys: [],
     ui: {
-      selectedKeycapModelId: model.id,
-      selectedTemplateId: tpl.id,
-      selectedKeyId: key.id,
+      selectedKeycapModelId: null,
+      selectedTemplateId: null,
+      selectedKeyId: null,
     },
   }
 }

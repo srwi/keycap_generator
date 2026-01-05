@@ -31,7 +31,7 @@
 
 <div class="grid gap-4 lg:grid-cols-12">
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center justify-between gap-3 min-h-[2rem]">
       <div class="flex items-center gap-2">
         <div class="text-sm font-semibold">Keys</div>
         <HelpTooltip text="A key is a specific instance of a keycap that uses a template and contains actual text values. Each key represents one physical keycap you'll generate. Keys share the layout and styling from their template but have unique text for each symbol position (e.g., 'Q', 'Shift', 'Enter')." />
@@ -89,11 +89,13 @@
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    {#if !key}
-      <div class="text-sm text-slate-400">Create/select a key to edit.</div>
-    {:else}
+    <div class="flex items-center min-h-[2rem]">
       <div class="text-sm font-semibold">Key configuration</div>
+    </div>
 
+    {#if !key}
+      <div class="mt-3 flex items-center justify-center h-64 text-sm text-slate-400">Create/select a key to edit.</div>
+    {:else}
       <div class="mt-3 grid gap-3">
         <label class="grid gap-1 text-xs text-slate-400">
           Name
@@ -144,16 +146,12 @@
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    {#if key}
-      <KeycapPreview
-        template={tpl}
-        textsBySymbolId={key.textsBySymbolId}
-        widthMm={modelWidthMm}
-        heightMm={modelHeightMm}
-        keyId={key.id}
-      />
-    {:else}
-      <div class="text-sm text-slate-400">Select a key to preview.</div>
-    {/if}
+    <KeycapPreview
+      template={tpl}
+      textsBySymbolId={key?.textsBySymbolId ?? {}}
+      widthMm={modelWidthMm}
+      heightMm={modelHeightMm}
+      keyId={key?.id ?? null}
+    />
   </section>
 </div>

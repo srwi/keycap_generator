@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount, onDestroy } from 'svelte'
   import { app } from './lib/state/store'
   import { downloadStateFile, loadStateFromFile, loadPreset } from './lib/state/persistence'
   import { generateAll3mfsWithWorker } from './lib/generate/generate'
@@ -113,6 +114,23 @@
       isGenerating = false
     }
   }
+
+  $: hasUnsavedChanges = $app.keycapModels.length > 0 || $app.templates.length > 0 || $app.keys.length > 0
+
+  function handleBeforeUnload(event: BeforeUnloadEvent) {
+    if (hasUnsavedChanges) {
+      event.preventDefault()
+      return ''
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('beforeunload', handleBeforeUnload)
+  })
+
+  onDestroy(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+  })
 </script>
 
 <div class="min-h-dvh">
