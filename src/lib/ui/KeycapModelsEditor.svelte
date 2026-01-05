@@ -6,6 +6,7 @@
   import { showConfirm } from '../state/modalStore'
   import { Trash2, Plus } from 'lucide-svelte'
   import { getPublicPath } from '../utils/paths'
+  import HelpTooltip from './HelpTooltip.svelte'
 
   type ServerModel = {
     id: string
@@ -126,7 +127,10 @@
 <div class="grid gap-4 lg:grid-cols-12">
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <div class="flex items-center justify-between gap-3">
-      <div class="text-sm font-semibold">Models</div>
+      <div class="flex items-center gap-2">
+        <div class="text-sm font-semibold">Models</div>
+        <HelpTooltip text="A model defines the 3D shape and size of a keycap (e.g., 1u, 1.25u, 2u, 6.25u space bar). Different models represent different key sizes. Each model specifies the physical dimensions that affect how labels are positioned and scaled on the keycap surface." />
+      </div>
       <div class="flex items-center gap-2">
         <button
           class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -270,7 +274,10 @@
 
         {#if model.source.kind === 'upload' && model.source.stl}
           <div class="mt-2 grid gap-3">
-            <div class="text-xs font-semibold text-slate-300">Model Orientation</div>
+            <div class="flex items-center gap-2">
+              <div class="text-xs font-semibold text-slate-300">Model Orientation</div>
+              <HelpTooltip text="The model must be oriented with its face pointing forward (towards the camera) so that labels are correctly positioned and extruded into the keycap surface. If the model is rotated incorrectly, the text will appear on the wrong side or be extruded in the wrong direction when generating the final keycap." />
+            </div>
             <div class="grid gap-2 rounded-lg border border-slate-800 bg-slate-900/50 p-3">
               <div class="text-xs text-slate-400 mb-1">Rotate the model until the face points towards the camera.</div>
               <div class="grid grid-cols-3 gap-2">
@@ -355,7 +362,10 @@
   </section>
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    <div class="text-sm font-semibold">3D Preview</div>
+    <div class="flex items-center gap-2">
+      <div class="text-sm font-semibold">3D Preview</div>
+      <HelpTooltip text="Preview the 3D model shape and orientation. This helps verify that uploaded models are correctly oriented before generating keycaps." />
+    </div>
     <div class="mt-3 h-96 rounded-lg border border-slate-800 overflow-hidden">
       {#if !model}
         <div class="flex h-full items-center justify-center text-sm text-slate-400">

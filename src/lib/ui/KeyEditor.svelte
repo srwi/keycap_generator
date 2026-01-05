@@ -3,6 +3,7 @@
   import LabelPreview from './LabelPreview.svelte'
   import KeycapPreview from './KeycapPreview.svelte'
   import { Trash2, Plus } from 'lucide-svelte'
+  import HelpTooltip from './HelpTooltip.svelte'
 
   $: key = $selectedKey
   $: tpl = key == null ? null : ($app.templates.find(t => t.id === key.templateId) ?? null)
@@ -31,7 +32,10 @@
 <div class="grid gap-4 lg:grid-cols-12">
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <div class="flex items-center justify-between gap-3">
-      <div class="text-sm font-semibold">Keys</div>
+      <div class="flex items-center gap-2">
+        <div class="text-sm font-semibold">Keys</div>
+        <HelpTooltip text="A key is a specific instance of a keycap that uses a template and contains actual text values. Each key represents one physical keycap you'll generate. Keys share the layout and styling from their template but have unique text for each symbol position (e.g., 'Q', 'Shift', 'Enter')." />
+      </div>
       <div class="flex items-center gap-2">
         <button
           class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"

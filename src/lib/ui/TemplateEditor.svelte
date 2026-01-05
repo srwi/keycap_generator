@@ -6,6 +6,7 @@
   import { showConfirm } from '../state/modalStore'
   import { slide } from 'svelte/transition'
   import { Trash2, Plus, ChevronRight } from 'lucide-svelte'
+  import HelpTooltip from './HelpTooltip.svelte'
 
   $: tpl = $selectedTemplate
   $: usedByKeyCount = tpl == null ? 0 : $app.keys.filter(k => k.templateId === tpl.id).length
@@ -74,7 +75,12 @@
 <div class="grid gap-4 lg:grid-cols-12">
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <div class="flex items-center justify-between gap-3">
-      <div class="text-sm font-semibold">Templates</div>
+      <div class="flex items-center gap-2">
+        <div class="text-sm font-semibold">Templates</div>
+        <HelpTooltip
+          text="A template defines the layout and styling of symbols (labels) on a keycap. It specifies where text appears, what font, size, color, and rotation to use. Multiple keys can share the same template but display different text values. Templates are linked to a specific keycap model size."
+        />
+      </div>
       <div class="flex items-center gap-2">
         <button
           class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -171,7 +177,12 @@
 
         <div class="mt-2">
           <div class="flex items-center justify-between gap-3">
-            <div class="text-xs font-semibold text-slate-300">Symbols</div>
+            <div class="flex items-center gap-2">
+              <div class="text-xs font-semibold text-slate-300">Symbols</div>
+              <HelpTooltip
+                text="Symbols represent different label positions on a keycap (e.g., primary, secondary, tertiary). You can add multiple symbols to create keys with multiple labels, each with its own position, font, size, rotation, and color. This allows you to create keys with legends, modifiers, or multi-character labels."
+              />
+            </div>
             <button
               class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={tpl.symbols.length >= MAX_SLOTS}
