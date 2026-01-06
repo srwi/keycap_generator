@@ -93,8 +93,8 @@
       "name": "Other",
       "keycaps": [
         {
-          "path": "Other/Flat DSA - 1u.stl",
-          "displayName": "Flat DSA - 1u",
+          "path": "Other/Flat DSA - 1.00u.stl",
+          "displayName": "Flat DSA - 1.00u",
           "author": "LoremToastum",
           "authorLink": "https://www.printables.com/@LoremToastum",
           "license": "CC BY 4.0"

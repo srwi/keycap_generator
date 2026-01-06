@@ -40,16 +40,18 @@ function defaultSymbol(): SymbolDef {
 }
 
 function defaultKeycapModel(): KeycapModel {
+  const defaultRegistryPath = 'JoeScotto_Flat/1.00u.stl'
+  const defaultServerId = defaultRegistryPath.replace(/[^a-zA-Z0-9]/g, '_')
   return {
     id: newId('model'),
-    name: '1u',
+    name: '1.00u',
     widthMm: 0, // 0 indicates dimensions not yet loaded
     heightMm: 0,
     source: {
       kind: 'server',
-      serverId: '1u',
-      url: getPublicPath('stls/1u.stl'),
-      stl: { fileName: '1u.stl', pathHint: 'server:1u' },
+      serverId: defaultServerId,
+      url: getPublicPath(`stls/${defaultRegistryPath}`),
+      stl: { fileName: '1.00u.stl', pathHint: `server:${defaultServerId}` },
     },
     rotationX: 0,
     rotationY: 0,

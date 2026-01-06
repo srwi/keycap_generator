@@ -2,12 +2,12 @@
   import { app, actions } from '../state/store'
   import { stlBuffersByModelId } from '../state/sessionAssets'
   import { getStlDimensions } from '../generate/stl'
-  import Model3DViewer from './Model3DViewer.svelte'
   import { showConfirm } from '../state/modalStore'
   import { Trash2, Plus } from 'lucide-svelte'
   import { getPublicPath } from '../utils/paths'
-  import HelpTooltip from './HelpTooltip.svelte'
   import { onMount } from 'svelte'
+  import HelpTooltip from './HelpTooltip.svelte'
+  import Model3DViewer from './Model3DViewer.svelte'
 
   type KeycapEntry = {
     path: string
@@ -523,13 +523,15 @@
         <div class="flex items-center justify-center h-64 text-sm text-slate-400">Select a model to preview</div>
       {:else if modelStlUrl || modelStlBuffer}
         <div class="h-96 rounded-lg border border-slate-800 overflow-hidden">
-          <Model3DViewer
-            stlUrl={modelStlUrl}
-            stlBuffer={modelStlBuffer}
-            rotationX={model.rotationX}
-            rotationY={model.rotationY}
-            rotationZ={model.rotationZ}
-          />
+          {#key model.id}
+            <Model3DViewer
+              stlUrl={modelStlUrl}
+              stlBuffer={modelStlBuffer}
+              rotationX={model.rotationX}
+              rotationY={model.rotationY}
+              rotationZ={model.rotationZ}
+            />
+          {/key}
         </div>
       {:else}
         <div class="flex items-center justify-center h-64 text-sm text-slate-400">
