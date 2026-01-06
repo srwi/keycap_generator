@@ -8,13 +8,17 @@
       "heightMm": 19.05,
       "source": {
         "kind": "server",
-        "serverId": "1u",
-        "url": "/stls/1u.stl",
+        "serverId": "JoeScotto_Flat_1.00u",
+        "url": "/stls/JoeScotto_Flat/1.00u.stl",
         "stl": {
-          "fileName": "1u.stl",
-          "pathHint": "server:1u"
+          "fileName": "1.00u.stl",
+          "pathHint": "server:JoeScotto_Flat_1.00u"
         }
-      }
+      },
+      "rotationX": 0,
+      "rotationY": 0,
+      "rotationZ": 0,
+      "extrusionDepthMm": 0.6
     },
     {
       "id": "model_125u",
@@ -23,13 +27,17 @@
       "heightMm": 19.05,
       "source": {
         "kind": "server",
-        "serverId": "125u",
-        "url": "/stls/1_25u.stl",
+        "serverId": "JoeScotto_Flat_1.25u",
+        "url": "/stls/JoeScotto_Flat/1.25u.stl",
         "stl": {
           "fileName": "1.25u.stl",
-          "pathHint": "server:125u"
+          "pathHint": "server:JoeScotto_Flat_1.25u"
         }
-      }
+      },
+      "rotationX": 0,
+      "rotationY": 0,
+      "rotationZ": 0,
+      "extrusionDepthMm": 0.6
     },
     {
       "id": "model_2u",
@@ -38,13 +46,17 @@
       "heightMm": 19.05,
       "source": {
         "kind": "server",
-        "serverId": "2u",
-        "url": "/stls/2u.stl",
+        "serverId": "JoeScotto_Flat_2.00u",
+        "url": "/stls/JoeScotto_Flat/2.00u.stl",
         "stl": {
-          "fileName": "2u.stl",
-          "pathHint": "server:2u"
+          "fileName": "2.00u.stl",
+          "pathHint": "server:JoeScotto_Flat_2.00u"
         }
-      }
+      },
+      "rotationX": 0,
+      "rotationY": 0,
+      "rotationZ": 0,
+      "extrusionDepthMm": 0.6
     },
     {
       "id": "model_625u",
@@ -53,13 +65,17 @@
       "heightMm": 19.05,
       "source": {
         "kind": "server",
-        "serverId": "625u",
-        "url": "/stls/6_25u_space.stl",
+        "serverId": "JoeScotto_Flat_6.25u",
+        "url": "/stls/JoeScotto_Flat/6.25u.stl",
         "stl": {
-          "fileName": "6.25u Space.stl",
-          "pathHint": "server:625u"
+          "fileName": "6.25u.stl",
+          "pathHint": "server:JoeScotto_Flat_6.25u"
         }
-      }
+      },
+      "rotationX": 0,
+      "rotationY": 0,
+      "rotationZ": 0,
+      "extrusionDepthMm": 0.6
     }
   ],
   "templates": [
@@ -73,8 +89,7 @@
           "slotName": "Primary",
           "x": 0,
           "y": -3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 4,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -84,8 +99,7 @@
           "slotName": "Secondary",
           "x": 0,
           "y": 3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 3.5,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -95,8 +109,7 @@
           "slotName": "Tertiary",
           "x": -4.7625,
           "y": -3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 3,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -113,8 +126,7 @@
           "slotName": "Primary",
           "x": 0,
           "y": -3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 4,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -124,8 +136,7 @@
           "slotName": "Secondary",
           "x": 0,
           "y": 3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 3.5,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -135,8 +146,7 @@
           "slotName": "Tertiary",
           "x": -4.28625,
           "y": -3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 3,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -153,8 +163,7 @@
           "slotName": "Primary",
           "x": 0,
           "y": -3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 4,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -164,8 +173,7 @@
           "slotName": "Secondary",
           "x": 0,
           "y": 3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 3.5,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -175,8 +183,7 @@
           "slotName": "Tertiary",
           "x": -9.525,
           "y": -3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 3,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -193,8 +200,7 @@
           "slotName": "Primary",
           "x": 0,
           "y": 0,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 4,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -211,8 +217,7 @@
           "slotName": "Main",
           "x": 0,
           "y": 0,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 4,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -229,8 +234,7 @@
           "slotName": "Main",
           "x": 0,
           "y": 0,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 4,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -247,8 +251,7 @@
           "slotName": "Main",
           "x": 0,
           "y": 0,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
+          "fontName": "DejaVuSans",
           "fontSizeMm": 4,
           "color": "#ffffff",
           "rotationDeg": 0
@@ -829,13 +832,5 @@
         "sym_125u_single": "Ctrl"
       }
     }
-  ],
-  "settings": {
-    "extrusionDepthMm": 0.8
-  },
-  "ui": {
-    "selectedKeycapModelId": "model_1u",
-    "selectedTemplateId": "tpl_1u",
-    "selectedKeyId": "key_esc"
-  }
+  ]
 }

@@ -1,0 +1,694 @@
+{
+  "categories": [
+    {
+      "name": "Flat",
+      "keycaps": [
+        {
+          "path": "JoeScotto_Flat/1.00u.stl",
+          "displayName": "1.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/1.25u.stl",
+          "displayName": "1.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/1.50u.stl",
+          "displayName": "1.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/1.75u.stl",
+          "displayName": "1.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/10.00u.stl",
+          "displayName": "10.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/2.00u.stl",
+          "displayName": "2.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/2.25u.stl",
+          "displayName": "2.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/2.50u.stl",
+          "displayName": "2.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/2.75u.stl",
+          "displayName": "2.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/3.00u.stl",
+          "displayName": "3.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/6.25u.stl",
+          "displayName": "6.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Flat/7.00u.stl",
+          "displayName": "7.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        }
+      ]
+    },
+    {
+      "name": "Other",
+      "keycaps": [
+        {
+          "path": "Other/Flat DSA - 1u.stl",
+          "displayName": "Flat DSA - 1u",
+          "author": "LoremToastum",
+          "authorLink": "https://www.printables.com/@LoremToastum",
+          "license": "CC BY 4.0"
+        }
+      ]
+    },
+    {
+      "name": "Scooped (MX)",
+      "keycaps": [
+        {
+          "path": "JoeScotto_Scooped_MX/1.00u (Concave).stl",
+          "displayName": "1.00u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/1.25u (Concave).stl",
+          "displayName": "1.25u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/1.50u (Concave).stl",
+          "displayName": "1.50u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/1.75u (Concave).stl",
+          "displayName": "1.75u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/10.00u (Concave).stl",
+          "displayName": "10.00u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/2.00u (Concave).stl",
+          "displayName": "2.00u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/2.25u (Concave).stl",
+          "displayName": "2.25u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/2.50u (Concave).stl",
+          "displayName": "2.50u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/2.75u (Concave).stl",
+          "displayName": "2.75u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/3.00u (Concave).stl",
+          "displayName": "3.00u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/6.25u (Concave).stl",
+          "displayName": "6.25u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Scooped_MX/7.00u (Concave).stl",
+          "displayName": "7.00u (Concave)",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        }
+      ]
+    },
+    {
+      "name": "Sculpted",
+      "keycaps": [
+        {
+          "path": "JoeScotto_Sculpted/R1 - 1.00u.stl",
+          "displayName": "R1 - 1.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 1.25u.stl",
+          "displayName": "R1 - 1.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 1.50u.stl",
+          "displayName": "R1 - 1.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 1.75u.stl",
+          "displayName": "R1 - 1.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 10.00u.stl",
+          "displayName": "R1 - 10.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 2.00u.stl",
+          "displayName": "R1 - 2.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 2.25u.stl",
+          "displayName": "R1 - 2.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 2.50u.stl",
+          "displayName": "R1 - 2.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 2.75u.stl",
+          "displayName": "R1 - 2.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 3.00u.stl",
+          "displayName": "R1 - 3.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 6.25u.stl",
+          "displayName": "R1 - 6.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R1 - 7.00u.stl",
+          "displayName": "R1 - 7.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 1.00u.stl",
+          "displayName": "R2 - 1.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 1.25u.stl",
+          "displayName": "R2 - 1.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 1.50u.stl",
+          "displayName": "R2 - 1.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 1.75u.stl",
+          "displayName": "R2 - 1.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2- 10.00u.stl",
+          "displayName": "R2 - 10.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 2.00u.stl",
+          "displayName": "R2 - 2.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 2.25u.stl",
+          "displayName": "R2 - 2.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 2.50u.stl",
+          "displayName": "R2 - 2.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 2.75u.stl",
+          "displayName": "R2 - 2.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 3.00u.stl",
+          "displayName": "R2 - 3.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R2 - 6.25u.stl",
+          "displayName": "R2 - 6.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 1.00u.stl",
+          "displayName": "R3 - 1.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 1.25u.stl",
+          "displayName": "R3 - 1.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 1.50u.stl",
+          "displayName": "R3 - 1.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 1.75u.stl",
+          "displayName": "R3 - 1.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 10.00u.stl",
+          "displayName": "R3 - 10.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 2.00u.stl",
+          "displayName": "R3 - 2.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 2.25u.stl",
+          "displayName": "R3 - 2.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 2.50u.stl",
+          "displayName": "R3 - 2.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 2.75u.stl",
+          "displayName": "R3 - 2.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 3.00u.stl",
+          "displayName": "R3 - 3.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 6.25u.stl",
+          "displayName": "R3 - 6.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R3 - 7.00u.stl",
+          "displayName": "R3 - 7.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 1.00u.stl",
+          "displayName": "R4 - 1.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 1.25u.stl",
+          "displayName": "R4 - 1.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 1.50u.stl",
+          "displayName": "R4 - 1.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 1.75u.stl",
+          "displayName": "R4 - 1.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4- 10.00u.stl",
+          "displayName": "R4 - 10.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 2.00u.stl",
+          "displayName": "R4 - 2.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 2.25u.stl",
+          "displayName": "R4 - 2.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 2.50u.stl",
+          "displayName": "R4 - 2.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 2.75u.stl",
+          "displayName": "R4 - 2.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 3.00u.stl",
+          "displayName": "R4 - 3.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R4 - 6.25u.stl",
+          "displayName": "R4 - 6.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 1.00u.stl",
+          "displayName": "R5 - 1.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 1.25u.stl",
+          "displayName": "R5 - 1.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 1.50u.stl",
+          "displayName": "R5 - 1.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 1.75u.stl",
+          "displayName": "R5 - 1.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 10.00u.stl",
+          "displayName": "R5 - 10.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 2.00u.stl",
+          "displayName": "R5 - 2.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 2.25u.stl",
+          "displayName": "R5 - 2.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 2.50u.stl",
+          "displayName": "R5 - 2.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 2.75u.stl",
+          "displayName": "R5 - 2.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 3.00u.stl",
+          "displayName": "R5 - 3.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 6.25u.stl",
+          "displayName": "R5 - 6.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted/R5 - 7.00u.stl",
+          "displayName": "R5 - 7.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        }
+      ]
+    },
+    {
+      "name": "Sculpted (Flat)",
+      "keycaps": [
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 1.00u.stl",
+          "displayName": "R3 - 1.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 1.25u.stl",
+          "displayName": "R3 - 1.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 1.50u.stl",
+          "displayName": "R3 - 1.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 1.75u.stl",
+          "displayName": "R3 - 1.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 10.00u.stl",
+          "displayName": "R3 - 10.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 2.00u.stl",
+          "displayName": "R3 - 2.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 2.25u.stl",
+          "displayName": "R3 - 2.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 2.50u.stl",
+          "displayName": "R3 - 2.50u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 2.75u.stl",
+          "displayName": "R3 - 2.75u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 3.00u.stl",
+          "displayName": "R3 - 3.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 6.25u.stl",
+          "displayName": "R3 - 6.25u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        },
+        {
+          "path": "JoeScotto_Sculpted_Flat/R3 - 7.00u.stl",
+          "displayName": "R3 - 7.00u",
+          "author": "Joe Scotto",
+          "authorLink": "https://github.com/joe-scotto/scottokeebs",
+          "license": "CC BY-NC-SA 4.0"
+        }
+      ]
+    }
+  ]
+}

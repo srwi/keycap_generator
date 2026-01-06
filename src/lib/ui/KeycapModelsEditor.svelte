@@ -7,22 +7,76 @@
   import { Trash2, Plus } from 'lucide-svelte'
   import { getPublicPath } from '../utils/paths'
   import HelpTooltip from './HelpTooltip.svelte'
+  import { onMount } from 'svelte'
 
-  type ServerModel = {
-    id: string
-    name: string
-    url: string
+  type KeycapEntry = {
+    path: string
+    displayName: string
+    author: string
+    authorLink: string
+    license: string
   }
 
-  const serverModels: ServerModel[] = [
-    { id: '1u', name: '1u', url: getPublicPath('stls/1u.stl') },
-    { id: '125u', name: '1.25u', url: getPublicPath('stls/1_25u.stl') },
-    { id: '2u', name: '2u', url: getPublicPath('stls/2u.stl') },
-    { id: '625u', name: '6.25u Space', url: getPublicPath('stls/6_25u_space.stl') },
-  ]
+  type Category = {
+    name: string
+    keycaps: KeycapEntry[]
+  }
+
+  type Registry = {
+    categories: Category[]
+  }
+
+  let registry: Registry | null = null
+
+  function extractPathFromUrl(url: string): string | null {
+    const baseUrl = getPublicPath('stls/')
+    if (url.startsWith(baseUrl)) {
+      return url.slice(baseUrl.length)
+    }
+    const stlsIndex = url.indexOf('stls/')
+    if (stlsIndex !== -1) {
+      return url.slice(stlsIndex + 5)
+    }
+    return null
+  }
+
+  function findKeycapByPath(path: string): { category: string; keycap: KeycapEntry } | null {
+    if (!registry) return null
+    for (const category of registry.categories) {
+      const keycap = category.keycaps.find(k => k.path === path)
+      if (keycap) {
+        return { category: category.name, keycap }
+      }
+    }
+    return null
+  }
+
+  onMount(async () => {
+    try {
+      const response = await fetch(getPublicPath('stls/registry.json'))
+      registry = await response.json()
+    } catch (err) {
+      console.error('Failed to load STL registry:', err)
+    }
+  })
 
   $: selectedId = $app.ui.selectedKeycapModelId
   $: model = selectedId ? ($app.keycapModels.find(m => m.id === selectedId) ?? null) : null
+
+  // Derive selected category and keycap from the current model's URL
+  $: selectedKeycapInfo = (() => {
+    if (!model || !registry || model.source.kind !== 'server') return null
+    const path = extractPathFromUrl(model.source.url)
+    return path ? findKeycapByPath(path) : null
+  })()
+
+  $: selectedCategory = selectedKeycapInfo?.category ?? registry?.categories[0]?.name ?? ''
+  $: selectedKeycapPath = selectedKeycapInfo?.keycap.path ?? registry?.categories[0]?.keycaps[0]?.path ?? ''
+
+  $: categories = registry ? registry.categories.map(c => c.name) : []
+  $: selectedCategoryData = registry ? registry.categories.find(c => c.name === selectedCategory) : null
+  $: keycapsInCategory = selectedCategoryData ? selectedCategoryData.keycaps : []
+  $: selectedKeycap = selectedKeycapInfo?.keycap ?? null
 
   $: if (model?.source.kind === 'server' && (model.widthMm === 0 || model.heightMm === 0)) {
     fetch(model.source.url)
@@ -105,22 +159,44 @@
     actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0 })
   }
 
-  async function onSelectServerModel(serverId: string) {
-    if (!model) return
-    const entry = serverModels.find(s => s.id === serverId)
-    if (!entry) return
+  function applyServerModel(keycapPath: string) {
+    if (!model || !registry) return
+    const found = findKeycapByPath(keycapPath)
+    if (!found) return
 
-    actions.renameKeycapModel(model.id, entry.name)
+    const entry = found.keycap
+    const url = getPublicPath(`stls/${entry.path}`)
+    const serverId = entry.path.replace(/[^a-zA-Z0-9]/g, '_')
+
+    actions.renameKeycapModel(model.id, entry.displayName)
     actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0 })
     actions.setKeycapModelSource(model.id, {
       kind: 'server',
-      serverId: entry.id,
-      url: entry.url,
-      stl: { fileName: `${entry.name}.stl`, pathHint: `server:${entry.id}` },
+      serverId: serverId,
+      url: url,
+      stl: { fileName: entry.path.split('/').pop() || `${entry.displayName}.stl`, pathHint: `server:${serverId}` },
     })
 
     // Reset to 0 so reactive statement will reload dimensions
     actions.updateKeycapModel(model.id, { widthMm: 0, heightMm: 0 })
+  }
+
+  function onCategoryChange(category: string) {
+    if (!model || !registry) return
+    const categoryData = registry.categories.find(c => c.name === category)
+    if (!categoryData || categoryData.keycaps.length === 0) return
+
+    // Check if current keycap is in new category
+    const currentInCategory = categoryData.keycaps.find(k => k.path === selectedKeycapPath)
+    const keycapPath = currentInCategory ? currentInCategory.path : categoryData.keycaps[0].path
+
+    applyServerModel(keycapPath)
+  }
+
+  function onKeycapChange(keycapPath: string) {
+    if (model) {
+      applyServerModel(keycapPath)
+    }
   }
 </script>
 
@@ -194,7 +270,7 @@
           <div class="flex items-center gap-2">
             <span>Symbol extrusion depth (mm)</span>
             <HelpTooltip
-              text="The depth at which text symbols are extruded into the keycap surface. This determines how deep the engraved or embossed text appears on the keycap. A larger value creates deeper text, while a smaller value creates shallower text. This affects the visual appearance and tactile feel of the keycap labels."
+              text="The depth at which text is extruded into the keycap surface. Higher values result in deeper engraving. Setting this too high may cause the text to break through to the inside of the keycap. When printing on the top surface, use a multiple of your layer height."
             />
           </div>
           <input
@@ -204,7 +280,9 @@
             step="0.1"
             value={model.extrusionDepthMm}
             on:input={e =>
-              actions.updateKeycapModel(model.id, { extrusionDepthMm: Number((e.currentTarget as HTMLInputElement).value) })}
+              actions.updateKeycapModel(model.id, {
+                extrusionDepthMm: Number((e.currentTarget as HTMLInputElement).value),
+              })}
           />
         </label>
 
@@ -220,7 +298,7 @@
                   class="h-4 w-4 border-slate-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
                   checked={model.source.kind === 'server'}
                   on:change={() => {
-                    if (model.source.kind !== 'server' && serverModels.length > 0) {
+                    if (model.source.kind !== 'server' && registry && selectedKeycapPath) {
                       // Clear uploaded buffer when switching to server mode
                       if (model.source.kind === 'upload') {
                         stlBuffersByModelId.update(m => {
@@ -228,10 +306,8 @@
                           delete next[model.id]
                           return next
                         })
-                        // Reset rotation when switching to server (server models are pre-oriented)
-                        actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0 })
                       }
-                      onSelectServerModel(serverModels[0].id)
+                      applyServerModel(selectedKeycapPath)
                     }
                   }}
                 />
@@ -250,18 +326,64 @@
             </div>
 
             {#if model.source.kind === 'server'}
-              <label class="grid gap-1 text-xs text-slate-400">
-                Select model
-                <select
-                  class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                  value={model.source.serverId}
-                  on:change={e => onSelectServerModel((e.currentTarget as HTMLSelectElement).value)}
-                >
-                  {#each serverModels as s}
-                    <option value={s.id}>{s.name}</option>
-                  {/each}
-                </select>
-              </label>
+              {#if registry}
+                <div class="grid gap-2">
+                  <div class="grid grid-cols-2 gap-2">
+                    <label class="grid gap-1 text-xs text-slate-400">
+                      Category
+                      <select
+                        class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                        value={selectedCategory}
+                        on:change={e => onCategoryChange((e.currentTarget as HTMLSelectElement).value)}
+                      >
+                        {#each categories as cat}
+                          <option value={cat}>{cat}</option>
+                        {/each}
+                      </select>
+                    </label>
+                    <label class="grid gap-1 text-xs text-slate-400">
+                      Keycap
+                      <select
+                        class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                        value={selectedKeycapPath}
+                        on:change={e => onKeycapChange((e.currentTarget as HTMLSelectElement).value)}
+                      >
+                        {#each keycapsInCategory as keycap}
+                          <option value={keycap.path}>{keycap.displayName}</option>
+                        {/each}
+                      </select>
+                    </label>
+                  </div>
+                  {#if selectedKeycap}
+                    <div class="mt-2 pt-2 border-t border-slate-800 text-xs text-slate-400">
+                      {#if selectedKeycap.author}
+                        <div class="mb-1">
+                          Author:
+                          {#if selectedKeycap.authorLink}
+                            <a
+                              href={selectedKeycap.authorLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="text-blue-400 hover:text-blue-300 underline"
+                            >
+                              {selectedKeycap.author}
+                            </a>
+                          {:else}
+                            <span class="text-slate-300">{selectedKeycap.author}</span>
+                          {/if}
+                        </div>
+                      {/if}
+                      {#if selectedKeycap.license}
+                        <div>
+                          License: <span class="text-slate-300">{selectedKeycap.license}</span>
+                        </div>
+                      {/if}
+                    </div>
+                  {/if}
+                </div>
+              {:else}
+                <div class="text-xs text-slate-500">Loading registry...</div>
+              {/if}
             {:else}
               <label class="grid gap-1 text-xs text-slate-400">
                 Choose STL file

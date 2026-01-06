@@ -8,13 +8,17 @@
       "heightMm": 19.05,
       "source": {
         "kind": "server",
-        "serverId": "1u",
-        "url": "/stls/1u.stl",
+        "serverId": "JoeScotto_Flat_1.00u",
+        "url": "/stls/JoeScotto_Flat/1.00u.stl",
         "stl": {
-          "fileName": "1u.stl",
-          "pathHint": "server:1u"
+          "fileName": "1.00u.stl",
+          "pathHint": "server:JoeScotto_Flat_1.00u"
         }
-      }
+      },
+      "rotationX": 0,
+      "rotationY": 0,
+      "rotationZ": 0,
+      "extrusionDepthMm": 0.6
     },
     {
       "id": "model_2u",
@@ -23,13 +27,17 @@
       "heightMm": 19.05,
       "source": {
         "kind": "server",
-        "serverId": "2u",
-        "url": "/stls/2u.stl",
+        "serverId": "JoeScotto_Flat_2.00u",
+        "url": "/stls/JoeScotto_Flat/2.00u.stl",
         "stl": {
-          "fileName": "2u.stl",
-          "pathHint": "server:2u"
+          "fileName": "2.00u.stl",
+          "pathHint": "server:JoeScotto_Flat_2.00u"
         }
-      }
+      },
+      "rotationX": 0,
+      "rotationY": 0,
+      "rotationZ": 0,
+      "extrusionDepthMm": 0.6
     }
   ],
   "templates": [
@@ -41,34 +49,31 @@
         {
           "id": "sym_1u_primary",
           "slotName": "Primary",
-          "x": 0,
-          "y": -3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
-          "fontSizeMm": 4,
+          "x": -4.2,
+          "y": 4.2,
+          "fontName": "DejaVuSans",
+          "fontSizeMm": 6,
           "color": "#ffffff",
           "rotationDeg": 0
         },
         {
           "id": "sym_1u_secondary",
           "slotName": "Secondary",
-          "x": 0,
-          "y": 3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
-          "fontSizeMm": 3.5,
-          "color": "#ffffff",
+          "x": 4.3,
+          "y": -4.2,
+          "fontName": "DejaVuSans",
+          "fontSizeMm": 5,
+          "color": "#4d56ce",
           "rotationDeg": 0
         },
         {
           "id": "sym_1u_tertiary",
           "slotName": "Tertiary",
-          "x": -4.7625,
-          "y": -3.81,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
-          "fontSizeMm": 3,
-          "color": "#ffffff",
+          "x": 4.3,
+          "y": 4,
+          "fontName": "DejaVuSans",
+          "fontSizeMm": 5,
+          "color": "#4d56ce",
           "rotationDeg": 0
         }
       ]
@@ -83,9 +88,8 @@
           "slotName": "Main",
           "x": 0,
           "y": 0,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
-          "fontSizeMm": 4,
+          "fontName": "DejaVuSans",
+          "fontSizeMm": 5,
           "color": "#ffffff",
           "rotationDeg": 0
         }
@@ -101,9 +105,8 @@
           "slotName": "Main",
           "x": 0,
           "y": 0,
-          "fontFamily": "helvetiker",
-          "fontWeight": "regular",
-          "fontSizeMm": 4,
+          "fontName": "DejaVuSans",
+          "fontSizeMm": 5,
           "color": "#ffffff",
           "rotationDeg": 0
         }
@@ -125,8 +128,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "Q",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "1"
+        "sym_1u_secondary": "1",
+        "sym_1u_tertiary": "!"
       }
     },
     {
@@ -135,8 +138,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "W",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "2"
+        "sym_1u_secondary": "2",
+        "sym_1u_tertiary": "@"
       }
     },
     {
@@ -145,8 +148,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "E",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "3"
+        "sym_1u_secondary": "3",
+        "sym_1u_tertiary": "#"
       }
     },
     {
@@ -155,8 +158,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "R",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "4"
+        "sym_1u_secondary": "4",
+        "sym_1u_tertiary": "$"
       }
     },
     {
@@ -165,8 +168,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "T",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "5"
+        "sym_1u_secondary": "5",
+        "sym_1u_tertiary": "%"
       }
     },
     {
@@ -175,8 +178,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "Y",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "6"
+        "sym_1u_secondary": "6",
+        "sym_1u_tertiary": "^"
       }
     },
     {
@@ -185,8 +188,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "U",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "7"
+        "sym_1u_secondary": "7",
+        "sym_1u_tertiary": "&"
       }
     },
     {
@@ -195,8 +198,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "I",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "8"
+        "sym_1u_secondary": "8",
+        "sym_1u_tertiary": "*"
       }
     },
     {
@@ -205,8 +208,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "O",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "9"
+        "sym_1u_secondary": "9",
+        "sym_1u_tertiary": "("
       }
     },
     {
@@ -215,8 +218,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "P",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "0"
+        "sym_1u_secondary": "0",
+        "sym_1u_tertiary": ")"
       }
     },
     {
@@ -242,7 +245,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "A",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F1"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -252,7 +255,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "S",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F2"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -262,7 +265,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "D",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F3"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -272,7 +275,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "F",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F4"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -282,7 +285,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "G",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F5"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -291,8 +294,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "H",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F6"
+        "sym_1u_secondary": "[",
+        "sym_1u_tertiary": "{"
       }
     },
     {
@@ -301,8 +304,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "J",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "_"
+        "sym_1u_secondary": "]",
+        "sym_1u_tertiary": "}"
       }
     },
     {
@@ -311,8 +314,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "K",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "+"
+        "sym_1u_secondary": "\\",
+        "sym_1u_tertiary": "|"
       }
     },
     {
@@ -321,8 +324,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "L",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "{"
+        "sym_1u_secondary": "'",
+        "sym_1u_tertiary": "\""
       }
     },
     {
@@ -340,9 +343,9 @@
       "name": "'",
       "templateId": "tpl_1u",
       "textsBySymbolId": {
-        "sym_1u_primary": "'",
-        "sym_1u_secondary": "\"",
-        "sym_1u_tertiary": "|"
+        "sym_1u_primary": "",
+        "sym_1u_secondary": "'",
+        "sym_1u_tertiary": "\""
       }
     },
     {
@@ -360,7 +363,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "Z",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F7"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -370,7 +373,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "X",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F8"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -380,7 +383,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "C",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F9"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -390,7 +393,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "V",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F10"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -400,7 +403,7 @@
       "textsBySymbolId": {
         "sym_1u_primary": "B",
         "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F11"
+        "sym_1u_tertiary": ""
       }
     },
     {
@@ -409,8 +412,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "N",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "F12"
+        "sym_1u_secondary": "-",
+        "sym_1u_tertiary": "_"
       }
     },
     {
@@ -419,8 +422,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "M",
-        "sym_1u_secondary": "",
-        "sym_1u_tertiary": "~"
+        "sym_1u_secondary": "=",
+        "sym_1u_tertiary": "+"
       }
     },
     {
@@ -429,8 +432,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": ",",
-        "sym_1u_secondary": "<",
-        "sym_1u_tertiary": "|"
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "<"
       }
     },
     {
@@ -439,8 +442,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": ".",
-        "sym_1u_secondary": ">",
-        "sym_1u_tertiary": "Home"
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": ">"
       }
     },
     {
@@ -449,8 +452,8 @@
       "templateId": "tpl_1u",
       "textsBySymbolId": {
         "sym_1u_primary": "/",
-        "sym_1u_secondary": "?",
-        "sym_1u_tertiary": "End"
+        "sym_1u_secondary": "",
+        "sym_1u_tertiary": "?"
       }
     },
     {
@@ -458,15 +461,15 @@
       "name": "Enter",
       "templateId": "tpl_1u_single",
       "textsBySymbolId": {
-        "sym_1u_single": "Enter"
+        "sym_1u_single": "Ret"
       }
     },
     {
       "id": "key_backlit",
-      "name": "Backlit",
+      "name": "Function",
       "templateId": "tpl_1u_single",
       "textsBySymbolId": {
-        "sym_1u_single": "BL"
+        "sym_1u_single": "Fn"
       }
     },
     {
@@ -498,7 +501,7 @@
       "name": "Lower",
       "templateId": "tpl_1u_single",
       "textsBySymbolId": {
-        "sym_1u_single": "Lower"
+        "sym_1u_single": "Lw"
       }
     },
     {
@@ -514,7 +517,7 @@
       "name": "Raise",
       "templateId": "tpl_1u_single",
       "textsBySymbolId": {
-        "sym_1u_single": "Raise"
+        "sym_1u_single": "Rs"
       }
     },
     {
@@ -549,13 +552,5 @@
         "sym_1u_single": "→"
       }
     }
-  ],
-  "settings": {
-    "extrusionDepthMm": 0.8
-  },
-  "ui": {
-    "selectedKeycapModelId": "model_1u",
-    "selectedTemplateId": "tpl_1u",
-    "selectedKeyId": "key_tab"
-  }
+  ]
 }
