@@ -86,7 +86,6 @@ export async function generateKeycapModel(
 
     const text = (key.textsBySymbolId[sym.id] ?? '').trim()
     if (!text) continue
-
     const fontResult = getFont(sym.fontName)
     const font = fontResult instanceof Promise ? await fontResult : fontResult
     const textGeom = new TextGeometry(text, {
@@ -100,12 +99,10 @@ export async function generateKeycapModel(
     textGeom.computeVertexNormals()
     centerGeometryXY(textGeom)
 
-    const tx = sym.x
-    const ty = sym.y
-
     const rz = MathUtils.degToRad(sym.rotationDeg)
+    textGeom.rotateY(Math.PI)
     if (rz !== 0) textGeom.rotateZ(rz)
-    textGeom.translate(tx, ty, 0)
+    textGeom.translate(-sym.x, sym.y, 0)
     alignBottomTo(textGeom, baseMinZ)
 
     const color = parseInt(sym.color.replace('#', '0x'))

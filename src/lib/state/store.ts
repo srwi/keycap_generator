@@ -4,16 +4,16 @@ import { newId } from '../utils/id'
 import { getPublicPath } from '../utils/paths'
 
 export const SLOTS = [
-  { name: 'alpha', symbol: 'Α' },
-  { name: 'beta', symbol: 'Β' },
-  { name: 'gamma', symbol: 'Γ' },
-  { name: 'delta', symbol: 'Δ' },
-  { name: 'epsilon', symbol: 'Ε' },
-  { name: 'zeta', symbol: 'Ζ' },
-  { name: 'eta', symbol: 'Η' },
-  { name: 'theta', symbol: 'Θ' },
-  { name: 'iota', symbol: 'Ι' },
-  { name: 'kappa', symbol: 'Κ' },
+  { name: 'alpha', symbol: 'A' },
+  { name: 'beta', symbol: 'B' },
+  { name: 'gamma', symbol: 'C' },
+  { name: 'delta', symbol: 'D' },
+  { name: 'epsilon', symbol: 'E' },
+  { name: 'zeta', symbol: 'F' },
+  { name: 'eta', symbol: 'G' },
+  { name: 'theta', symbol: 'H' },
+  { name: 'iota', symbol: 'I' },
+  { name: 'kappa', symbol: 'J' },
 ] as const
 
 export const MAX_SLOTS = SLOTS.length
