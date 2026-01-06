@@ -17,18 +17,40 @@ self.onmessage = async (e: MessageEvent) => {
     return
   }
 
-  if (type === 'generate-all') {
+  if (type === 'zip') {
     cancelled = false
-    const { state, stlBuffersByModelId } = payload as {
+    const { files } = payload as { files: Record<string, Uint8Array> }
+    try {
+      const zipData = zipSync(files)
+      if (!cancelled) {
+        self.postMessage({ type: 'zip-complete', payload: { zipData } }, [zipData.buffer])
+      }
+    } catch (error) {
+      if (!cancelled) {
+        self.postMessage({
+          type: 'error',
+          payload: { message: error instanceof Error ? error.message : 'Zip failed.' },
+        })
+      }
+    }
+    return
+  }
+
+  if (type === 'generate-batch') {
+    cancelled = false
+    const { state, stlBuffersByModelId, keyIds } = payload as {
       state: AppState
       stlBuffersByModelId: Record<string, ArrayBuffer | null>
+      keyIds: string[]
     }
 
     try {
       const baseGeomByModelId = new Map<string, BufferGeometry>()
       const files: Record<string, Uint8Array> = {}
 
-      if (state.keys.length === 0) {
+      const keysById = new Map(state.keys.map(k => [k.id, k]))
+
+      if (keyIds.length === 0) {
         throw new Error('No keys configured')
       }
 
@@ -39,15 +61,11 @@ self.onmessage = async (e: MessageEvent) => {
         }
       }
 
-      const total = state.keys.length
-      for (let i = 0; i < total; i++) {
+      for (const keyId of keyIds) {
         await yieldAndCheck()
 
-        const key = state.keys[i]
-        self.postMessage({
-          type: 'progress',
-          payload: { current: i + 1, total, keyId: key.id },
-        })
+        const key = keysById.get(keyId)
+        if (!key) continue
 
         const template = getTemplate(state, key)
         if (!template) {
@@ -66,22 +84,25 @@ self.onmessage = async (e: MessageEvent) => {
         }
 
         const group = await generateKeycapModel(state, key, template, baseGeom, yieldAndCheck)
-
         const blob = await exportTo3MF(group)
 
         const arrayBuffer = await blob.arrayBuffer()
         files[`${safeFileName(key.name)}.3mf`] = new Uint8Array(arrayBuffer)
+
+        self.postMessage({ type: 'progress', payload: { keyId: key.id } })
       }
 
       await yieldAndCheck()
 
-      const allFilesZip = zipSync(files)
-
       if (!cancelled) {
-        self.postMessage({
-          type: 'complete',
-          payload: { zipData: allFilesZip },
-        })
+        const transfers = Object.values(files).map(u => u.buffer)
+        self.postMessage(
+          {
+            type: 'batch-complete',
+            payload: { files },
+          },
+          transfers
+        )
       }
     } catch (error) {
       if (!cancelled) {

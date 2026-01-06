@@ -93,7 +93,7 @@ export async function generateKeycapModel(
       font,
       size: sym.fontSizeMm,
       depth: model.extrusionDepthMm,
-      curveSegments: 6,
+      curveSegments: 3,
       bevelEnabled: false,
     } as any)
 
@@ -120,6 +120,7 @@ export async function generateKeycapModel(
 
   const baseMesh = makeMesh(baseGeom.clone() as BufferGeometry, 0xdddddd)
   const unionExtrusion = csgUnionMeshes(extrusionMeshes)
+
   const bodyResult = unionExtrusion ? csgSubtract(baseMesh, unionExtrusion) : baseMesh
 
   const group = new Group()
@@ -146,51 +147,135 @@ export function generateAll3mfsWithWorker(
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const workerUrl = new URL('./generate.worker.ts', import.meta.url)
-    const worker = new Worker(workerUrl, { type: 'module' })
+    const workers: Worker[] = []
     let cancelled = false
+    let zipWorker: Worker | null = null
+
+    const total = state.keys.length
+    if (total === 0) {
+      reject(new Error('No keys configured'))
+      return
+    }
+
+    const cpuCount =
+      typeof navigator !== 'undefined' && typeof navigator.hardwareConcurrency === 'number'
+        ? navigator.hardwareConcurrency
+        : 4
+    const workerCount = Math.max(1, Math.min(total, Math.max(1, cpuCount - 1)))
+
+    const abortHandler = () => {
+      cancelled = true
+      for (const w of workers) w.postMessage({ type: 'cancel' })
+      if (zipWorker) zipWorker.postMessage({ type: 'cancel' })
+      terminateAll()
+      reject(new Error('Generation cancelled'))
+    }
+
+    const terminateAll = () => {
+      if (signal) signal.removeEventListener('abort', abortHandler)
+      for (const w of workers) w.terminate()
+      workers.length = 0
+      if (zipWorker) {
+        zipWorker.terminate()
+        zipWorker = null
+      }
+    }
 
     if (signal) {
-      signal.addEventListener('abort', () => {
-        cancelled = true
-        worker.postMessage({ type: 'cancel' })
-        worker.terminate()
-        reject(new Error('Generation cancelled'))
+      signal.addEventListener('abort', abortHandler, { once: true })
+    }
+
+    const files: Record<string, Uint8Array> = {}
+    let completed = 0
+    let finishedWorkers = 0
+
+    const maybeFinish = () => {
+      if (cancelled) return
+      if (finishedWorkers !== workerCount) return
+
+      zipWorker = new Worker(workerUrl, { type: 'module' })
+      zipWorker.onmessage = e => {
+        const { type, payload } = e.data
+        if (type === 'zip-complete') {
+          if (!cancelled) {
+            const { zipData } = payload as { zipData: Uint8Array }
+            downloadBytes(zipData, 'keycaps.zip', 'application/zip')
+            terminateAll()
+            resolve()
+          }
+        } else if (type === 'error') {
+          if (!cancelled) {
+            terminateAll()
+            reject(new Error(payload.message))
+          }
+        }
+      }
+      zipWorker.onerror = err => {
+        if (!cancelled) {
+          terminateAll()
+          reject(err)
+        }
+      }
+
+      const transfers = Object.values(files).map(u => u.buffer)
+      zipWorker.postMessage({ type: 'zip', payload: { files } }, transfers)
+    }
+
+    const keyIds = state.keys.map(k => k.id)
+    const chunks: string[][] = Array.from({ length: workerCount }, () => [])
+    for (let i = 0; i < keyIds.length; i++) {
+      chunks[i % workerCount].push(keyIds[i])
+    }
+
+    for (let workerIndex = 0; workerIndex < workerCount; workerIndex++) {
+      const w = new Worker(workerUrl, { type: 'module' })
+      workers.push(w)
+
+      w.onmessage = e => {
+        const { type, payload } = e.data
+
+        if (type === 'progress') {
+          if (!cancelled) {
+            const { keyId } = payload as { keyId: string }
+            completed++
+            onProgress?.({ current: completed, total, keyId })
+          }
+        } else if (type === 'batch-complete') {
+          if (!cancelled) {
+            const batchFiles = (payload as { files: Record<string, Uint8Array> }).files
+            for (const [name, bytes] of Object.entries(batchFiles)) {
+              files[name] = bytes
+            }
+            finishedWorkers++
+            maybeFinish()
+          }
+        } else if (type === 'error') {
+          if (!cancelled) {
+            cancelled = true
+            terminateAll()
+            reject(new Error(payload.message))
+          }
+        }
+      }
+
+      w.onerror = error => {
+        if (!cancelled) {
+          cancelled = true
+          terminateAll()
+          reject(error)
+        }
+      }
+
+      w.postMessage({
+        type: 'generate-batch',
+        payload: { state, stlBuffersByModelId, keyIds: chunks[workerIndex] },
       })
     }
 
-    worker.onmessage = e => {
-      const { type, payload } = e.data
-
-      if (type === 'progress') {
-        if (!cancelled) {
-          onProgress?.(payload)
-        }
-      } else if (type === 'complete') {
-        if (!cancelled) {
-          const { zipData } = payload
-          downloadBytes(zipData, 'keycaps.zip', 'application/zip')
-          worker.terminate()
-          resolve()
-        }
-      } else if (type === 'error') {
-        if (!cancelled) {
-          worker.terminate()
-          reject(new Error(payload.message))
-        }
-      }
+    // Emit an initial progress event so UI can show something immediately.
+    if (onProgress && total > 0) {
+      onProgress({ current: 0, total, keyId: state.keys[0].id })
     }
-
-    worker.onerror = error => {
-      if (!cancelled) {
-        worker.terminate()
-        reject(error)
-      }
-    }
-
-    worker.postMessage({
-      type: 'generate-all',
-      payload: { state, stlBuffersByModelId },
-    })
   })
 }
 
