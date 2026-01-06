@@ -1,8 +1,9 @@
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION, ADDITION, INTERSECTION } from 'three-bvh-csg'
+import { createKeycapMaterial, KEYCAP_BODY_COLOR } from './materials'
 
-export function makeMesh(geometry: THREE.BufferGeometry, color = 0xcccccc): THREE.Mesh {
-  const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color }))
+export function makeMesh(geometry: THREE.BufferGeometry, color = KEYCAP_BODY_COLOR): THREE.Mesh {
+  const mesh = new THREE.Mesh(geometry, createKeycapMaterial(color))
   mesh.updateMatrix()
   mesh.matrixAutoUpdate = false
   return mesh

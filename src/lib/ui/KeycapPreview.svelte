@@ -232,7 +232,7 @@
       </div>
     {:else}
       <!-- 3D View -->
-      <div class="h-96 rounded-lg border border-slate-800 overflow-hidden relative">
+      <div class="h-96 overflow-hidden relative">
         <Model3DViewer modelGroup={previewModel} />
 
         {#if isGeneratingPreview}

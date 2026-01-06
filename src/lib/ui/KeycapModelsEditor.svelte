@@ -522,7 +522,7 @@
       {#if !model}
         <div class="flex items-center justify-center h-64 text-sm text-slate-400">Select a model to preview</div>
       {:else if modelStlUrl || modelStlBuffer}
-        <div class="h-96 rounded-lg border border-slate-800 overflow-hidden">
+        <div class="h-96 overflow-hidden">
           {#key model.id}
             <Model3DViewer
               stlUrl={modelStlUrl}

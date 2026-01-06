@@ -4,6 +4,7 @@
   import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
   import type { Group } from 'three'
+  import { createKeycapMaterial, KEYCAP_BODY_COLOR } from '../generate/materials'
 
   export let stlUrl: string | null = null
   export let stlBuffer: ArrayBuffer | null = null
@@ -24,15 +25,19 @@
     if (!container) return
 
     scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x0f172a) // slate-950
+    scene.background = null
 
     camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000)
     camera.position.set(0, 0, 80)
     camera.lookAt(0, 0, 0)
 
-    renderer = new THREE.WebGLRenderer({ antialias: true })
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(container.clientWidth, container.clientHeight)
     renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.setClearColor(0x000000, 0)
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.2
+
     container.appendChild(renderer.domElement)
 
     controls = new OrbitControls(camera, renderer.domElement)
@@ -40,17 +45,33 @@
     controls.maxDistance = 200
     controls.target.set(0, 0, 0)
 
-    // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4)
+    hemisphereLight.position.set(0, 50, 0)
+    scene.add(hemisphereLight)
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
     scene.add(ambientLight)
 
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.4)
-    directionalLight1.position.set(0, 50, 50)
-    scene.add(directionalLight1)
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.0)
+    keyLight.position.set(50, 80, 50)
+    keyLight.castShadow = false
+    scene.add(keyLight)
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.3)
-    directionalLight2.position.set(-50, -50, 50)
-    scene.add(directionalLight2)
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.5)
+    fillLight.position.set(-40, 30, 60)
+    scene.add(fillLight)
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.6)
+    rimLight.position.set(-60, -40, -40)
+    scene.add(rimLight)
+
+    const bottomLight = new THREE.DirectionalLight(0xffffff, 0.35)
+    bottomLight.position.set(30, -50, 30)
+    scene.add(bottomLight)
+
+    const pointLight = new THREE.PointLight(0xffffff, 0.3, 200)
+    pointLight.position.set(0, 0, 100)
+    scene.add(pointLight)
 
     loadModel()
   }
@@ -161,11 +182,7 @@
       if (rz !== 0) geometry.rotateZ(rz)
     }
 
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x64748b, // slate-500
-      metalness: 0.3,
-      roughness: 0.7,
-    })
+    const material = createKeycapMaterial(KEYCAP_BODY_COLOR)
 
     mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
@@ -227,4 +244,4 @@
   $: (rotationX, rotationY, rotationZ, (stlUrl !== null || stlBuffer !== null) && loadModel())
 </script>
 
-<div bind:this={container} class="h-full w-full rounded-lg bg-slate-950" style="min-height: 300px;"></div>
+<div bind:this={container} class="h-full w-full" style="min-height: 300px;"></div>

@@ -1,6 +1,7 @@
 import type { AppState, KeyDef, KeycapModel, Template } from '../state/types'
 import { processStlForModel, centerGeometryXY, alignBottomTo } from './stl'
 import { makeMesh, csgIntersect, csgSubtract, csgUnionMeshes } from './csg'
+import { KEYCAP_BODY_COLOR } from './materials'
 import { getFont } from './fonts'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { MathUtils, Group, Mesh, BufferGeometry } from 'three'
@@ -115,7 +116,7 @@ export async function generateKeycapModel(
 
   if (yieldAndCheck) await yieldAndCheck()
 
-  const baseMesh = makeMesh(baseGeom.clone() as BufferGeometry, 0xdddddd)
+  const baseMesh = makeMesh(baseGeom.clone() as BufferGeometry, KEYCAP_BODY_COLOR)
   const unionExtrusion = csgUnionMeshes(extrusionMeshes)
 
   const bodyResult = unionExtrusion ? csgSubtract(baseMesh, unionExtrusion) : baseMesh
