@@ -6,6 +6,15 @@ import { getFont } from './fonts'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { MathUtils, Group, Mesh, BufferGeometry } from 'three'
 
+function createGenerateWorker(name?: string): Worker {
+  // Important for GitHub Pages: avoid root-absolute `/assets/...` worker URLs.
+  // Vite will bundle this and rewrite it relative to the configured `base`.
+  return new Worker(new URL('./generate.worker.ts', import.meta.url), {
+    type: 'module',
+    name,
+  })
+}
+
 export function safeFileName(name: string): string {
   return (
     name
@@ -144,7 +153,6 @@ export function generateAll3mfsWithWorker(
   signal?: AbortSignal
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const workerUrl = new URL('./generate.worker.ts', import.meta.url)
     const workers: Worker[] = []
     let cancelled = false
     let zipWorker: Worker | null = null
@@ -191,7 +199,7 @@ export function generateAll3mfsWithWorker(
       if (cancelled) return
       if (finishedWorkers !== workerCount) return
 
-      zipWorker = new Worker(workerUrl, { type: 'module' })
+      zipWorker = createGenerateWorker('zip')
       zipWorker.onmessage = e => {
         const { type, payload } = e.data
         if (type === 'zip-complete') {
@@ -210,8 +218,17 @@ export function generateAll3mfsWithWorker(
       }
       zipWorker.onerror = err => {
         if (!cancelled) {
+          const errorEvent = err as ErrorEvent
+          const errorMsg = errorEvent.message || errorEvent.filename || 'Zip worker failed to load or execute'
+          console.error('Zip worker error:', {
+            message: errorEvent.message,
+            filename: errorEvent.filename,
+            lineno: errorEvent.lineno,
+            colno: errorEvent.colno,
+            error: errorEvent.error,
+          })
           terminateAll()
-          reject(err)
+          reject(new Error(`Zip worker failed: ${errorMsg}`))
         }
       }
 
@@ -226,7 +243,7 @@ export function generateAll3mfsWithWorker(
     }
 
     for (let workerIndex = 0; workerIndex < workerCount; workerIndex++) {
-      const w = new Worker(workerUrl, { type: 'module' })
+      const w = createGenerateWorker(`generate-${workerIndex + 1}`)
       workers.push(w)
 
       w.onmessage = e => {
@@ -259,8 +276,17 @@ export function generateAll3mfsWithWorker(
       w.onerror = error => {
         if (!cancelled) {
           cancelled = true
+          const errorEvent = error as ErrorEvent
+          const errorMsg = errorEvent.message || errorEvent.filename || 'Worker failed to load or execute'
+          console.error('Worker error:', {
+            message: errorEvent.message,
+            filename: errorEvent.filename,
+            lineno: errorEvent.lineno,
+            colno: errorEvent.colno,
+            error: errorEvent.error,
+          })
           terminateAll()
-          reject(error)
+          reject(new Error(`Worker failed: ${errorMsg}`))
         }
       }
 
