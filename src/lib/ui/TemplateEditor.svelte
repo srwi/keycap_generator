@@ -330,12 +330,6 @@
               </div>
             {/each}
           </div>
-
-          <div class="mt-3 text-xs text-slate-400">
-            X/Y are mm offsets from center: (0,0)=center. Positive X is right, positive Y is down. Model size: {modelWidthMm.toFixed(
-              1
-            )}mm × {modelHeightMm.toFixed(1)}mm.
-          </div>
         </div>
       </div>
     {/if}

@@ -1,0 +1,234 @@
+{
+  "version": 1,
+  "keycapModels": [
+    {
+      "id": "model_1u",
+      "name": "1u",
+      "widthMm": 19.05,
+      "heightMm": 19.05,
+      "source": {
+        "kind": "server",
+        "serverId": "JoeScotto_Flat_1.00u",
+        "url": "/stls/JoeScotto_Flat/1.00u.stl",
+        "stl": {
+          "fileName": "1.00u.stl",
+          "pathHint": "server:JoeScotto_Flat_1.00u"
+        }
+      },
+      "rotationX": 0,
+      "rotationY": 0,
+      "rotationZ": 0,
+      "extrusionDepthMm": 0.6
+    },
+    {
+      "id": "model_2u",
+      "name": "2u",
+      "widthMm": 38.1,
+      "heightMm": 19.05,
+      "source": {
+        "kind": "server",
+        "serverId": "JoeScotto_Flat_2.00u",
+        "url": "/stls/JoeScotto_Flat/2.00u.stl",
+        "stl": {
+          "fileName": "2.00u.stl",
+          "pathHint": "server:JoeScotto_Flat_2.00u"
+        }
+      },
+      "rotationX": 0,
+      "rotationY": 0,
+      "rotationZ": 0,
+      "extrusionDepthMm": 0.6
+    }
+  ],
+  "templates": [
+    {
+      "id": "tpl_1u_single",
+      "name": "1u",
+      "keycapModelId": "model_1u",
+      "symbols": [
+        {
+          "id": "sym_1u_single",
+          "slotName": "Main",
+          "x": 0,
+          "y": 0,
+          "fontName": "Dongle",
+          "fontSizeMm": 11,
+          "color": "#ffffff",
+          "rotationDeg": 0
+        }
+      ]
+    },
+    {
+      "id": "tpl_2u_single",
+      "name": "2u Vertical",
+      "keycapModelId": "model_2u",
+      "symbols": [
+        {
+          "id": "sym_2u_single",
+          "slotName": "Main",
+          "x": 0,
+          "y": 0,
+          "fontName": "Dongle",
+          "fontSizeMm": 11,
+          "color": "#ffffff",
+          "rotationDeg": -90
+        }
+      ]
+    },
+    {
+      "id": "tpl_6729b3a920b824b7",
+      "name": "2u",
+      "keycapModelId": "model_2u",
+      "symbols": [
+        {
+          "id": "sym_752fc5f226f1d13",
+          "slotName": "",
+          "x": 0,
+          "y": 0,
+          "fontName": "Dongle",
+          "fontSizeMm": 11,
+          "color": "#ffffff",
+          "rotationDeg": 0
+        }
+      ]
+    }
+  ],
+  "keys": [
+    {
+      "id": "key_numlock",
+      "name": "Equal",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "="
+      }
+    },
+    {
+      "id": "key_divide",
+      "name": "/",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "/"
+      }
+    },
+    {
+      "id": "key_multiply",
+      "name": "*",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "*"
+      }
+    },
+    {
+      "id": "key_subtract",
+      "name": "-",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "-"
+      }
+    },
+    {
+      "id": "key_7",
+      "name": "7",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "7"
+      }
+    },
+    {
+      "id": "key_8",
+      "name": "8",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "8"
+      }
+    },
+    {
+      "id": "key_9",
+      "name": "9",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "9"
+      }
+    },
+    {
+      "id": "key_4",
+      "name": "4",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "4"
+      }
+    },
+    {
+      "id": "key_5",
+      "name": "5",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "5"
+      }
+    },
+    {
+      "id": "key_6",
+      "name": "6",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "6"
+      }
+    },
+    {
+      "id": "key_1",
+      "name": "1",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "1"
+      }
+    },
+    {
+      "id": "key_2",
+      "name": "2",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "2"
+      }
+    },
+    {
+      "id": "key_3",
+      "name": "3",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "3"
+      }
+    },
+    {
+      "id": "key_decimal",
+      "name": "0",
+      "templateId": "tpl_6729b3a920b824b7",
+      "textsBySymbolId": {
+        "sym_752fc5f226f1d13": "0"
+      }
+    },
+    {
+      "id": "key_af693af4a6dfb9c3",
+      "name": "Dot",
+      "templateId": "tpl_1u_single",
+      "textsBySymbolId": {
+        "sym_1u_single": "."
+      }
+    },
+    {
+      "id": "key_adedc509ca452c17",
+      "name": "Plus",
+      "templateId": "tpl_2u_single",
+      "textsBySymbolId": {
+        "sym_2u_single": "+"
+      }
+    },
+    {
+      "id": "key_c88af61e60141a3",
+      "name": "Enter",
+      "templateId": "tpl_2u_single",
+      "textsBySymbolId": {
+        "sym_2u_single": "→"
+      }
+    }
+  ]
+}

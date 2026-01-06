@@ -11,15 +11,16 @@
   import ModalContainer from './lib/ui/ModalContainer.svelte'
   import { showMessage, showConfirm } from './lib/state/modalStore'
   import { clickOutside } from './lib/ui/actions/clickOutside'
-  import { Download, Upload, BookOpen, ChevronDown, Trash2 } from 'lucide-svelte'
+  import { Download, Upload, BookOpen, ChevronDown, Trash2, Github, Star, Heart, Coffee } from 'lucide-svelte'
 
   let tab: 'models' | 'templates' | 'keys' = 'models'
   let presetsMenuOpen = false
   let presetsMenuRef: HTMLElement
 
   const presets = [
-    { value: '60-percent', label: '60% Keyboard' },
-    { value: 'planck', label: 'Planck' },
+    { value: 'numpad', label: 'Numpad' },
+    { value: '40-percent-ortho', label: '40% Ortholinear' },
+    { value: '60-percent', label: '60% ANSI' },
   ]
 
   function onLoadPreset(presetValue: string) {
@@ -133,7 +134,7 @@
   })
 </script>
 
-<div class="min-h-dvh">
+<div class="flex min-h-dvh flex-col">
   <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4">
       <div class="flex-1">
@@ -209,7 +210,7 @@
     </div>
   </header>
 
-  <div class="mx-auto w-full max-w-6xl px-3 py-4 sm:px-4">
+  <div class="mx-auto flex-1 w-full max-w-6xl px-3 py-4 sm:px-4">
     <nav class="flex flex-wrap gap-2">
       <button
         class="rounded-md px-3 py-1.5 text-sm ring-1 ring-slate-800 hover:bg-slate-900"
@@ -266,4 +267,57 @@
   {/if}
 
   <ModalContainer />
+
+  <footer class="mt-auto border-t border-slate-800 bg-slate-950/80 backdrop-blur">
+    <div
+      class="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-3 py-6 sm:flex-row sm:px-4"
+    >
+      <div class="flex items-center gap-4">
+        <a
+          href="https://github.com/srwi/keycap_generator"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-2 rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-800 hover:text-slate-100"
+        >
+          <Github class="h-4 w-4" />
+          <span>View on GitHub</span>
+        </a>
+
+        <a
+          href="https://github.com/srwi/keycap_generator"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-2 rounded-md border border-emerald-700/60 bg-emerald-950/30 px-4 py-2 text-sm font-medium text-emerald-200 transition-all hover:border-emerald-600/60 hover:bg-emerald-950/60 hover:text-emerald-100"
+        >
+          <Star class="h-4 w-4" />
+          <span>Star</span>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-slate-400">Donate:</span>
+        <a
+          href="https://paypal.me/rumswinkel"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Support this project via PayPal"
+          class="flex items-center gap-2 rounded-md border border-blue-700/60 bg-blue-950/30 px-4 py-2 text-sm font-medium text-blue-200 transition-all hover:border-blue-600/60 hover:bg-blue-950/60 hover:text-blue-100"
+        >
+          <Heart class="h-4 w-4" />
+          <span>PayPal</span>
+        </a>
+
+        <a
+          href="https://ko-fi.com/stephanrwi"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Support this project via Ko-fi"
+          class="flex items-center gap-2 rounded-md border border-orange-700/60 bg-orange-950/30 px-4 py-2 text-sm font-medium text-orange-200 transition-all hover:border-orange-600/60 hover:bg-orange-950/60 hover:text-orange-100"
+        >
+          <Coffee class="h-4 w-4" />
+          <span>Ko-fi</span>
+        </a>
+      </div>
+    </div>
+  </footer>
 </div>

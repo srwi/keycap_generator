@@ -5,13 +5,12 @@ import * as opentype from 'opentype.js'
 import { getPublicPath } from '../utils/paths'
 
 const FONT_REGISTRY = {
-  DejaVuSans: getPublicPath('fonts/DejaVu/DejaVuSans.ttf'),
-  'DejaVuSans-Bold': getPublicPath('fonts/DejaVu/DejaVuSans-Bold.ttf'),
-  DejaVuSansMono: getPublicPath('fonts/DejaVu/DejaVuSansMono.ttf'),
-  'DejaVuSansMono-Bold': getPublicPath('fonts/DejaVu/DejaVuSansMono-Bold.ttf'),
-  DejaVuSerif: getPublicPath('fonts/DejaVu/DejaVuSerif.ttf'),
-  'DejaVuSerif-Bold': getPublicPath('fonts/DejaVu/DejaVuSerif-Bold.ttf'),
-  'DejaVuSerif-Italic': getPublicPath('fonts/DejaVu/DejaVuSerif-Italic.ttf'),
+  'DejaVu Sans': getPublicPath('fonts/DejaVu/DejaVuSans.ttf'),
+  'DejaVu Sans Bold': getPublicPath('fonts/DejaVu/DejaVuSans-Bold.ttf'),
+  'DejaVu Serif': getPublicPath('fonts/DejaVu/DejaVuSerif.ttf'),
+  'DejaVu Serif Bold': getPublicPath('fonts/DejaVu/DejaVuSerif-Bold.ttf'),
+  Dongle: getPublicPath('fonts/Dongle/Dongle-Regular.ttf'),
+  'Dongle Bold': getPublicPath('fonts/Dongle/Dongle-Bold.ttf'),
 } as const
 
 export type FontName = keyof typeof FONT_REGISTRY

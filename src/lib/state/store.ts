@@ -32,15 +32,15 @@ function defaultSymbol(): SymbolDef {
     slotName: '',
     x: 0,
     y: 0,
-    fontName: 'DejaVuSans',
-    fontSizeMm: 8,
+    fontName: 'Dongle',
+    fontSizeMm: 11,
     color: '#ffffff',
     rotationDeg: 0,
   }
 }
 
 function defaultKeycapModel(): KeycapModel {
-  const defaultRegistryPath = 'JoeScotto_Flat/1.00u.stl'
+  const defaultRegistryPath = 'JoeScotto_Scooped_MX/1.00u (Concave).stl'
   const defaultServerId = defaultRegistryPath.replace(/[^a-zA-Z0-9]/g, '_')
   return {
     id: newId('model'),
@@ -56,7 +56,7 @@ function defaultKeycapModel(): KeycapModel {
     rotationX: 0,
     rotationY: 0,
     rotationZ: 0,
-    extrusionDepthMm: 0.4,
+    extrusionDepthMm: 0.6,
   }
 }
 
