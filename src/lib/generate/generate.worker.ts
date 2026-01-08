@@ -6,6 +6,7 @@ import { exportTo3MF } from 'three-3mf-exporter'
 import { generateKeycapModel, getTemplate, getModel, getStlBufferForModel, safeFileName } from './generate'
 import { BufferGeometry } from 'three'
 import { zipSync } from 'fflate'
+import { registerCustomFonts } from './fonts'
 
 let cancelled = false
 
@@ -45,6 +46,7 @@ self.onmessage = async (e: MessageEvent) => {
     }
 
     try {
+      registerCustomFonts(state.customFonts)
       const baseGeomByModelId = new Map<string, BufferGeometry>()
       const files: Record<string, Uint8Array> = {}
 

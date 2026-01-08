@@ -1,5 +1,5 @@
 import { derived, writable } from 'svelte/store'
-import type { AppState, KeyDef, KeycapModel, SymbolDef, Template } from './types'
+import type { AppState, KeyDef, KeycapModel, SymbolDef, Template, CustomFont } from './types'
 import { newId } from '../utils/id'
 import { getPublicPath } from '../utils/paths'
 
@@ -75,6 +75,7 @@ function defaultState(): AppState {
     keycapModels: [],
     templates: [],
     keys: [],
+    customFonts: [],
     ui: {
       selectedKeycapModelId: null,
       selectedTemplateId: null,
@@ -330,5 +331,14 @@ export const actions = {
         k.id === keyId ? { ...k, textsBySymbolId: { ...k.textsBySymbolId, [symbolId]: text } } : k
       ),
     }))
+  },
+
+  addCustomFont(font: CustomFont) {
+    app.update(s => {
+      if (s.customFonts.some(f => f.id === font.id || f.name === font.name)) {
+        return s
+      }
+      return { ...s, customFonts: [...s.customFonts, font] }
+    })
   },
 }

@@ -1,10 +1,11 @@
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
-import { TTFLoader } from 'three/addons/loaders/TTFLoader.js'
+import { TTFLoader } from 'three/examples/jsm/loaders/TTFLoader.js'
 import type { Font } from 'three/examples/jsm/loaders/FontLoader.js'
 import * as opentype from 'opentype.js'
 import { getPublicPath } from '../utils/paths'
+import type { CustomFont } from '../state/types'
 
-const FONT_REGISTRY = {
+const BUILTIN_FONT_REGISTRY = {
   'DejaVu Sans': getPublicPath('fonts/DejaVu/DejaVuSans.ttf'),
   'DejaVu Sans Bold': getPublicPath('fonts/DejaVu/DejaVuSans-Bold.ttf'),
   'DejaVu Serif': getPublicPath('fonts/DejaVu/DejaVuSerif.ttf'),
@@ -13,15 +14,55 @@ const FONT_REGISTRY = {
   'Dongle Bold': getPublicPath('fonts/Dongle/Dongle-Bold.ttf'),
 } as const
 
-export type FontName = keyof typeof FONT_REGISTRY
-export const AVAILABLE_FONTS: readonly FontName[] = Object.keys(FONT_REGISTRY) as FontName[]
+export type FontName = string
+export const AVAILABLE_FONTS: readonly string[] = Object.keys(BUILTIN_FONT_REGISTRY)
+
+const customTtfByName = new Map<string, ArrayBuffer>()
+const customBase64ByName = new Map<string, string>()
 
 const fontCache = new Map<string, Font>()
 const opentypeFontCache = new Map<string, opentype.Font>()
 const loadingPromises = new Map<string, Promise<void>>()
 
-function getFontPath(fontName: FontName): string {
-  return FONT_REGISTRY[fontName]
+function isBuiltinFont(fontName: string): boolean {
+  return Object.prototype.hasOwnProperty.call(BUILTIN_FONT_REGISTRY, fontName)
+}
+
+function getBuiltinFontPath(fontName: string): string {
+  return (BUILTIN_FONT_REGISTRY as Record<string, string>)[fontName]
+}
+
+function getCustomFontBuffer(fontName: string): ArrayBuffer | null {
+  return customTtfByName.get(fontName) ?? null
+}
+
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binary = atob(base64)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return bytes.buffer
+}
+
+export function registerCustomFonts(fonts: readonly CustomFont[] | null | undefined): void {
+  if (!fonts || fonts.length === 0) return
+
+  for (const f of fonts) {
+    if (!f?.name || !f?.ttfBase64) continue
+    const prev = customBase64ByName.get(f.name)
+    if (prev === f.ttfBase64) continue
+
+    const buf = base64ToArrayBuffer(f.ttfBase64)
+    customBase64ByName.set(f.name, f.ttfBase64)
+    customTtfByName.set(f.name, buf)
+
+    // Invalidate any cached parsed versions for this font name.
+    fontCache.delete(f.name)
+    opentypeFontCache.delete(f.name)
+    loadingPromises.delete(f.name)
+    loadingPromises.delete(`opentype:${f.name}`)
+  }
 }
 
 async function loadThreeFont(fontName: FontName): Promise<Font> {
@@ -30,12 +71,18 @@ async function loadThreeFont(fontName: FontName): Promise<Font> {
 
   let loadPromise = loadingPromises.get(fontName)
   if (!loadPromise) {
-    const fontPath = getFontPath(fontName)
     loadPromise = (async () => {
       const ttfLoader = new TTFLoader()
-      const fontJson = await ttfLoader.loadAsync(fontPath)
+      const fontJson = (() => {
+        const customBuf = getCustomFontBuffer(fontName)
+        if (customBuf) return ttfLoader.parse(customBuf)
+        if (isBuiltinFont(fontName)) return ttfLoader.loadAsync(getBuiltinFontPath(fontName))
+        throw new Error(`Unknown font: ${fontName}`)
+      })()
+
+      const resolvedJson = fontJson instanceof Promise ? await fontJson : fontJson
       const fontLoader = new FontLoader()
-      const font = fontLoader.parse(fontJson)
+      const font = fontLoader.parse(resolvedJson)
       fontCache.set(fontName, font)
     })()
     loadingPromises.set(fontName, loadPromise)
@@ -44,7 +91,7 @@ async function loadThreeFont(fontName: FontName): Promise<Font> {
   await loadPromise
   const font = fontCache.get(fontName)
   if (!font) {
-    throw new Error(`Font ${fontName} failed to load from ${getFontPath(fontName)}`)
+    throw new Error(`Font ${fontName} failed to load`)
   }
   return font
 }
@@ -56,9 +103,15 @@ async function loadOpenTypeFont(fontName: FontName): Promise<opentype.Font> {
   const loadingKey = `opentype:${fontName}`
   let loadPromise = loadingPromises.get(loadingKey)
   if (!loadPromise) {
-    const fontPath = getFontPath(fontName)
     loadPromise = (async () => {
-      const font = await opentype.load(fontPath)
+      const customBuf = getCustomFontBuffer(fontName)
+      const font = customBuf
+        ? opentype.parse(customBuf)
+        : isBuiltinFont(fontName)
+          ? await opentype.load(getBuiltinFontPath(fontName))
+          : (() => {
+              throw new Error(`Unknown font: ${fontName}`)
+            })()
       opentypeFontCache.set(fontName, font)
     })()
     loadingPromises.set(loadingKey, loadPromise)
@@ -67,7 +120,7 @@ async function loadOpenTypeFont(fontName: FontName): Promise<opentype.Font> {
   await loadPromise
   const font = opentypeFontCache.get(fontName)
   if (!font) {
-    throw new Error(`OpenType font ${fontName} failed to load from ${getFontPath(fontName)}`)
+    throw new Error(`OpenType font ${fontName} failed to load`)
   }
   return font
 }

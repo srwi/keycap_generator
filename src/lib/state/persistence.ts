@@ -1,5 +1,5 @@
 import { app } from './store'
-import type { AppState, KeyDef, KeycapModel, Template } from './types'
+import type { AppState, KeyDef, KeycapModel, Template, CustomFont } from './types'
 import { stlBuffersByModelId } from './sessionAssets'
 import { getPublicPath } from '../utils/paths'
 
@@ -38,6 +38,7 @@ type RawProjectV1 = {
   keycapModels: KeycapModel[]
   templates: Template[]
   keys: KeyDef[]
+  customFonts: CustomFont[]
 }
 
 function parseProjectV1(raw: unknown): AppState | null {
@@ -57,6 +58,7 @@ function parseProjectV1(raw: unknown): AppState | null {
     keycapModels: normalizedModels,
     templates: project.templates,
     keys: project.keys,
+    customFonts: project.customFonts,
     ui: {
       selectedKeycapModelId: normalizedModels[0]?.id ?? null,
       selectedTemplateId: project.templates[0]?.id ?? null,

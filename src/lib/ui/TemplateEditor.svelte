@@ -1,12 +1,12 @@
 <script lang="ts">
   import { app, actions, selectedTemplate, getSlotName, getSlotSymbol, MAX_SLOTS } from '../state/store'
-  import type { SymbolDef } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
   import KeycapPreview from './KeycapPreview.svelte'
-  import { showConfirm } from '../state/modalStore'
+  import { showConfirm, showMessage } from '../state/modalStore'
   import { slide } from 'svelte/transition'
   import { Trash2, Plus, ChevronRight } from 'lucide-svelte'
   import HelpTooltip from './HelpTooltip.svelte'
+  import { newId } from '../utils/id'
 
   $: tpl = $selectedTemplate
   $: usedByKeyCount = tpl == null ? 0 : $app.keys.filter(k => k.templateId === tpl.id).length
@@ -30,6 +30,9 @@
 
   import { AVAILABLE_FONTS } from '../generate/fonts'
 
+  $: customFontNames = $app.customFonts.map(f => f.name)
+  $: fontOptions = [...AVAILABLE_FONTS, ...customFontNames.filter(n => !AVAILABLE_FONTS.includes(n))]
+
   $: model = tpl == null ? null : ($app.keycapModels.find(m => m.id === tpl.keycapModelId) ?? null)
   $: modelWidthMm = model?.widthMm ?? 0
   $: modelHeightMm = model?.heightMm ?? 0
@@ -44,6 +47,68 @@
     const t = $app.templates.find(t => t.id === templateId)
     if (!t) return null
     return $app.keycapModels.find(m => m.id === t.keycapModelId) ?? null
+  }
+
+  let fontUploadInput: HTMLInputElement | null = null
+  let fontUploadTarget: { templateId: string; symbolId: string } | null = null
+
+  function arrayBufferToBase64(buf: ArrayBuffer): string {
+    const bytes = new Uint8Array(buf)
+    let binary = ''
+    const chunkSize = 0x8000
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+    }
+    return btoa(binary)
+  }
+
+  function makeUniqueFontName(baseName: string, existing: Set<string>): string {
+    const trimmed = baseName.trim() || 'Custom Font'
+    if (!existing.has(trimmed)) return trimmed
+    for (let i = 2; i < 1000; i++) {
+      const candidate = `${trimmed} (${i})`
+      if (!existing.has(candidate)) return candidate
+    }
+    return `${trimmed} (${Date.now()})`
+  }
+
+  function onClickAddFont(templateId: string, symbolId: string) {
+    fontUploadTarget = { templateId, symbolId }
+    fontUploadInput?.click()
+  }
+
+  async function onFontUploadChange(ev: Event) {
+    const input = ev.currentTarget as HTMLInputElement
+    const file = input.files?.[0] ?? null
+    input.value = ''
+
+    const target = fontUploadTarget
+    fontUploadTarget = null
+
+    if (!file || !target) return
+    if (!file.name.toLowerCase().endsWith('.ttf')) {
+      showMessage('Please upload a .ttf font file.')
+      return
+    }
+
+    try {
+      const buf = await file.arrayBuffer()
+      const baseName = file.name.replace(/\.[^.]+$/, '') || 'Custom Font'
+      const existing = new Set(fontOptions)
+      const uniqueName = makeUniqueFontName(baseName, existing)
+
+      actions.addCustomFont({
+        id: newId('font'),
+        name: uniqueName,
+        fileName: file.name,
+        ttfBase64: arrayBufferToBase64(buf),
+      })
+
+      actions.updateSymbol(target.templateId, target.symbolId, { fontName: uniqueName })
+    } catch (e) {
+      console.error(e)
+      showMessage(e instanceof Error ? e.message : 'Failed to upload font.')
+    }
   }
 
   let collapsedSymbols = new Set<string>()
@@ -265,18 +330,29 @@
                     <div class="mt-3">
                       <label class="grid gap-1 text-xs text-slate-400">
                         Font
-                        <select
-                          class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                          value={sym.fontName}
-                          on:change={e =>
-                            actions.updateSymbol(tpl.id, sym.id, {
-                              fontName: (e.currentTarget as HTMLSelectElement).value as SymbolDef['fontName'],
-                            })}
-                        >
-                          {#each AVAILABLE_FONTS as fontName}
-                            <option value={fontName}>{fontName}</option>
-                          {/each}
-                        </select>
+                        <div class="flex items-center gap-2">
+                          <select
+                            class="flex-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
+                            value={sym.fontName}
+                            on:change={e =>
+                              actions.updateSymbol(tpl.id, sym.id, {
+                                fontName: (e.currentTarget as HTMLSelectElement).value,
+                              })}
+                          >
+                            {#each fontOptions as fontName}
+                              <option value={fontName}>{fontName}</option>
+                            {/each}
+                          </select>
+                          <button
+                            type="button"
+                            class="inline-flex items-center justify-center rounded-md border border-slate-700 bg-slate-900 h-9 w-9 hover:bg-slate-800"
+                            title="Add font"
+                            on:click={() => onClickAddFont(tpl.id, sym.id)}
+                          >
+                            <Plus class="h-4 w-4" />
+                            <span class="sr-only">Add font</span>
+                          </button>
+                        </div>
                       </label>
                     </div>
 
@@ -334,6 +410,14 @@
       </div>
     {/if}
   </section>
+
+  <input
+    class="hidden"
+    bind:this={fontUploadInput}
+    type="file"
+    accept=".ttf,font/ttf,application/x-font-ttf"
+    on:change={onFontUploadChange}
+  />
 
   <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
     <KeycapPreview

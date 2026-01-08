@@ -12,6 +12,7 @@
   import { showMessage, showConfirm } from './lib/state/modalStore'
   import { clickOutside } from './lib/ui/actions/clickOutside'
   import { Download, Upload, BookOpen, ChevronDown, Trash2, Github, Star, Heart, Coffee } from 'lucide-svelte'
+  import { registerCustomFonts } from './lib/generate/fonts'
 
   let tab: 'models' | 'templates' | 'keys' = 'models'
   let presetsMenuOpen = false
@@ -41,6 +42,7 @@
         keycapModels: [],
         templates: [],
         keys: [],
+        customFonts: [],
         ui: {
           selectedKeycapModelId: null,
           selectedTemplateId: null,
@@ -49,6 +51,8 @@
       })
     })
   }
+
+  $: registerCustomFonts($app.customFonts)
 
   let isGenerating = false
   let progressCurrent = 0

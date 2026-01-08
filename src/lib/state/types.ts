@@ -1,6 +1,13 @@
 import type { FontName } from '../generate/fonts'
 export type { FontName }
 
+export type CustomFont = {
+  id: string
+  name: string
+  fileName: string
+  ttfBase64: string
+}
+
 export type SymbolDef = {
   id: string
   slotName: string
@@ -58,5 +65,6 @@ export type AppState = {
   keycapModels: KeycapModel[]
   templates: Template[]
   keys: KeyDef[]
+  customFonts: CustomFont[]
   ui: AppUiState
 }
