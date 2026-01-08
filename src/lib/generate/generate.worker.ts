@@ -87,7 +87,8 @@ self.onmessage = async (e: MessageEvent) => {
         const blob = await exportTo3MF(group)
 
         const arrayBuffer = await blob.arrayBuffer()
-        files[`${safeFileName(key.name)}.3mf`] = new Uint8Array(arrayBuffer)
+        const keyIndex = state.keys.findIndex(k => k.id === keyId) + 1
+        files[`${keyIndex}. ${safeFileName(key.name)}.3mf`] = new Uint8Array(arrayBuffer)
 
         self.postMessage({ type: 'progress', payload: { keyId: key.id } })
       }
