@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { app } from './lib/state/store'
-  import { downloadStateFile, loadStateFromFile, loadPreset } from './lib/state/persistence'
+  import { applyLoadedProject, downloadStateFile, readProjectFromFile, readPresetProject } from './lib/state/persistence'
   import { generateAll3mfsWithWorker } from './lib/generate/generate'
   import { stlBuffersByModelId } from './lib/state/sessionAssets'
   import KeycapModelsEditor from './lib/ui/KeycapModelsEditor.svelte'
@@ -37,10 +37,9 @@
   function onLoadPreset(presetValue: string) {
     presetsMenuOpen = false
     showConfirm('Loading a preset will replace your current project. Continue?', async () => {
-      const error = await loadPreset(presetValue)
-      if (error) {
-        showMessage(error)
-      }
+      const result = await readPresetProject(presetValue)
+      if ('error' in result) showMessage(result.error)
+      else applyLoadedProject(result.project)
     })
   }
 
@@ -166,10 +165,10 @@
           type="file"
           accept="application/json"
           on:change={async e => {
-            const error = await loadStateFromFile(e)
-            if (error) {
-              showMessage(error)
-            }
+            const result = await readProjectFromFile(e)
+            if (!result) return
+            if ('error' in result) showMessage(result.error)
+            else applyLoadedProject(result.project)
           }}
         />
         <ButtonGroup>
