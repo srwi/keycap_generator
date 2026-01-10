@@ -23,6 +23,7 @@
     DropdownMenuTrigger,
   } from '@/lib/components/ui/dropdown-menu'
   import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/lib/components/ui/tabs'
+  import { getPublicPath } from './lib/utils/paths'
 
   let tab: 'models' | 'templates' | 'keys' = 'models'
   let presetsMenuOpen = false
@@ -152,8 +153,13 @@
   <header class="border-b bg-background/80 backdrop-blur">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4">
       <div class="flex-1">
-        <div class="text-lg font-semibold leading-tight">Keycap Generator</div>
-        <div class="text-xs text-muted-foreground">Custom keycap model generator for multi-color 3D printing</div>
+        <div class="flex items-center gap-2 h-12">
+          <img src={getPublicPath('icon.png')} alt="Keycap Generator Icon" class="h-12 mr-2 w-auto object-contain" />
+          <div class="flex-1">
+            <div class="text-lg font-semibold leading-tight">Keycap Generator</div>
+            <div class="text-xs text-muted-foreground">Custom keycap model generator for multi-color 3D printing</div>
+          </div>
+        </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
