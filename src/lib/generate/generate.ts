@@ -337,3 +337,39 @@ export async function generatePreviewModel(
 
   return await generateKeycapModel(state, key, template, baseGeom, yieldAndCheck)
 }
+
+export async function generatePreviewFromTemplate(
+  state: AppState,
+  template: Template,
+  textsBySymbolId: Record<string, string>,
+  stlBuffersByModelId: Record<string, ArrayBuffer | null>,
+  signal?: AbortSignal
+): Promise<Group> {
+  const yieldAndCheck = async () => {
+    await new Promise(r => setTimeout(r, 0))
+    if (signal?.aborted) {
+      throw new Error('Preview generation cancelled')
+    }
+  }
+
+  await yieldAndCheck()
+
+  const model = getModel(state, template)
+  if (!model) throw new Error(`Template "${template.name}" references a missing keycap model.`)
+
+  await yieldAndCheck()
+  const stlBuf = await getStlBufferForModel(model, stlBuffersByModelId)
+  await yieldAndCheck()
+
+  const baseGeom = await processStlForModel(stlBuf, model.rotationX, model.rotationY, model.rotationZ)
+  await yieldAndCheck()
+
+  const key: KeyDef = {
+    id: '__preview__',
+    name: 'Preview',
+    templateId: template.id,
+    textsBySymbolId,
+  }
+
+  return await generateKeycapModel(state, key, template, baseGeom, yieldAndCheck)
+}

@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { onDestroy, tick } from 'svelte'
+  import { onDestroy } from 'svelte'
+  import { generatePreviewFromTemplate, generatePreviewModel } from '../generate/generate'
   import { app } from '../state/store'
-  import { generatePreviewModel } from '../generate/generate'
   import { stlBuffersByModelId } from '../state/sessionAssets'
-  import { newId } from '../utils/id'
   import LabelPreview from './LabelPreview.svelte'
   import Model3DViewer from './Model3DViewer.svelte'
   import { showMessage } from '../state/modalStore'
@@ -26,8 +25,6 @@
   let lastGeneratedKeyId: string | null = null
   let lastGeneratedTextsHash: string = ''
   let lastGeneratedTemplateHash: string = ''
-  let tempKeyId: string | null = null
-  let isInitialized = false
 
   // Compute hash of texts for change detection
   function getTextsHash(texts: Record<string, string>): string {
@@ -73,64 +70,19 @@
     previewAbortController = new AbortController()
 
     try {
-      let effectiveKeyId = keyId
-
-      // If no keyId (template preview), create a temporary key
-      if (!effectiveKeyId) {
-        tempKeyId = newId('temp-key')
-        const tempKey = {
-          id: tempKeyId,
-          name: 'Temp Preview',
-          templateId: template.id,
-          textsBySymbolId,
-        }
-        // Temporarily add to state
-        app.update(s => ({
-          ...s,
-          keys: [...s.keys, tempKey],
-        }))
-        // Wait for state to settle
-        await tick()
-        effectiveKeyId = tempKeyId
-      }
-
-      const model = await generatePreviewModel(
-        $app,
-        effectiveKeyId,
-        $stlBuffersByModelId,
-        previewAbortController.signal
-      )
+      const model = keyId
+        ? await generatePreviewModel($app, keyId, $stlBuffersByModelId, previewAbortController.signal)
+        : await generatePreviewFromTemplate($app, template, textsBySymbolId, $stlBuffersByModelId, previewAbortController.signal)
       previewModel = model
-      // Store the actual keyId (not tempKeyId) for comparison
       lastGeneratedKeyId = keyId ?? null
       lastGeneratedTemplateHash = getTemplateHash(template)
       lastGeneratedTextsHash = getTextsHash(textsBySymbolId)
-      isInitialized = true
-
-      // Clean up temporary key after a short delay to ensure generation is complete
-      if (tempKeyId) {
-        await new Promise(r => setTimeout(r, 100))
-        app.update(s => ({
-          ...s,
-          keys: s.keys.filter(k => k.id !== tempKeyId),
-        }))
-        tempKeyId = null
-      }
     } catch (e) {
       console.error(e)
       if (!(e instanceof Error && e.message === 'Preview generation cancelled')) {
         showMessage(e instanceof Error ? e.message : 'Preview generation failed.')
       }
       previewModel = null
-
-      // Clean up temporary key on error
-      if (tempKeyId) {
-        app.update(s => ({
-          ...s,
-          keys: s.keys.filter(k => k.id !== tempKeyId),
-        }))
-        tempKeyId = null
-      }
     } finally {
       isGeneratingPreview = false
       previewAbortController = null
@@ -151,31 +103,16 @@
   // Reset preview when keyId or template changes (but not during generation)
   $: if (
     !isGeneratingPreview &&
-    isInitialized &&
     (keyId !== lastGeneratedKeyId || getTemplateHash(template) !== lastGeneratedTemplateHash)
   ) {
     previewModel = null
     lastGeneratedKeyId = null
     lastGeneratedTemplateHash = ''
     lastGeneratedTextsHash = ''
-    // Clear tempKeyId if it exists (it will be recreated if needed)
-    if (tempKeyId) {
-      app.update(s => ({
-        ...s,
-        keys: s.keys.filter(k => k.id !== tempKeyId),
-      }))
-      tempKeyId = null
-    }
   }
 
   // Cleanup on destroy
   onDestroy(() => {
-    if (tempKeyId) {
-      app.update(s => ({
-        ...s,
-        keys: s.keys.filter(k => k.id !== tempKeyId),
-      }))
-    }
     if (previewAbortController) {
       previewAbortController.abort()
     }
