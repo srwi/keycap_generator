@@ -2,6 +2,8 @@
   import { app, actions } from '../state/store'
   import { stlBuffersByModelId } from '../state/sessionAssets'
   import { getStlDimensions } from '../generate/stl'
+  import { fetchStlDimensions } from '../services/stlDimensions'
+  import { extractPathFromUrl, findKeycapByPath, loadStlRegistry, type Registry } from '../services/stlRegistry'
   import { showConfirm } from '../state/modalStore'
   import { X, Plus } from 'lucide-svelte'
   import { getPublicPath } from '../utils/paths'
@@ -19,52 +21,11 @@
   import { ScrollArea } from '@/lib/components/ui/scroll-area'
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/lib/components/ui/select'
 
-  type KeycapEntry = {
-    path: string
-    displayName: string
-    author: string
-    authorLink: string
-    license: string
-  }
-
-  type Category = {
-    name: string
-    keycaps: KeycapEntry[]
-  }
-
-  type Registry = {
-    categories: Category[]
-  }
-
   let registry: Registry | null = null
-
-  function extractPathFromUrl(url: string): string | null {
-    const baseUrl = getPublicPath('stls/')
-    if (url.startsWith(baseUrl)) {
-      return url.slice(baseUrl.length)
-    }
-    const stlsIndex = url.indexOf('stls/')
-    if (stlsIndex !== -1) {
-      return url.slice(stlsIndex + 5)
-    }
-    return null
-  }
-
-  function findKeycapByPath(path: string): { category: string; keycap: KeycapEntry } | null {
-    if (!registry) return null
-    for (const category of registry.categories) {
-      const keycap = category.keycaps.find(k => k.path === path)
-      if (keycap) {
-        return { category: category.name, keycap }
-      }
-    }
-    return null
-  }
 
   onMount(async () => {
     try {
-      const response = await fetch(getPublicPath('stls/registry.json'))
-      registry = await response.json()
+      registry = await loadStlRegistry()
     } catch (err) {
       console.error('Failed to load STL registry:', err)
     }
@@ -77,7 +38,7 @@
   $: selectedKeycapInfo = (() => {
     if (!model || !registry || model.source.kind !== 'server') return null
     const path = extractPathFromUrl(model.source.url)
-    return path ? findKeycapByPath(path) : null
+    return path ? findKeycapByPath(registry, path) : null
   })()
 
   $: selectedCategory = selectedKeycapInfo?.category ?? registry?.categories[0]?.name ?? ''
@@ -137,9 +98,7 @@
   }
 
   $: if (model?.source.kind === 'server' && (model.widthMm === 0 || model.heightMm === 0)) {
-    fetch(model.source.url)
-      .then(res => res.arrayBuffer())
-      .then(buf => getStlDimensions(buf))
+    fetchStlDimensions(model.source.url)
       .then(({ widthMm, heightMm }) => actions.updateKeycapModel(model.id, { widthMm, heightMm }))
       .catch(err => console.error('Failed to load server STL dimensions:', err))
   }
@@ -222,7 +181,7 @@
 
   function applyServerModel(keycapPath: string) {
     if (!model || !registry) return
-    const found = findKeycapByPath(keycapPath)
+    const found = findKeycapByPath(registry, keycapPath)
     if (!found) return
 
     const entry = found.keycap

@@ -160,24 +160,6 @@
       <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
         <ModeToggle />
 
-        <DropdownMenu bind:open={presetsMenuOpen}>
-          <DropdownMenuTrigger>
-            {#snippet child({ props })}
-              <Button variant="outline" size="sm" title="Load preset" {...props}>
-                <BookOpen class="size-4" />
-                <span class="sm:hidden">Presets</span>
-                <span class="hidden sm:inline">Load preset</span>
-                <ChevronDown class="size-3" />
-              </Button>
-            {/snippet}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" class="min-w-[160px]">
-            {#each presets as preset}
-              <DropdownMenuItem onclick={() => onLoadPreset(preset.value)}>{preset.label}</DropdownMenuItem>
-            {/each}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
         <input
           bind:this={loadInput}
           class="hidden"
@@ -201,7 +183,25 @@
           </Button>
         </ButtonGroup>
 
-        <Button variant="outline" size="sm" onclick={onClear} title="Clear all">
+        <DropdownMenu bind:open={presetsMenuOpen}>
+          <DropdownMenuTrigger>
+            {#snippet child({ props })}
+              <Button variant="outline" size="sm" title="Load preset" {...props}>
+                <BookOpen class="size-4" />
+                <span class="sm:hidden">Presets</span>
+                <span class="hidden sm:inline">Load preset</span>
+                <ChevronDown class="size-3" />
+              </Button>
+            {/snippet}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="min-w-[160px]">
+            {#each presets as preset}
+              <DropdownMenuItem onclick={() => onLoadPreset(preset.value)}>{preset.label}</DropdownMenuItem>
+            {/each}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Button variant="destructive" size="sm" onclick={onClear} title="Clear all">
           <Trash2 class="size-4" />
           <span class="hidden sm:inline">Clear</span>
         </Button>

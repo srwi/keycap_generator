@@ -7,6 +7,7 @@
   import { X, Plus, ChevronRight } from 'lucide-svelte'
   import HelpTooltip from './HelpTooltip.svelte'
   import { newId } from '../utils/id'
+  import { arrayBufferToBase64, baseNameFromFileName, isTtfFileName, makeUniqueFontName } from '../services/customFonts'
   import { Button } from '@/lib/components/ui/button'
   import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/card'
   import { Field, FieldGroup, FieldLabel } from '@/lib/components/ui/field'
@@ -80,26 +81,6 @@
   let fontUploadInput: HTMLInputElement | null = null
   let fontUploadTarget: { templateId: string; symbolId: string } | null = null
 
-  function arrayBufferToBase64(buf: ArrayBuffer): string {
-    const bytes = new Uint8Array(buf)
-    let binary = ''
-    const chunkSize = 0x8000
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
-    }
-    return btoa(binary)
-  }
-
-  function makeUniqueFontName(baseName: string, existing: Set<string>): string {
-    const trimmed = baseName.trim() || 'Custom Font'
-    if (!existing.has(trimmed)) return trimmed
-    for (let i = 2; i < 1000; i++) {
-      const candidate = `${trimmed} (${i})`
-      if (!existing.has(candidate)) return candidate
-    }
-    return `${trimmed} (${Date.now()})`
-  }
-
   function onClickAddFont(templateId: string, symbolId: string) {
     fontUploadTarget = { templateId, symbolId }
     fontUploadInput?.click()
@@ -114,14 +95,14 @@
     fontUploadTarget = null
 
     if (!file || !target) return
-    if (!file.name.toLowerCase().endsWith('.ttf')) {
+    if (!isTtfFileName(file.name)) {
       showMessage('Please upload a .ttf font file.')
       return
     }
 
     try {
       const buf = await file.arrayBuffer()
-      const baseName = file.name.replace(/\.[^.]+$/, '') || 'Custom Font'
+      const baseName = baseNameFromFileName(file.name) || 'Custom Font'
       const existing = new Set(fontOptions)
       const uniqueName = makeUniqueFontName(baseName, existing)
 
