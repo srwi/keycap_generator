@@ -10,13 +10,23 @@
   import ProcessingModal from './lib/ui/ProcessingModal.svelte'
   import ModalContainer from './lib/ui/ModalContainer.svelte'
   import { showMessage, showConfirm } from './lib/state/modalStore'
-  import { clickOutside } from './lib/ui/actions/clickOutside'
   import { Download, Upload, BookOpen, ChevronDown, Trash2, Github, Star, Heart, Coffee } from 'lucide-svelte'
   import { registerCustomFonts } from './lib/generate/fonts'
+  import ModeToggle from './lib/ui/ModeToggle.svelte'
+  import { initTheme } from './lib/state/theme'
+  import { Button } from '@/lib/components/ui/button'
+  import { ButtonGroup } from '@/lib/components/ui/button-group'
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+  } from '@/lib/components/ui/dropdown-menu'
+  import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/lib/components/ui/tabs'
 
   let tab: 'models' | 'templates' | 'keys' = 'models'
   let presetsMenuOpen = false
-  let presetsMenuRef: HTMLElement
+  let loadInput: HTMLInputElement
 
   const presets = [
     { value: 'numpad', label: 'Numpad' },
@@ -131,6 +141,7 @@
 
   onMount(() => {
     window.addEventListener('beforeunload', handleBeforeUnload)
+    return initTheme({ defaultTheme: 'dark', storageKey: 'vite-ui-theme' })
   })
 
   onDestroy(() => {
@@ -139,122 +150,93 @@
 </script>
 
 <div class="flex min-h-dvh flex-col">
-  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+  <header class="border-b bg-background/80 backdrop-blur">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4">
       <div class="flex-1">
         <div class="text-lg font-semibold leading-tight">Keycap Generator</div>
-        <div class="text-xs text-slate-400">Custom keycap model generator for multi-color 3D printing</div>
+        <div class="text-xs text-muted-foreground">Custom keycap model generator for multi-color 3D printing</div>
       </div>
 
       <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-        <button
-          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs hover:bg-slate-800 sm:px-2.5 sm:text-sm"
-          on:click={() => downloadStateFile($app)}
-          title="Save project"
-        >
-          <Download class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          <span class="hidden sm:inline">Save</span>
-        </button>
+        <ModeToggle />
 
-        <label
-          class="flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs hover:bg-slate-800 sm:px-2.5 sm:text-sm"
-          title="Load project"
-        >
-          <Upload class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          <span class="hidden sm:inline">Load</span>
-          <input
-            class="hidden"
-            type="file"
-            accept="application/json"
-            on:change={async e => {
-              const error = await loadStateFromFile(e)
-              if (error) {
-                showMessage(error)
-              }
-            }}
-          />
-        </label>
+        <DropdownMenu bind:open={presetsMenuOpen}>
+          <DropdownMenuTrigger>
+            {#snippet child({ props })}
+              <Button variant="outline" size="sm" title="Load preset" {...props}>
+                <BookOpen class="size-4" />
+                <span class="sm:hidden">Presets</span>
+                <span class="hidden sm:inline">Load preset</span>
+                <ChevronDown class="size-3" />
+              </Button>
+            {/snippet}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="min-w-[160px]">
+            {#each presets as preset}
+              <DropdownMenuItem onclick={() => onLoadPreset(preset.value)}>{preset.label}</DropdownMenuItem>
+            {/each}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        <div class="relative" bind:this={presetsMenuRef} use:clickOutside={() => (presetsMenuOpen = false)}>
-          <button
-            class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs hover:bg-slate-800 sm:px-2.5 sm:text-sm"
-            on:click={() => (presetsMenuOpen = !presetsMenuOpen)}
-            title="Load preset"
-          >
-            <BookOpen class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            <span class="sm:hidden">Presets</span>
-            <span class="hidden sm:inline">Load preset</span>
-            <ChevronDown class="h-3 w-3" />
-          </button>
-          {#if presetsMenuOpen}
-            <div
-              class="absolute left-0 top-full z-50 mt-1 min-w-[160px] rounded-md border border-slate-700 bg-slate-900 shadow-lg sm:right-0 sm:left-auto"
-            >
-              {#each presets as preset}
-                <button
-                  class="w-full px-3 py-2 text-left text-xs text-slate-100 hover:bg-slate-800 first:rounded-t-md last:rounded-b-md sm:text-sm"
-                  on:click={() => onLoadPreset(preset.value)}
-                >
-                  {preset.label}
-                </button>
-              {/each}
-            </div>
-          {/if}
-        </div>
+        <input
+          bind:this={loadInput}
+          class="hidden"
+          type="file"
+          accept="application/json"
+          on:change={async e => {
+            const error = await loadStateFromFile(e)
+            if (error) {
+              showMessage(error)
+            }
+          }}
+        />
+        <ButtonGroup>
+          <Button variant="outline" size="sm" onclick={() => downloadStateFile($app)} title="Save project">
+            <Download class="size-4" />
+            <span class="hidden sm:inline">Save</span>
+          </Button>
+          <Button variant="outline" size="sm" onclick={() => loadInput?.click()} title="Load project">
+            <Upload class="size-4" />
+            <span class="hidden sm:inline">Load</span>
+          </Button>
+        </ButtonGroup>
 
-        <button
-          class="flex items-center gap-1.5 rounded-md border border-red-700/60 bg-red-950/30 px-2 py-1.5 text-xs text-red-200 hover:bg-red-950/60 sm:px-2.5 sm:text-sm"
-          on:click={onClear}
-          title="Clear all"
-        >
-          <Trash2 class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+        <Button variant="outline" size="sm" onclick={onClear} title="Clear all">
+          <Trash2 class="size-4" />
           <span class="hidden sm:inline">Clear</span>
-        </button>
+        </Button>
       </div>
     </div>
   </header>
 
   <div class="mx-auto flex-1 w-full max-w-6xl px-3 py-4 sm:px-4">
-    <nav class="flex flex-wrap gap-2">
-      <button
-        class="rounded-md px-3 py-1.5 text-sm ring-1 ring-slate-800 hover:bg-slate-900"
-        class:bg-slate-900={tab === 'models'}
-        on:click={() => (tab = 'models')}
-      >
-        Models
-      </button>
-      <button
-        class="rounded-md px-3 py-1.5 text-sm ring-1 ring-slate-800 hover:bg-slate-900"
-        class:bg-slate-900={tab === 'templates'}
-        on:click={() => (tab = 'templates')}
-      >
-        Templates
-      </button>
-      <button
-        class="rounded-md px-3 py-1.5 text-sm ring-1 ring-slate-800 hover:bg-slate-900"
-        class:bg-slate-900={tab === 'keys'}
-        on:click={() => (tab = 'keys')}
-      >
-        Keys
-      </button>
-      <button
-        class="rounded-md border border-emerald-900/60 bg-emerald-950/30 px-3 py-1.5 text-sm font-semibold text-emerald-200 hover:bg-emerald-950/60 disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={$app.keys.length === 0 || missingUploadModels.length > 0 || isGenerating}
-        on:click={onGenerate}
-      >
-        Generate
-      </button>
-    </nav>
+    <Tabs bind:value={tab} class="gap-4">
+      <div class="flex flex-wrap items-center gap-2">
+        <TabsList>
+          <TabsTrigger value="models">Models</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="keys">Keys</TabsTrigger>
+        </TabsList>
 
-    <div class="mt-4">
-      {#if tab === 'models'}
+        <Button
+          class="ml-auto"
+          disabled={$app.keys.length === 0 || missingUploadModels.length > 0 || isGenerating}
+          onclick={onGenerate}
+        >
+          Generate
+        </Button>
+      </div>
+
+      <TabsContent value="models">
         <KeycapModelsEditor />
-      {:else if tab === 'templates'}
+      </TabsContent>
+      <TabsContent value="templates">
         <TemplateEditor />
-      {:else if tab === 'keys'}
+      </TabsContent>
+      <TabsContent value="keys">
         <KeyEditor />
-      {/if}
-    </div>
+      </TabsContent>
+    </Tabs>
   </div>
 
   {#if isGenerating}
@@ -272,55 +254,59 @@
 
   <ModalContainer />
 
-  <footer class="mt-auto border-t border-slate-800 bg-slate-950/80 backdrop-blur">
+  <footer class="mt-auto border-t bg-background/80 backdrop-blur">
     <div
       class="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-3 py-6 sm:flex-row sm:px-4"
     >
       <div class="flex items-center gap-4">
-        <a
+        <Button
           href="https://github.com/srwi/keycap_generator"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-2 rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-800 hover:text-slate-100"
+          variant="outline"
+          size="sm"
         >
           <Github class="h-4 w-4" />
           <span>View on GitHub</span>
-        </a>
+        </Button>
 
-        <a
+        <Button
           href="https://github.com/srwi/keycap_generator"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-2 rounded-md border border-emerald-700/60 bg-emerald-950/30 px-4 py-2 text-sm font-medium text-emerald-200 transition-all hover:border-emerald-600/60 hover:bg-emerald-950/60 hover:text-emerald-100"
+          variant="outline"
+          size="sm"
         >
-          <Star class="h-4 w-4" />
+          <Star class="h-4 w-4 text-yellow-500" />
           <span>Star</span>
-        </a>
+        </Button>
       </div>
 
       <div class="flex items-center gap-3">
-        <span class="text-sm text-slate-400">Donate:</span>
-        <a
+        <span class="text-sm text-muted-foreground">Donate:</span>
+        <Button
           href="https://paypal.me/rumswinkel"
           target="_blank"
           rel="noopener noreferrer"
           title="Support this project via PayPal"
-          class="flex items-center gap-2 rounded-md border border-blue-700/60 bg-blue-950/30 px-4 py-2 text-sm font-medium text-blue-200 transition-all hover:border-blue-600/60 hover:bg-blue-950/60 hover:text-blue-100"
+          variant="outline"
+          size="sm"
         >
-          <Heart class="h-4 w-4" />
+          <Heart class="h-4 w-4 text-rose-500" />
           <span>PayPal</span>
-        </a>
+        </Button>
 
-        <a
+        <Button
           href="https://ko-fi.com/stephanrwi"
           target="_blank"
           rel="noopener noreferrer"
           title="Support this project via Ko-fi"
-          class="flex items-center gap-2 rounded-md border border-orange-700/60 bg-orange-950/30 px-4 py-2 text-sm font-medium text-orange-200 transition-all hover:border-orange-600/60 hover:bg-orange-950/60 hover:text-orange-100"
+          variant="outline"
+          size="sm"
         >
-          <Coffee class="h-4 w-4" />
+          <Coffee class="h-4 w-4 text-amber-500" />
           <span>Ko-fi</span>
-        </a>
+        </Button>
       </div>
     </div>
   </footer>

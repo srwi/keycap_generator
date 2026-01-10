@@ -10,12 +10,14 @@
   import type { Template } from '../state/types'
   import type { Group } from 'three'
   import { RefreshCw } from 'lucide-svelte'
+  import { Button } from '@/lib/components/ui/button'
 
   export let template: Template | null = null
   export let textsBySymbolId: Record<string, string> = {}
   export let widthMm: number
   export let heightMm: number
   export let keyId: string | null = null // For generating 3D preview (null for templates)
+  export let is3d = false
 
   let viewMode: '2d' | '3d' = '2d'
   let previewModel: Group | null = null
@@ -50,12 +52,13 @@
     )
   }
 
-  // Check if 3D preview is out of date
-  $: isOutOfDate =
-    viewMode === '3d' &&
-    (lastGeneratedKeyId !== keyId ||
-      lastGeneratedTemplateHash !== getTemplateHash(template) ||
-      lastGeneratedTextsHash !== getTextsHash(textsBySymbolId))
+  $: needsRegenerate =
+    lastGeneratedKeyId !== keyId ||
+    lastGeneratedTemplateHash !== getTemplateHash(template) ||
+    lastGeneratedTextsHash !== getTextsHash(textsBySymbolId)
+
+  // Check if 3D preview is out of date (only relevant when viewing 3D)
+  $: isOutOfDate = viewMode === '3d' && needsRegenerate
 
   async function generate3DPreview() {
     if (!template || isGeneratingPreview) return
@@ -134,16 +137,9 @@
     }
   }
 
-  function onToggleView() {
-    if (viewMode === '2d') {
-      viewMode = '3d'
-      // Generate preview if we don't have one or it's out of date
-      if (template && (!previewModel || isOutOfDate)) {
-        generate3DPreview()
-      }
-    } else {
-      viewMode = '2d'
-    }
+  $: viewMode = is3d ? '3d' : '2d'
+  $: if (is3d && template && (!previewModel || needsRegenerate)) {
+    generate3DPreview()
   }
 
   function onRefresh3D() {
@@ -187,45 +183,9 @@
 </script>
 
 <div class="flex flex-col gap-3">
-  <div class="flex items-center justify-between min-h-[2rem]">
-    <div class="text-sm font-semibold">Preview</div>
-    <button
-      class="relative inline-flex items-center rounded-md border border-slate-700 bg-slate-900 p-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-      on:click={onToggleView}
-      disabled={!template}
-      role="switch"
-      aria-checked={viewMode === '3d'}
-    >
-      <span class="relative flex w-full items-center">
-        <span
-          class="relative z-10 flex-1 rounded px-2 py-1.5 text-xs font-medium transition-colors text-center {viewMode ===
-          '2d'
-            ? 'text-slate-200'
-            : 'text-slate-400'}"
-        >
-          2D
-        </span>
-        <span
-          class="relative z-10 flex-1 rounded px-2 py-1.5 text-xs font-medium transition-colors text-center {viewMode ===
-          '3d'
-            ? 'text-slate-200'
-            : 'text-slate-400'}"
-        >
-          3D
-        </span>
-      </span>
-      <span
-        class="absolute top-0.5 bottom-0.5 left-0.5 w-[calc(50%)] rounded bg-slate-800 transition-all duration-200 ease-in-out {viewMode ===
-        '3d'
-          ? 'translate-x-[calc(100%-0.25rem)]'
-          : 'translate-x-0'}"
-      ></span>
-    </button>
-  </div>
-
   <div class="relative">
     {#if !template}
-      <div class="flex items-center justify-center h-64 text-sm text-slate-400">Select a key to preview</div>
+      <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">Select a key to preview</div>
     {:else if viewMode === '2d'}
       <div class="flex items-center justify-center">
         <LabelPreview {template} {textsBySymbolId} {widthMm} {heightMm} className="max-w-[340px]" />
@@ -237,10 +197,10 @@
 
         {#if isGeneratingPreview}
           <!-- Loading overlay -->
-          <div class="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-10">
+          <div class="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
             <div class="flex flex-col items-center gap-3">
               <svg
-                class="animate-spin h-8 w-8 text-blue-400"
+                class="animate-spin h-8 w-8 text-primary"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -252,10 +212,11 @@
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              <div class="text-sm text-slate-300">Generating preview…</div>
-              <button
-                class="mt-1 rounded-md border border-red-900/60 bg-red-950/30 px-3 py-1.5 text-xs text-red-200 hover:bg-red-950/60 transition-colors"
-                on:click={() => {
+              <div class="text-sm text-muted-foreground">Generating preview…</div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onclick={() => {
                   if (previewAbortController) {
                     previewAbortController.abort()
                     previewAbortController = null
@@ -265,19 +226,16 @@
                 }}
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         {:else if !previewModel || isOutOfDate}
           <!-- No preview or out of date - show refresh button overlay -->
-          <div class="absolute inset-0 bg-slate-950/60 flex items-center justify-center z-10 backdrop-blur-sm">
-            <button
-              class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg font-medium"
-              on:click={onRefresh3D}
-            >
-              <RefreshCw class="h-4 w-4" />
+          <div class="absolute inset-0 bg-background/60 flex items-center justify-center z-10 backdrop-blur-sm">
+            <Button variant="secondary" class="flex items-center gap-2" onclick={onRefresh3D}>
+              <RefreshCw class="size-4" />
               {previewModel ? 'Refresh 3D Preview' : 'Generate 3D Preview'}
-            </button>
+            </Button>
           </div>
         {/if}
       </div>

@@ -4,28 +4,54 @@
   import KeycapPreview from './KeycapPreview.svelte'
   import { showConfirm, showMessage } from '../state/modalStore'
   import { slide } from 'svelte/transition'
-  import { Trash2, Plus, ChevronRight } from 'lucide-svelte'
+  import { X, Plus, ChevronRight } from 'lucide-svelte'
   import HelpTooltip from './HelpTooltip.svelte'
   import { newId } from '../utils/id'
+  import { Button } from '@/lib/components/ui/button'
+  import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/card'
+  import { Field, FieldGroup, FieldLabel } from '@/lib/components/ui/field'
+  import { Input } from '@/lib/components/ui/input'
+  import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/lib/components/ui/item'
+  import { ScrollArea } from '@/lib/components/ui/scroll-area'
+  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/lib/components/ui/select'
+  import { Switch } from '@/lib/components/ui/switch'
+  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/lib/components/ui/tooltip'
 
   $: tpl = $selectedTemplate
-  $: usedByKeyCount = tpl == null ? 0 : $app.keys.filter(k => k.templateId === tpl.id).length
   $: hasModels = $app.keycapModels.length > 0
+  let selectedKeycapModelId: string = ''
+  let prevKeycapModelId: string | null = null
+  $: if (tpl && tpl.keycapModelId !== prevKeycapModelId) {
+    prevKeycapModelId = tpl.keycapModelId
+    selectedKeycapModelId = tpl.keycapModelId
+  }
+  $: if (tpl && selectedKeycapModelId !== tpl.keycapModelId) {
+    actions.setTemplateKeycapModel(tpl.id, selectedKeycapModelId)
+  }
 
-  let showTooltip = false
+  function deleteTemplateById(templateId: string) {
+    const t = $app.templates.find(t => t.id === templateId)
+    if (!t) return
 
-  function onDeleteTemplate() {
-    if (!tpl) return
+    const usedByKeyCount = $app.keys.filter(k => k.templateId === t.id).length
     if (usedByKeyCount > 0) {
       showConfirm(
-        `Template "${tpl.name}" is used by ${usedByKeyCount} key(s).\n\nIf you delete it, those keys will be removed as well.\n\nDelete template?`,
+        `Template "${t.name}" is used by ${usedByKeyCount} key(s).\n\nIf you delete it, those keys will be removed as well.\n\nDelete template?`,
         () => {
-          actions.deleteTemplate(tpl.id)
+          actions.deleteTemplate(t.id)
         }
       )
       return
     }
-    actions.deleteTemplate(tpl.id)
+
+    actions.deleteTemplate(t.id)
+  }
+
+  function onRowKeydown(ev: KeyboardEvent, action: () => void) {
+    if (ev.key === 'Enter' || ev.key === ' ') {
+      ev.preventDefault()
+      action()
+    }
   }
 
   import { AVAILABLE_FONTS } from '../generate/fonts'
@@ -38,6 +64,8 @@
   $: modelHeightMm = model?.heightMm ?? 0
 
   $: previewTextsBySymbolId = tpl ? Object.fromEntries(tpl.symbols.map((s, index) => [s.id, getSlotSymbol(index)])) : {}
+
+  let previewIs3d = false
 
   function clamp(n: number, min: number, max: number) {
     return Math.min(max, Math.max(min, n))
@@ -141,291 +169,341 @@
 </script>
 
 <div class="grid gap-4 lg:grid-cols-12">
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    <div class="flex items-center justify-between gap-3 min-h-[2rem]">
-      <div class="flex items-center gap-2">
-        <div class="text-sm font-semibold">Templates</div>
-        <HelpTooltip
-          text="A template defines the layout and styling of symbols (labels) on a keycap. It specifies where text appears, what font, size, color, and rotation to use. Multiple keys can share the same template but display different text values. Templates are linked to a specific keycap model size."
-        />
-      </div>
-      <div class="flex items-center gap-2">
-        <button
-          class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={!tpl}
-          on:click={onDeleteTemplate}
-          title="Delete template"
-        >
-          <Trash2 class="h-4 w-4" />
-          <span>Delete</span>
-        </button>
-        <div class="relative inline-flex items-center">
-          <button
-            class="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!hasModels}
-            on:click={actions.createTemplate}
-            on:mouseenter={() => !hasModels && (showTooltip = true)}
-            on:mouseleave={() => (showTooltip = false)}
-            title={hasModels ? 'New template' : ''}
-          >
-            <Plus class="h-4 w-4" />
-            <span>New</span>
-          </button>
-          {#if !hasModels && showTooltip}
-            <div
-              class="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 z-50 w-64 p-3 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-200 shadow-lg"
-              role="tooltip"
-            >
-              <div class="whitespace-normal">
+  <Card class="lg:col-span-4">
+    <CardHeader class="border-b">
+      <div class="flex items-center justify-between gap-3 min-h-8">
+        <div class="flex items-center gap-2 min-w-0">
+          <CardTitle class="text-base">Templates</CardTitle>
+          <HelpTooltip
+            text="A template defines the layout and styling of symbols (labels) on a keycap. It specifies where text appears, what font, size, color, and rotation to use. Multiple keys can share the same template but display different text values. Templates are linked to a specific keycap model size."
+          />
+        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              {#snippet child({ props })}
+                <Button
+                  size="sm"
+                  disabled={!hasModels}
+                  onclick={actions.createTemplate}
+                  title="New template"
+                  {...props}
+                >
+                  <Plus class="size-4" />
+                  <span class="hidden sm:inline">New</span>
+                </Button>
+              {/snippet}
+            </TooltipTrigger>
+            {#if !hasModels}
+              <TooltipContent class="max-w-xs whitespace-normal">
                 Create at least one model before creating a template. Templates require a keycap model to define their
                 size and shape.
-              </div>
-              <!-- Arrow -->
-              <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-                <div class="w-2 h-2 border-l border-b border-slate-700 bg-slate-900 rotate-[-45deg]"></div>
-              </div>
-            </div>
-          {/if}
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-3 grid gap-2">
-      {#each $app.templates as t (t.id)}
-        {@const tModel = getTemplateModel(t.id)}
-        {@const previewTexts = Object.fromEntries(t.symbols.map((s, index) => [s.id, getSlotSymbol(index)]))}
-        <button
-          class="flex w-full items-center justify-between gap-2 rounded-md border border-slate-800 px-3 py-2 text-left hover:bg-slate-900"
-          class:bg-slate-900={$app.ui.selectedTemplateId === t.id}
-          on:click={() => actions.selectTemplate(t.id)}
-        >
-          <div class="min-w-0 flex-1">
-            <div class="truncate text-sm font-medium">{t.name}</div>
-            <div class="truncate text-xs text-slate-400">
-              {$app.keycapModels.find(m => m.id === t.keycapModelId)?.name ?? '—'}
-            </div>
-          </div>
-          <div class="h-10 w-10 -mr-1 flex-shrink-0 flex items-center justify-center">
-            {#if tModel}
-              <LabelPreview
-                template={t}
-                textsBySymbolId={previewTexts}
-                widthMm={tModel.widthMm}
-                heightMm={tModel.heightMm}
-                className="rounded"
-              />
+              </TooltipContent>
             {/if}
-          </div>
-        </button>
-      {/each}
-    </div>
-  </section>
-
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    <div class="flex items-center min-h-[2rem]">
-      <div class="text-sm font-semibold">Template configuration</div>
-    </div>
-
-    {#if !tpl}
-      <div class="mt-3 flex items-center justify-center h-64 text-sm text-slate-400">
-        Create/select a template to edit.
+          </Tooltip>
+        </TooltipProvider>
       </div>
-    {:else}
-      <div class="mt-3 grid gap-3">
-        <label class="grid gap-1 text-xs text-slate-400">
-          Name
-          <input
-            class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-            value={tpl.name}
-            on:input={e => actions.renameTemplate(tpl.id, (e.currentTarget as HTMLInputElement).value)}
-          />
-        </label>
+    </CardHeader>
 
-        <label class="grid gap-1 text-xs text-slate-400">
-          Keycap model
-          <select
-            class="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-            value={tpl.keycapModelId}
-            on:change={e => actions.setTemplateKeycapModel(tpl.id, (e.currentTarget as HTMLSelectElement).value)}
-          >
-            {#each $app.keycapModels as km (km.id)}
-              <option value={km.id}>{km.name}</option>
-            {/each}
-          </select>
-        </label>
-
-        <div class="mt-2">
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-              <div class="text-xs font-semibold text-slate-300">Symbols</div>
-              <HelpTooltip
-                text="Symbols represent different label positions on a keycap (e.g., primary, secondary, tertiary). You can add multiple symbols to create keys with multiple labels, each with its own position, font, size, rotation, and color. This allows you to create keys with legends, modifiers, or multi-character labels."
-              />
-            </div>
-            <button
-              class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={tpl.symbols.length >= MAX_SLOTS}
-              on:click={() => actions.addSymbol(tpl.id)}
+    <CardContent>
+      <ScrollArea class="h-[32rem] w-full">
+        <div class="grid gap-2 p-1">
+          {#each $app.templates as t (t.id)}
+            {@const tModel = getTemplateModel(t.id)}
+            {@const previewTexts = Object.fromEntries(t.symbols.map((s, index) => [s.id, getSlotSymbol(index)]))}
+            <Item
+              size="sm"
+              variant={$app.ui.selectedTemplateId === t.id ? 'muted' : 'outline'}
+              class="w-full justify-between"
             >
-              Add symbol
-            </button>
-          </div>
-
-          <div class="mt-3 grid gap-3">
-            {#each tpl.symbols as sym (sym.id)}
-              {@const isCollapsed = collapsedSymbols.has(sym.id)}
-              <div class="rounded-lg border border-slate-800 bg-slate-900/50 overflow-hidden">
-                <div class="flex items-center justify-between gap-2 p-3">
-                  <button
-                    type="button"
-                    class="flex items-center gap-2 flex-1 min-w-0 hover:bg-slate-900/50 transition-colors rounded px-2 py-1 -mx-2 -my-1"
-                    on:click={() => toggleSymbol(sym.id)}
-                  >
-                    <ChevronRight
-                      class="h-4 w-4 text-slate-400 transition-transform {isCollapsed ? '' : 'rotate-90'}"
-                    />
-                    <span class="text-sm font-medium text-slate-200 truncate capitalize"
-                      >{getSlotName(tpl.symbols.indexOf(sym))} ({getSlotSymbol(tpl.symbols.indexOf(sym))})</span
-                    >
-                  </button>
-                  <button
-                    class="rounded-md border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 hover:bg-slate-900"
-                    on:click={() => actions.deleteSymbol(tpl.id, sym.id)}
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                {#if !isCollapsed}
-                  <div class="p-3 pt-0 space-y-3" transition:slide={{ duration: 200 }}>
-                    <div class="grid grid-cols-2 gap-3">
-                      <label class="grid gap-1 text-xs text-slate-400">
-                        X (mm)
-                        <input
-                          class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                          type="number"
-                          step="0.1"
-                          value={sym.x}
-                          on:input={e =>
-                            actions.updateSymbol(tpl.id, sym.id, {
-                              x: Number((e.currentTarget as HTMLInputElement).value),
-                            })}
-                        />
-                      </label>
-                      <label class="grid gap-1 text-xs text-slate-400">
-                        Y (mm)
-                        <input
-                          class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                          type="number"
-                          step="0.1"
-                          value={sym.y}
-                          on:input={e =>
-                            actions.updateSymbol(tpl.id, sym.id, {
-                              y: Number((e.currentTarget as HTMLInputElement).value),
-                            })}
-                        />
-                      </label>
-                    </div>
-
-                    <div class="mt-3">
-                      <label class="grid gap-1 text-xs text-slate-400">
-                        Font
-                        <div class="flex items-center gap-2">
-                          <select
-                            class="flex-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                            value={sym.fontName}
-                            on:change={e =>
-                              actions.updateSymbol(tpl.id, sym.id, {
-                                fontName: (e.currentTarget as HTMLSelectElement).value,
-                              })}
-                          >
-                            {#each fontOptions as fontName}
-                              <option value={fontName}>{fontName}</option>
-                            {/each}
-                          </select>
-                          <button
-                            type="button"
-                            class="inline-flex items-center justify-center rounded-md border border-slate-700 bg-slate-900 h-9 w-9 hover:bg-slate-800"
-                            title="Add font"
-                            on:click={() => onClickAddFont(tpl.id, sym.id)}
-                          >
-                            <Plus class="h-4 w-4" />
-                            <span class="sr-only">Add font</span>
-                          </button>
-                        </div>
-                      </label>
-                    </div>
-
-                    <div class="mt-3 grid grid-cols-2 gap-3">
-                      <label class="grid gap-1 text-xs text-slate-400">
-                        Size (mm)
-                        <input
-                          class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                          type="number"
-                          min="0.1"
-                          step="0.1"
-                          value={sym.fontSizeMm}
-                          on:input={e =>
-                            actions.updateSymbol(tpl.id, sym.id, {
-                              fontSizeMm: Number((e.currentTarget as HTMLInputElement).value),
-                            })}
-                        />
-                      </label>
-                      <label class="grid gap-1 text-xs text-slate-400">
-                        Rotation (deg)
-                        <input
-                          class="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
-                          type="number"
-                          step="1"
-                          value={sym.rotationDeg}
-                          on:input={e =>
-                            actions.updateSymbol(tpl.id, sym.id, {
-                              rotationDeg: Number((e.currentTarget as HTMLInputElement).value),
-                            })}
-                        />
-                      </label>
-                    </div>
-
-                    <label class="grid gap-1 text-xs text-slate-400">
-                      Color
-                      <div class="flex items-center gap-2">
-                        <input
-                          class="h-9 w-20 rounded-md border border-slate-700 bg-slate-900"
-                          type="color"
-                          value={sym.color}
-                          on:input={e =>
-                            actions.updateSymbol(tpl.id, sym.id, {
-                              color: (e.currentTarget as HTMLInputElement).value,
-                            })}
-                        />
-                        <span class="text-xs text-slate-500 font-mono">{sym.color}</span>
-                      </div>
-                    </label>
+              {#snippet child({ props })}
+                <div
+                  {...props}
+                  class={(props.class as string) + ' w-full flex items-center gap-2'}
+                  role="button"
+                  tabindex="0"
+                  onclick={() => actions.selectTemplate(t.id)}
+                  onkeydown={(ev: KeyboardEvent) => onRowKeydown(ev, () => actions.selectTemplate(t.id))}
+                >
+                  <div class="h-10 w-10 flex-shrink-0 flex items-center justify-start">
+                    {#if tModel}
+                      <LabelPreview
+                        template={t}
+                        textsBySymbolId={previewTexts}
+                        widthMm={tModel.widthMm}
+                        heightMm={tModel.heightMm}
+                        className="rounded"
+                      />
+                    {/if}
                   </div>
-                {/if}
-              </div>
-            {/each}
-          </div>
+                  <ItemContent class="min-w-0 flex-1">
+                    <ItemTitle class="truncate">{t.name}</ItemTitle>
+                    <ItemDescription class="truncate">
+                      {$app.keycapModels.find(m => m.id === t.keycapModelId)?.name ?? '—'}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions class="ms-auto">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      class="text-foreground/70 hover:text-foreground hover:bg-muted"
+                      title="Delete template"
+                      onclick={(ev: MouseEvent) => {
+                        ev.preventDefault()
+                        ev.stopPropagation()
+                        deleteTemplateById(t.id)
+                      }}
+                    >
+                      <X class="size-4" />
+                    </Button>
+                  </ItemActions>
+                </div>
+              {/snippet}
+            </Item>
+          {/each}
         </div>
+      </ScrollArea>
+    </CardContent>
+  </Card>
+
+  <Card class="lg:col-span-4">
+    <CardHeader class="border-b">
+      <div class="flex items-center justify-between gap-3 min-h-8">
+        <CardTitle class="text-base">Template configuration</CardTitle>
       </div>
-    {/if}
-  </section>
+    </CardHeader>
+
+    <CardContent>
+      {#if !tpl}
+        <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
+          Create/select a template to edit.
+        </div>
+      {:else}
+        {@const nameId = `template-${tpl.id}-name`}
+        {@const modelId = `template-${tpl.id}-keycap-model`}
+
+        <FieldGroup>
+          <Field>
+            <FieldLabel for={nameId}>Name</FieldLabel>
+            <Input
+              id={nameId}
+              value={tpl.name}
+              oninput={e => actions.renameTemplate(tpl.id, (e.currentTarget as HTMLInputElement).value)}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel for={modelId}>Keycap model</FieldLabel>
+            <Select type="single" bind:value={selectedKeycapModelId}>
+              <SelectTrigger id={modelId} class="w-full" data-placeholder={!selectedKeycapModelId}>
+                <SelectValue
+                  placeholder="Select a model"
+                  value={$app.keycapModels.find(m => m.id === selectedKeycapModelId)?.name ?? null}
+                />
+              </SelectTrigger>
+              <SelectContent class="w-full">
+                {#each $app.keycapModels as km (km.id)}
+                  <SelectItem value={km.id} label={km.name} />
+                {/each}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <div class="grid gap-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <div class="text-sm font-medium">Symbols</div>
+                <HelpTooltip
+                  text="Symbols represent different label positions on a keycap (e.g., primary, secondary, tertiary). You can add multiple symbols to create keys with multiple labels, each with its own position, font, size, rotation, and color. This allows you to create keys with legends, modifiers, or multi-character labels."
+                />
+              </div>
+              <Button size="sm" disabled={tpl.symbols.length >= MAX_SLOTS} onclick={() => actions.addSymbol(tpl.id)}>
+                <Plus class="size-4" />
+                Add
+              </Button>
+            </div>
+
+            <div class="grid gap-3">
+              {#each tpl.symbols as sym (sym.id)}
+                {@const isCollapsed = collapsedSymbols.has(sym.id)}
+                <div class="card-box overflow-hidden">
+                  <div class="flex items-center justify-between gap-2 px-2 py-2">
+                    <Button
+                      variant="ghost"
+                      class="h-auto flex-1 justify-start hover:bg-accent/40 dark:hover:bg-accent/20"
+                      onclick={() => toggleSymbol(sym.id)}
+                    >
+                      <ChevronRight
+                        class="size-4 text-muted-foreground transition-transform {isCollapsed ? '' : 'rotate-90'}"
+                      />
+                      <span class="truncate capitalize"
+                        >{getSlotName(tpl.symbols.indexOf(sym))} ({getSlotSymbol(tpl.symbols.indexOf(sym))})</span
+                      >
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      class="text-foreground/70 hover:text-foreground hover:bg-muted"
+                      title="Remove symbol"
+                      onclick={() => actions.deleteSymbol(tpl.id, sym.id)}
+                    >
+                      <X class="size-4" />
+                    </Button>
+                  </div>
+
+                  {#if !isCollapsed}
+                    <div class="p-3 pt-0" transition:slide={{ duration: 200 }}>
+                      <FieldGroup>
+                        <div class="grid grid-cols-2 gap-3">
+                          <Field>
+                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-x`}>X (mm)</FieldLabel>
+                            <Input
+                              id={`template-${tpl.id}-symbol-${sym.id}-x`}
+                              type="number"
+                              step="0.1"
+                              value={sym.x}
+                              oninput={e =>
+                                actions.updateSymbol(tpl.id, sym.id, {
+                                  x: Number((e.currentTarget as HTMLInputElement).value),
+                                })}
+                            />
+                          </Field>
+
+                          <Field>
+                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-y`}>Y (mm)</FieldLabel>
+                            <Input
+                              id={`template-${tpl.id}-symbol-${sym.id}-y`}
+                              type="number"
+                              step="0.1"
+                              value={sym.y}
+                              oninput={e =>
+                                actions.updateSymbol(tpl.id, sym.id, {
+                                  y: Number((e.currentTarget as HTMLInputElement).value),
+                                })}
+                            />
+                          </Field>
+                        </div>
+
+                        <Field>
+                          <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-font`}>Font</FieldLabel>
+                          <div class="flex items-center gap-2">
+                            <Select
+                              type="single"
+                              value={sym.fontName}
+                              onValueChange={(fontName: string) => actions.updateSymbol(tpl.id, sym.id, { fontName })}
+                            >
+                              <SelectTrigger
+                                id={`template-${tpl.id}-symbol-${sym.id}-font`}
+                                class="w-full flex-1"
+                                data-placeholder={!sym.fontName}
+                              >
+                                <SelectValue placeholder="Select a font" value={sym.fontName} />
+                              </SelectTrigger>
+                              <SelectContent class="w-full">
+                                {#each fontOptions as fontName}
+                                  <SelectItem value={fontName} label={fontName} />
+                                {/each}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              type="button"
+                              title="Add font"
+                              onclick={() => onClickAddFont(tpl.id, sym.id)}
+                            >
+                              <Plus class="size-4" />
+                            </Button>
+                          </div>
+                        </Field>
+
+                        <div class="grid grid-cols-2 gap-3">
+                          <Field>
+                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-size`}>Size (mm)</FieldLabel>
+                            <Input
+                              id={`template-${tpl.id}-symbol-${sym.id}-size`}
+                              type="number"
+                              min="0.1"
+                              step="0.1"
+                              value={sym.fontSizeMm}
+                              oninput={e =>
+                                actions.updateSymbol(tpl.id, sym.id, {
+                                  fontSizeMm: Number((e.currentTarget as HTMLInputElement).value),
+                                })}
+                            />
+                          </Field>
+
+                          <Field>
+                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-rotation`}>Rotation (deg)</FieldLabel>
+                            <Input
+                              id={`template-${tpl.id}-symbol-${sym.id}-rotation`}
+                              type="number"
+                              step="1"
+                              value={sym.rotationDeg}
+                              oninput={e =>
+                                actions.updateSymbol(tpl.id, sym.id, {
+                                  rotationDeg: Number((e.currentTarget as HTMLInputElement).value),
+                                })}
+                            />
+                          </Field>
+                        </div>
+
+                        <Field>
+                          <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-color`}>Color</FieldLabel>
+                          <div class="flex items-center gap-2">
+                            <input
+                              id={`template-${tpl.id}-symbol-${sym.id}-color`}
+                              class="h-9 w-20 rounded-md border border-input bg-background"
+                              type="color"
+                              value={sym.color}
+                              oninput={e =>
+                                actions.updateSymbol(tpl.id, sym.id, {
+                                  color: (e.currentTarget as HTMLInputElement).value,
+                                })}
+                            />
+                            <span class="text-xs text-muted-foreground font-mono">{sym.color}</span>
+                          </div>
+                        </Field>
+                      </FieldGroup>
+                    </div>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          </div>
+        </FieldGroup>
+      {/if}
+    </CardContent>
+  </Card>
 
   <input
     class="hidden"
     bind:this={fontUploadInput}
     type="file"
     accept=".ttf,font/ttf,application/x-font-ttf"
-    on:change={onFontUploadChange}
+    onchange={onFontUploadChange}
   />
 
-  <section class="rounded-lg border border-slate-800 bg-slate-950 p-4 lg:col-span-4">
-    <KeycapPreview
-      template={tpl}
-      textsBySymbolId={previewTextsBySymbolId}
-      widthMm={modelWidthMm}
-      heightMm={modelHeightMm}
-      keyId={null}
-    />
-  </section>
+  <Card class="lg:col-span-4">
+    <CardHeader class="border-b">
+      <div class="flex items-center justify-between gap-3 min-h-8">
+        <CardTitle class="text-base">Preview</CardTitle>
+        <div class="flex items-center gap-2">
+          <span class={previewIs3d ? 'text-xs text-muted-foreground' : 'text-xs font-medium'}>2D</span>
+          <Switch bind:checked={previewIs3d} disabled={!tpl} aria-label="Toggle 3D preview" />
+          <span class={previewIs3d ? 'text-xs font-medium' : 'text-xs text-muted-foreground'}>3D</span>
+        </div>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <KeycapPreview
+        template={tpl}
+        textsBySymbolId={previewTextsBySymbolId}
+        widthMm={modelWidthMm}
+        heightMm={modelHeightMm}
+        keyId={null}
+        bind:is3d={previewIs3d}
+      />
+    </CardContent>
+  </Card>
 </div>

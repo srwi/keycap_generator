@@ -1,7 +1,9 @@
 <script lang="ts">
-  import Modal from './Modal.svelte'
   import LabelPreview from './LabelPreview.svelte'
   import type { Template } from '../state/types'
+  import { Button } from '@/lib/components/ui/button'
+  import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/lib/components/ui/dialog'
+  import { Progress } from '@/lib/components/ui/progress'
 
   export let title: string
   export let onCancel: () => void
@@ -15,35 +17,36 @@
   $: progressPercent = total > 0 ? (current / total) * 100 : 0
 </script>
 
-<Modal {title}>
-  {#if previewTemplate}
-    <div class="flex justify-center mb-6">
-      <LabelPreview
-        template={previewTemplate}
-        textsBySymbolId={previewTextsBySymbolId}
-        widthMm={previewWidthMm}
-        heightMm={previewHeightMm}
-        className="max-w-[120px]"
-      />
-    </div>
-  {/if}
+<Dialog open={true}>
+  <DialogContent showCloseButton={false} class="sm:max-w-md">
+    <DialogHeader>
+      <DialogTitle>{title}</DialogTitle>
+    </DialogHeader>
 
-  {#if total > 0}
-    <div class="w-full mb-6">
-      <div class="flex justify-between text-xs text-slate-400 mb-2">
-        <span>{current} / {total}</span>
-        <span>{Math.round(progressPercent)}%</span>
+    {#if previewTemplate}
+      <div class="flex justify-center">
+        <LabelPreview
+          template={previewTemplate}
+          textsBySymbolId={previewTextsBySymbolId}
+          widthMm={previewWidthMm}
+          heightMm={previewHeightMm}
+          className="max-w-[120px]"
+        />
       </div>
-      <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-        <div class="h-full bg-emerald-500 transition-all duration-300 ease-out" style="width: {progressPercent}%"></div>
-      </div>
-    </div>
-  {/if}
+    {/if}
 
-  <button
-    class="rounded-md border border-red-900/60 bg-red-950/30 px-4 py-2 text-sm text-red-200 hover:bg-red-950/60 transition-colors"
-    on:click={onCancel}
-  >
-    Cancel
-  </button>
-</Modal>
+    {#if total > 0}
+      <div class="space-y-2">
+        <div class="flex justify-between text-xs text-muted-foreground">
+          <span>{current} / {total}</span>
+          <span>{Math.round(progressPercent)}%</span>
+        </div>
+        <Progress value={progressPercent} />
+      </div>
+    {/if}
+
+    <DialogFooter>
+      <Button variant="destructive" onclick={onCancel}>Cancel</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>

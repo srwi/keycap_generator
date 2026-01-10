@@ -39,7 +39,7 @@
   preserveAspectRatio="xMidYMid meet"
   style={`aspect-ratio: ${w} / ${h};`}
 >
-  <rect x={0} y={0} width={w} height={h} fill="rgba(148,163,184,0.25)" rx={r} />
+  <rect x={0} y={0} width={w} height={h} fill="var(--label-preview-bg)" rx={r} />
 
   {#if template}
     {#await symbolPaths}
