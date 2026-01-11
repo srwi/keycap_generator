@@ -4,7 +4,8 @@ import { makeMesh, csgIntersect, csgSubtract, csgUnionMeshes } from './csg'
 import { KEYCAP_BODY_COLOR } from './materials'
 import { getFont } from './fonts'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
-import { MathUtils, Group, Mesh, BufferGeometry } from 'three'
+import { BufferGeometry, Group, MathUtils, Mesh } from 'three'
+import { groupFromPreviewMeshes, type PreviewMeshPayload } from './previewMesh'
 
 function createGenerateWorker(name?: string): Worker {
   // Important for GitHub Pages: avoid root-absolute `/assets/...` worker URLs.
@@ -126,20 +127,26 @@ export async function generateKeycapModel(
   if (yieldAndCheck) await yieldAndCheck()
 
   const baseMesh = makeMesh(baseGeom.clone() as BufferGeometry, KEYCAP_BODY_COLOR)
-  const unionExtrusion = csgUnionMeshes(extrusionMeshes)
+  const unionExtrusion = await csgUnionMeshes(extrusionMeshes, yieldAndCheck)
+
+  if (yieldAndCheck) await yieldAndCheck()
 
   const bodyResult = unionExtrusion ? csgSubtract(baseMesh, unionExtrusion) : baseMesh
+
+  if (yieldAndCheck) await yieldAndCheck()
 
   const group = new Group()
   bodyResult.name = 'body'
   group.add(bodyResult)
 
-  textMeshes.forEach((tr, j) => {
+  for (let j = 0; j < textMeshes.length; j++) {
+    if (yieldAndCheck) await yieldAndCheck()
+    const tr = textMeshes[j]
     const r = csgIntersect(baseMesh, tr.mesh)
     r.material = tr.mesh.material
     r.name = tr.name || `text_${j}`
     group.add(r)
-  })
+  }
 
   if (yieldAndCheck) await yieldAndCheck()
 
@@ -255,9 +262,9 @@ export function generateAll3mfsWithWorker(
             completed++
             onProgress?.({ current: completed, total, keyId })
           }
-        } else if (type === 'batch-complete') {
+        } else if (type === 'complete' && payload?.output === 'batch') {
           if (!cancelled) {
-            const batchFiles = (payload as { files: Record<string, Uint8Array> }).files
+            const batchFiles = (payload as { output: 'batch'; files: Record<string, Uint8Array> }).files
             for (const [name, bytes] of Object.entries(batchFiles)) {
               files[name] = bytes
             }
@@ -291,8 +298,13 @@ export function generateAll3mfsWithWorker(
       }
 
       w.postMessage({
-        type: 'generate-batch',
-        payload: { state, stlBuffersByModelId, keyIds: chunks[workerIndex] },
+        type: 'generate',
+        payload: {
+          output: 'batch',
+          state,
+          stlBuffersByModelId,
+          items: chunks[workerIndex].map(keyId => ({ kind: 'keyId', keyId })),
+        },
       })
     }
 
@@ -372,4 +384,69 @@ export async function generatePreviewFromTemplate(
   }
 
   return await generateKeycapModel(state, key, template, baseGeom, yieldAndCheck)
+}
+
+export function generatePreviewWithWorker(
+  state: AppState,
+  input:
+    | { kind: 'keyId'; keyId: string }
+    | { kind: 'template'; template: Template; textsBySymbolId: Record<string, string> },
+  stlBuffersByModelId: Record<string, ArrayBuffer | null>,
+  signal?: AbortSignal
+): Promise<Group | null> {
+  return new Promise((resolve, reject) => {
+    const w = createGenerateWorker('preview')
+
+    let finished = false
+    const finish = (fn: () => void) => {
+      if (finished) return
+      finished = true
+      if (signal) signal.removeEventListener('abort', abortHandler)
+      w.terminate()
+      fn()
+    }
+
+    const abortHandler = () => {
+      try {
+        w.postMessage({ type: 'cancel' })
+      } catch {
+        // ignore
+      }
+      finish(() => reject(new Error('Preview generation cancelled')))
+    }
+
+    if (signal) {
+      if (signal.aborted) return abortHandler()
+      signal.addEventListener('abort', abortHandler, { once: true })
+    }
+
+    w.onmessage = e => {
+      const { type, payload } = e.data
+      if (type === 'complete' && payload?.output === 'preview') {
+        const meshes = (payload as { output: 'preview'; meshes: PreviewMeshPayload[] }).meshes
+        finish(() => resolve(meshes.length ? groupFromPreviewMeshes(meshes) : null))
+      } else if (type === 'error') {
+        finish(() => reject(new Error(payload.message)))
+      }
+    }
+
+    w.onerror = err => {
+      const errorEvent = err as ErrorEvent
+      const errorMsg = errorEvent.message || errorEvent.filename || 'Preview worker failed to load or execute'
+      finish(() => reject(new Error(`Preview worker failed: ${errorMsg}`)))
+    }
+
+    w.postMessage({
+      type: 'generate',
+      payload:
+        input.kind === 'keyId'
+          ? { output: 'preview', state, stlBuffersByModelId, items: [{ kind: 'keyId', keyId: input.keyId }] }
+          : {
+              output: 'preview',
+              state,
+              stlBuffersByModelId,
+              items: [{ kind: 'template', template: input.template, textsBySymbolId: input.textsBySymbolId }],
+            },
+    })
+  })
 }

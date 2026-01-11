@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
-  import { generatePreviewFromTemplate, generatePreviewModel } from '../generate/generate'
+  import { generatePreviewWithWorker } from '../generate/generate'
   import { app } from '../state/store'
   import { stlBuffersByModelId } from '../state/sessionAssets'
   import LabelPreview from './LabelPreview.svelte'
@@ -21,6 +21,7 @@
   let viewMode: '2d' | '3d' = '2d'
   let previewModel: Group | null = null
   let isGeneratingPreview = false
+  let isCancellingPreview = false
   let previewAbortController: AbortController | null = null
   let lastGeneratedKeyId: string | null = null
   let lastGeneratedTextsHash: string = ''
@@ -67,18 +68,18 @@
     }
 
     isGeneratingPreview = true
+    isCancellingPreview = false
     previewAbortController = new AbortController()
 
     try {
-      const model = keyId
-        ? await generatePreviewModel($app, keyId, $stlBuffersByModelId, previewAbortController.signal)
-        : await generatePreviewFromTemplate(
-            $app,
-            template,
-            textsBySymbolId,
-            $stlBuffersByModelId,
-            previewAbortController.signal
-          )
+      const model = await generatePreviewWithWorker(
+        $app,
+        keyId
+          ? { kind: 'keyId', keyId }
+          : { kind: 'template', template, textsBySymbolId },
+        $stlBuffersByModelId,
+        previewAbortController.signal
+      )
       previewModel = model
       lastGeneratedKeyId = keyId ?? null
       lastGeneratedTemplateHash = getTemplateHash(template)
@@ -91,6 +92,7 @@
       previewModel = null
     } finally {
       isGeneratingPreview = false
+      isCancellingPreview = false
       previewAbortController = null
     }
   }
@@ -155,18 +157,19 @@
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              <div class="text-sm text-muted-foreground">Generating preview…</div>
+              <div class="text-sm text-muted-foreground">
+                {isCancellingPreview ? 'Cancelling preview…' : 'Generating preview…'}
+              </div>
               <Button
                 variant="destructive"
                 size="sm"
                 onclick={() => {
                   if (previewAbortController) {
+                    isCancellingPreview = true
                     previewAbortController.abort()
-                    previewAbortController = null
                   }
-                  isGeneratingPreview = false
-                  previewModel = null
                 }}
+                disabled={isCancellingPreview}
               >
                 Cancel
               </Button>

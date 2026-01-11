@@ -61,7 +61,10 @@ export function csgSubtract(meshA: THREE.Mesh, meshB: THREE.Mesh): THREE.Mesh {
   return resultMesh
 }
 
-export function csgUnionMeshes(meshes: THREE.Mesh[]): THREE.Mesh | null {
+export async function csgUnionMeshes(
+  meshes: THREE.Mesh[],
+  yieldAndCheck?: () => Promise<void>
+): Promise<THREE.Mesh | null> {
   if (!meshes || meshes.length === 0) return null
 
   const evaluator = new Evaluator()
@@ -74,6 +77,7 @@ export function csgUnionMeshes(meshes: THREE.Mesh[]): THREE.Mesh | null {
   resultBrush.updateMatrixWorld()
 
   for (let i = 1; i < meshes.length; i++) {
+    if (yieldAndCheck) await yieldAndCheck()
     const nextBrush = new Brush(meshes[i].geometry as THREE.BufferGeometry)
     nextBrush.matrix.copy(meshes[i].matrix)
     nextBrush.prepareGeometry()
