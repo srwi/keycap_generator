@@ -72,7 +72,13 @@
     try {
       const model = keyId
         ? await generatePreviewModel($app, keyId, $stlBuffersByModelId, previewAbortController.signal)
-        : await generatePreviewFromTemplate($app, template, textsBySymbolId, $stlBuffersByModelId, previewAbortController.signal)
+        : await generatePreviewFromTemplate(
+            $app,
+            template,
+            textsBySymbolId,
+            $stlBuffersByModelId,
+            previewAbortController.signal
+          )
       previewModel = model
       lastGeneratedKeyId = keyId ?? null
       lastGeneratedTemplateHash = getTemplateHash(template)

@@ -48,10 +48,7 @@ export function extractPathFromUrl(url: string): string | null {
   return null
 }
 
-export function findKeycapByPath(
-  registry: Registry,
-  path: string
-): { category: string; keycap: KeycapEntry } | null {
+export function findKeycapByPath(registry: Registry, path: string): { category: string; keycap: KeycapEntry } | null {
   for (const category of registry.categories) {
     const keycap = category.keycaps.find(k => k.path === path)
     if (keycap) {
@@ -60,4 +57,3 @@ export function findKeycapByPath(
   }
   return null
 }
-

@@ -16,4 +16,3 @@ export async function fetchStlDimensions(url: string): Promise<{ widthMm: number
   stlDimensionsCache.set(url, dims)
   return dims
 }
-

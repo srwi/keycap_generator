@@ -25,4 +25,3 @@ export function makeUniqueFontName(baseName: string, existing: Set<string>): str
   }
   return `${trimmed} (${Date.now()})`
 }
-

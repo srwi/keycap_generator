@@ -23,12 +23,6 @@
   const isPlaceholder = $derived(!value)
 </script>
 
-<span
-  bind:this={ref}
-  data-slot={dataSlot}
-  data-placeholder={isPlaceholder}
-  class={cn(className)}
-  {...restProps}
->
+<span bind:this={ref} data-slot={dataSlot} data-placeholder={isPlaceholder} class={cn(className)} {...restProps}>
   {value ?? placeholder ?? ''}
 </span>

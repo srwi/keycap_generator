@@ -1,7 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { app } from './lib/state/store'
-  import { applyLoadedProject, downloadStateFile, readProjectFromFile, readPresetProject } from './lib/state/persistence'
+  import {
+    applyLoadedProject,
+    downloadStateFile,
+    readProjectFromFile,
+    readPresetProject,
+  } from './lib/state/persistence'
   import { generateAll3mfsWithWorker } from './lib/generate/generate'
   import { stlBuffersByModelId } from './lib/state/sessionAssets'
   import KeycapModelsEditor from './lib/ui/KeycapModelsEditor.svelte'
@@ -157,7 +162,7 @@
           <img src={getPublicPath('icon.png')} alt="Keycap Generator Icon" class="h-12 mr-2 w-auto object-contain" />
           <div class="flex-1">
             <div class="text-lg font-semibold leading-tight">Keycap Generator</div>
-            <div class="text-xs text-muted-foreground">Custom keycap model generator for multi-color 3D printing</div>
+            <div class="text-xs text-muted-foreground">Custom keycap generator for multi-color 3D printing</div>
           </div>
         </div>
       </div>
