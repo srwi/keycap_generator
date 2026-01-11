@@ -161,21 +161,3 @@ export async function getTextPath(
     y: bbox.y1,
   }
 }
-
-export async function preloadFonts(): Promise<void> {
-  const promises: Promise<void>[] = []
-  for (const fontName of AVAILABLE_FONTS) {
-    promises.push(
-      loadThreeFont(fontName)
-        .then(async () => {
-          await loadOpenTypeFont(fontName)
-        })
-        .catch(error => {
-          console.error(`Failed to preload font ${fontName}:`, error)
-          throw error
-        })
-    )
-  }
-
-  await Promise.all(promises)
-}
