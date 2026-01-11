@@ -140,7 +140,7 @@
 
         {#if isGeneratingPreview}
           <!-- Loading overlay -->
-          <div class="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
+          <div class="absolute inset-0 backdrop-blur-sm flex items-center justify-center z-10">
             <div class="flex flex-col items-center gap-3">
               <svg
                 class="animate-spin h-8 w-8 text-primary"
@@ -174,7 +174,7 @@
           </div>
         {:else if !previewModel || isOutOfDate}
           <!-- No preview or out of date - show refresh button overlay -->
-          <div class="absolute inset-0 bg-background/60 flex items-center justify-center z-10 backdrop-blur-sm">
+          <div class="absolute inset-0 flex items-center justify-center z-10 backdrop-blur-sm">
             <Button variant="secondary" class="flex items-center gap-2" onclick={onRefresh3D}>
               <RefreshCw class="size-4" />
               {previewModel ? 'Refresh 3D Preview' : 'Generate 3D Preview'}
