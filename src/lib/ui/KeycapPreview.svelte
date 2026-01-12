@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
-  import { generatePreviewWithWorker } from '../generate/generate'
+  import { generatePreview } from '../generate/generation-api'
   import { app } from '../state/store'
   import { stlBuffersByModelId } from '../state/sessionAssets'
   import LabelPreview from './LabelPreview.svelte'
@@ -72,14 +72,14 @@
     previewAbortController = new AbortController()
 
     try {
-      const model = await generatePreviewWithWorker(
-        $app,
-        keyId
+      const model = await generatePreview({
+        state: $app,
+        input: keyId
           ? { kind: 'keyId', keyId }
           : { kind: 'template', template, textsBySymbolId },
-        $stlBuffersByModelId,
-        previewAbortController.signal
-      )
+        stlBuffersByModelId: $stlBuffersByModelId,
+        signal: previewAbortController.signal,
+      })
       previewModel = model
       lastGeneratedKeyId = keyId ?? null
       lastGeneratedTemplateHash = getTemplateHash(template)

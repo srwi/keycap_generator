@@ -7,7 +7,7 @@
     readProjectFromFile,
     readPresetProject,
   } from './lib/state/persistence'
-  import { generateAll3mfsWithWorker } from './lib/generate/generate'
+  import { generateBatch } from './lib/generate/generation-api'
   import { stlBuffersByModelId } from './lib/state/sessionAssets'
   import KeycapModelsEditor from './lib/ui/KeycapModelsEditor.svelte'
   import TemplateEditor from './lib/ui/TemplateEditor.svelte'
@@ -97,16 +97,16 @@
     generateAbortController = new AbortController()
 
     try {
-      await generateAll3mfsWithWorker(
-        $app,
-        $stlBuffersByModelId,
-        p => {
+      await generateBatch({
+        state: $app,
+        stlBuffersByModelId: $stlBuffersByModelId,
+        onProgress: p => {
           progressCurrent = p.current
           progressTotal = p.total
           currentGeneratingKeyId = p.keyId
         },
-        generateAbortController.signal
-      )
+        signal: generateAbortController.signal,
+      })
       // Keep modal open briefly to show completion, then close
       await new Promise(r => setTimeout(r, 1500))
     } catch (e) {
