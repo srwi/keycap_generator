@@ -162,30 +162,15 @@
             text="A template defines the layout and styling of symbols (labels) on a keycap. It specifies where text appears, what font, size, color, and rotation to use. Multiple keys can share the same template but display different text values. Templates are linked to a specific keycap model size."
           />
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              {#snippet child({ props })}
-                <Button
-                  size="sm"
-                  disabled={!hasModels}
-                  onclick={actions.createTemplate}
-                  title="New template"
-                  {...props}
-                >
-                  <Plus class="size-4" />
-                  <span class="hidden sm:inline">New</span>
-                </Button>
-              {/snippet}
-            </TooltipTrigger>
-            {#if !hasModels}
-              <TooltipContent class="max-w-xs whitespace-normal">
-                Create at least one model before creating a template. Templates require a keycap model to define their
-                size and shape.
-              </TooltipContent>
-            {/if}
-          </Tooltip>
-        </TooltipProvider>
+        <Button
+          size="sm"
+          disabled={!hasModels}
+          title="New template"
+          onclick={actions.createTemplate}
+        >
+          <Plus class="size-4" />
+          <span class="hidden sm:inline">New</span>
+        </Button>
       </div>
     </CardHeader>
 

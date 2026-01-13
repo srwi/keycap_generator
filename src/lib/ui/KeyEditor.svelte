@@ -73,24 +73,10 @@
             text="A key is a specific instance of a keycap that uses a template and contains actual text values. Each key represents one physical keycap you'll generate. Keys share the layout and styling from their template but have unique text for each symbol position (e.g., 'Q', 'Shift', 'Enter')."
           />
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              {#snippet child({ props })}
-                <Button size="sm" disabled={!hasTemplates} onclick={actions.createKey} title="New key" {...props}>
-                  <Plus class="size-4" />
-                  <span class="hidden sm:inline">New</span>
-                </Button>
-              {/snippet}
-            </TooltipTrigger>
-            {#if !hasTemplates}
-              <TooltipContent class="max-w-xs whitespace-normal">
-                Create at least one template before creating a key. Keys require a template to define their layout and
-                styling.
-              </TooltipContent>
-            {/if}
-          </Tooltip>
-        </TooltipProvider>
+        <Button size="sm" disabled={!hasTemplates} onclick={actions.createKey} title="New key">
+          <Plus class="size-4" />
+          <span class="hidden sm:inline">New</span>
+        </Button>
       </div>
     </CardHeader>
 
