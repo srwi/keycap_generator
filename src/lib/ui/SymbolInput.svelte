@@ -4,13 +4,14 @@
   import { InputGroup, InputGroupInput, InputGroupAddon } from '@/lib/components/ui/input-group'
   import { Switch } from '@/lib/components/ui/switch'
   import { Popover, PopoverContent, PopoverTrigger } from '@/lib/components/ui/popover'
-  import { Type, Image } from 'lucide-svelte'
   import IconPicker from './IconPicker.svelte'
 
   export let content: SymbolContent | null = null
   export let placeholder = 'Enter text...'
   export let label = ''
   export let onContentChange: (content: SymbolContent | null) => void = () => {}
+  export let keyId: string = ''
+  export let symbolId: string = ''
 
   let iconMode = content?.kind === 'icon'
   let textValue = content?.kind === 'text' ? content.value : ''
@@ -30,8 +31,10 @@
     selectedIcon = null
   }
 
-  // Sync internal state when content prop changes
   $: {
+    // reference keyId/symbolId so Svelte re-runs when selection changes
+    const _trigger = keyId + '|' + symbolId
+
     if (content?.kind === 'icon') {
       iconMode = true
       iconName = content.iconName
@@ -41,7 +44,6 @@
       textValue = content.value
       iconName = ''
     } else {
-      // null content - reset to text mode
       iconMode = false
       textValue = ''
       iconName = ''
@@ -50,7 +52,6 @@
 
   function handleModeChange(checked: boolean) {
     iconMode = checked
-    // Clear content when switching modes
     if (iconMode) {
       textValue = ''
       onContentChange(iconName ? { kind: 'icon', iconName } : null)

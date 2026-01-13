@@ -210,6 +210,8 @@
                       label="{getSlotName(index)} ({getSlotSymbol(index)})"
                       content={getSymbolContent(key.id, sym.id)}
                       placeholder="Enter text..."
+                      keyId={key.id}
+                      symbolId={sym.id}
                       onContentChange={content => actions.setKeyContent(key.id, sym.id, content)}
                     />
                   </div>
