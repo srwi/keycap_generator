@@ -1,6 +1,6 @@
 <script lang="ts">
   import LabelPreview from './LabelPreview.svelte'
-  import type { Template } from '../state/types'
+  import type { SymbolContent, Template } from '../state/types'
   import { Button } from '@/lib/components/ui/button'
   import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/lib/components/ui/dialog'
   import { Progress } from '@/lib/components/ui/progress'
@@ -10,7 +10,7 @@
   export let current: number = 0
   export let total: number = 0
   export let previewTemplate: Template | null = null
-  export let previewTextsBySymbolId: Record<string, string> = {}
+  export let previewContentBySymbolId: Record<string, SymbolContent> = {}
   export let previewWidthMm: number = 0
   export let previewHeightMm: number = 0
 
@@ -27,7 +27,7 @@
       <div class="flex justify-center">
         <LabelPreview
           template={previewTemplate}
-          textsBySymbolId={previewTextsBySymbolId}
+          contentBySymbolId={previewContentBySymbolId}
           widthMm={previewWidthMm}
           heightMm={previewHeightMm}
           className="max-w-[120px]"

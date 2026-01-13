@@ -15,7 +15,10 @@ function getMeshColor(mesh: Mesh): number {
   return typeof hex === 'number' ? hex : 0xffffff
 }
 
-export function serializeGroupToPreviewMeshes(group: Group): { meshes: PreviewMeshPayload[]; transfers: Transferable[] } {
+export function serializeGroupToPreviewMeshes(group: Group): {
+  meshes: PreviewMeshPayload[]
+  transfers: Transferable[]
+} {
   const meshes: PreviewMeshPayload[] = []
   const transfers: Transferable[] = []
 
@@ -71,4 +74,3 @@ export function groupFromPreviewMeshes(meshes: PreviewMeshPayload[]): Group {
 
   return group
 }
-

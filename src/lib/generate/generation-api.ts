@@ -16,11 +16,7 @@ interface WorkerHandle {
   terminate: () => void
 }
 
-function setupWorker(
-  name: string,
-  signal: AbortSignal | undefined,
-  onAbort: () => void
-): WorkerHandle {
+function setupWorker(name: string, signal: AbortSignal | undefined, onAbort: () => void): WorkerHandle {
   const worker = createWorker(name)
   let terminated = false
 
@@ -95,7 +91,7 @@ export function generatePreview(options: PreviewOptions): Promise<Group | null> 
       }
     }
 
-    worker.onerror = (err) => {
+    worker.onerror = err => {
       const errorEvent = err as ErrorEvent
       const errorMsg = errorEvent.message || errorEvent.filename || 'Preview worker failed'
       finish(() => reject(new Error(`Preview worker failed: ${errorMsg}`)))
@@ -207,7 +203,7 @@ export function generateBatch(options: BatchOptions): Promise<void> {
         }
       }
 
-      zipWorker.onerror = (err) => {
+      zipWorker.onerror = err => {
         if (!cancelled) {
           const errorEvent = err as ErrorEvent
           const errorMsg = errorEvent.message || 'Zip worker failed'
@@ -257,7 +253,7 @@ export function generateBatch(options: BatchOptions): Promise<void> {
         }
       }
 
-      worker.onerror = (error) => {
+      worker.onerror = error => {
         if (!cancelled) {
           cancelled = true
           const errorEvent = error as ErrorEvent

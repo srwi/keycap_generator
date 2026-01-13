@@ -19,6 +19,8 @@ export type SymbolDef = {
   rotationDeg: number
 }
 
+export type SymbolContent = { kind: 'text'; value: string } | { kind: 'icon'; iconName: string }
+
 export type StlRef = {
   fileName: string
   pathHint: string
@@ -51,7 +53,7 @@ export type KeyDef = {
   id: string
   name: string
   templateId: string
-  textsBySymbolId: Record<string, string>
+  contentBySymbolId: Record<string, SymbolContent>
 }
 
 export type AppUiState = {

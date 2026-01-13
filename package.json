@@ -34,6 +34,8 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
+    "@phosphor-icons/core": "^2.1.1",
+    "@xmldom/xmldom": "^0.8.11",
     "fflate": "^0.8.2",
     "lucide-svelte": "^0.562.0",
     "opentype.js": "^1.3.4",

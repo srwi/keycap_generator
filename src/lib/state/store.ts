@@ -1,5 +1,5 @@
 import { derived, writable } from 'svelte/store'
-import type { AppState, KeyDef, KeycapModel, SymbolDef, Template, CustomFont } from './types'
+import type { AppState, KeyDef, KeycapModel, SymbolContent, SymbolDef, Template, CustomFont } from './types'
 import { newId } from '../utils/id'
 import { getPublicPath } from '../utils/paths'
 
@@ -235,11 +235,7 @@ export const actions = {
       const sym = defaultSymbol()
 
       const nextTemplates = s.templates.map(t => (t.id === templateId ? { ...t, symbols: [...t.symbols, sym] } : t))
-      const nextKeys = s.keys.map(k => {
-        if (k.templateId !== templateId) return k
-        return { ...k, textsBySymbolId: { ...k.textsBySymbolId, [sym.id]: '' } }
-      })
-      return { ...s, templates: nextTemplates, keys: nextKeys }
+      return { ...s, templates: nextTemplates }
     })
   },
 
@@ -253,8 +249,8 @@ export const actions = {
       )
       const nextKeys = s.keys.map(k => {
         if (k.templateId !== templateId) return k
-        const { [symbolId]: _, ...rest } = k.textsBySymbolId
-        return { ...k, textsBySymbolId: rest }
+        const { [symbolId]: _, ...rest } = k.contentBySymbolId
+        return { ...k, contentBySymbolId: rest }
       })
       return { ...s, templates: nextTemplates, keys: nextKeys }
     })
@@ -288,7 +284,7 @@ export const actions = {
         id: newId('key'),
         name: `Key ${s.keys.length + 1}`,
         templateId: tpl.id,
-        textsBySymbolId: Object.fromEntries(tpl.symbols.map(sym => [sym.id, ''])),
+        contentBySymbolId: {},
       }
       return { ...s, keys: [...s.keys, key], ui: { ...s.ui, selectedKeyId: key.id } }
     })
@@ -314,10 +310,17 @@ export const actions = {
         ...s,
         keys: s.keys.map(k => {
           if (k.id !== keyId) return k
+          // Keep content for symbols that exist in the new template
+          const newContentBySymbolId: Record<string, SymbolContent> = {}
+          for (const sym of tpl.symbols) {
+            if (k.contentBySymbolId[sym.id]) {
+              newContentBySymbolId[sym.id] = k.contentBySymbolId[sym.id]
+            }
+          }
           return {
             ...k,
             templateId,
-            textsBySymbolId: Object.fromEntries(tpl.symbols.map(sym => [sym.id, k.textsBySymbolId[sym.id] ?? ''])),
+            contentBySymbolId: newContentBySymbolId,
           }
         }),
       }
@@ -327,9 +330,57 @@ export const actions = {
   setKeyText(keyId: string, symbolId: string, text: string) {
     app.update(s => ({
       ...s,
-      keys: s.keys.map(k =>
-        k.id === keyId ? { ...k, textsBySymbolId: { ...k.textsBySymbolId, [symbolId]: text } } : k
-      ),
+      keys: s.keys.map(k => {
+        if (k.id !== keyId) return k
+        const newContentBySymbolId = { ...k.contentBySymbolId }
+        if (text.trim()) {
+          newContentBySymbolId[symbolId] = { kind: 'text', value: text }
+        } else {
+          delete newContentBySymbolId[symbolId]
+        }
+        return {
+          ...k,
+          contentBySymbolId: newContentBySymbolId,
+        }
+      }),
+    }))
+  },
+
+  setKeyIcon(keyId: string, symbolId: string, iconName: string | null) {
+    app.update(s => ({
+      ...s,
+      keys: s.keys.map(k => {
+        if (k.id !== keyId) return k
+        const newContentBySymbolId = { ...k.contentBySymbolId }
+        if (iconName) {
+          newContentBySymbolId[symbolId] = { kind: 'icon', iconName }
+        } else {
+          delete newContentBySymbolId[symbolId]
+        }
+        return {
+          ...k,
+          contentBySymbolId: newContentBySymbolId,
+        }
+      }),
+    }))
+  },
+
+  setKeyContent(keyId: string, symbolId: string, content: SymbolContent | null) {
+    app.update(s => ({
+      ...s,
+      keys: s.keys.map(k => {
+        if (k.id !== keyId) return k
+        const newContentBySymbolId = { ...k.contentBySymbolId }
+        if (content) {
+          newContentBySymbolId[symbolId] = content
+        } else {
+          delete newContentBySymbolId[symbolId]
+        }
+        return {
+          ...k,
+          contentBySymbolId: newContentBySymbolId,
+        }
+      }),
     }))
   },
 

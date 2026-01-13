@@ -1,0 +1,138 @@
+<script lang="ts">
+  import type { SymbolContent } from '../state/types'
+  import { getIcon, loadIcon, PHOSPHOR_ICON_VIEWBOX, type IconInfo } from '../services/icons'
+  import { InputGroup, InputGroupInput, InputGroupAddon } from '@/lib/components/ui/input-group'
+  import { Switch } from '@/lib/components/ui/switch'
+  import { Popover, PopoverContent, PopoverTrigger } from '@/lib/components/ui/popover'
+  import { Type, Image } from 'lucide-svelte'
+  import IconPicker from './IconPicker.svelte'
+
+  export let content: SymbolContent | null = null
+  export let placeholder = 'Enter text...'
+  export let label = ''
+  export let onContentChange: (content: SymbolContent | null) => void = () => {}
+
+  let iconMode = content?.kind === 'icon'
+  let textValue = content?.kind === 'text' ? content.value : ''
+  let iconName = content?.kind === 'icon' ? content.iconName : ''
+  let popoverOpen = false
+  let selectedIcon: IconInfo | null = null
+
+  // Load icon info when icon name changes
+  $: if (iconName) {
+    selectedIcon = getIcon(iconName)
+    if (!selectedIcon) {
+      loadIcon(iconName).then(icon => {
+        if (icon) selectedIcon = icon
+      })
+    }
+  } else {
+    selectedIcon = null
+  }
+
+  // Sync internal state when content prop changes
+  $: {
+    if (content?.kind === 'icon') {
+      iconMode = true
+      iconName = content.iconName
+      textValue = ''
+    } else if (content?.kind === 'text') {
+      iconMode = false
+      textValue = content.value
+      iconName = ''
+    } else {
+      // null content - reset to text mode
+      iconMode = false
+      textValue = ''
+      iconName = ''
+    }
+  }
+
+  function handleModeChange(checked: boolean) {
+    iconMode = checked
+    // Clear content when switching modes
+    if (iconMode) {
+      textValue = ''
+      onContentChange(iconName ? { kind: 'icon', iconName } : null)
+    } else {
+      iconName = ''
+      popoverOpen = false
+      onContentChange(textValue.trim() ? { kind: 'text', value: textValue } : null)
+    }
+  }
+
+  function handleTextInput(e: Event) {
+    const value = (e.target as HTMLInputElement).value
+    textValue = value
+    onContentChange(value.trim() ? { kind: 'text', value } : null)
+  }
+
+  function handleIconSelect(name: string) {
+    iconName = name
+    popoverOpen = false
+    onContentChange({ kind: 'icon', iconName: name })
+  }
+</script>
+
+<div class="flex flex-col gap-2">
+  <div class="flex items-center justify-between">
+    {#if label}
+      <span class="text-xs font-medium text-muted-foreground capitalize">{label}</span>
+    {:else}
+      <span></span>
+    {/if}
+
+    <div class="flex items-center gap-2">
+      <span
+        class="flex items-center gap-1 text-xs {!iconMode ? 'text-foreground font-medium' : 'text-muted-foreground'}"
+      >
+        Text
+      </span>
+      <Switch checked={iconMode} onCheckedChange={handleModeChange} aria-label="Toggle between text and icon input" />
+      <span
+        class="flex items-center gap-1 text-xs {iconMode ? 'text-foreground font-medium' : 'text-muted-foreground'}"
+      >
+        Icon
+      </span>
+    </div>
+  </div>
+
+  <!-- Input based on mode -->
+  {#if iconMode}
+    <!-- Icon mode - InputGroup with icon addon on left -->
+    <Popover bind:open={popoverOpen}>
+      <PopoverTrigger asChild>
+        <button type="button" class="w-full text-left">
+          <InputGroup>
+            <InputGroupAddon align="inline-start">
+              {#if selectedIcon}
+                <svg
+                  viewBox="0 0 {PHOSPHOR_ICON_VIEWBOX} {PHOSPHOR_ICON_VIEWBOX}"
+                  class="size-4"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d={selectedIcon.path} />
+                </svg>
+              {/if}
+            </InputGroupAddon>
+            <InputGroupInput
+              readonly
+              value={selectedIcon?.displayName ?? ''}
+              placeholder="Pick icon..."
+              class="cursor-pointer"
+            />
+          </InputGroup>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent class="w-80 p-0" align="start">
+        <IconPicker onSelect={handleIconSelect} />
+      </PopoverContent>
+    </Popover>
+  {:else}
+    <!-- Text mode - simple InputGroup -->
+    <InputGroup>
+      <InputGroupInput type="text" {placeholder} value={textValue} oninput={handleTextInput} />
+    </InputGroup>
+  {/if}
+</div>

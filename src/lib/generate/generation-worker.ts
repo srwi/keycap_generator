@@ -1,5 +1,12 @@
 /// <reference lib="webworker" />
 
+// three/examples/jsm/loaders/SVGLoader uses DOMParser internally; workers don't provide it.
+// Provide a small polyfill so batch generation can extrude SVG icons.
+import { DOMParser as XmldomDOMParser } from '@xmldom/xmldom'
+if (!(globalThis as any).DOMParser) {
+  ;(globalThis as any).DOMParser = XmldomDOMParser as any
+}
+
 import type { AppState } from '../state/types'
 import { exportTo3MF } from 'three-3mf-exporter'
 import { zipSync } from 'fflate'
@@ -83,20 +90,14 @@ async function handlePreviewGeneration(
   const baseGeom = await geometryCache.get(resolved.model, stlBuffersByModelId)
   checkCancelled('Preview generation cancelled')
 
-  const group = await buildKeycapGroup(
-    state,
-    resolved,
-    baseGeom,
-    () => yieldWithCancellationCheck('Preview generation cancelled')
+  const group = await buildKeycapGroup(state, resolved, baseGeom, () =>
+    yieldWithCancellationCheck('Preview generation cancelled')
   )
 
   const { meshes, transfers } = serializeGroupToPreviewMeshes(group)
 
   if (!cancelled) {
-    self.postMessage(
-      { type: 'preview-complete', payload: { meshes } } satisfies WorkerResponse,
-      transfers
-    )
+    self.postMessage({ type: 'preview-complete', payload: { meshes } } satisfies WorkerResponse, transfers)
   }
 }
 
@@ -117,11 +118,8 @@ async function handleBatchGeneration(
     const baseGeom = await geometryCache.get(resolved.model, stlBuffersByModelId)
     checkCancelled('Generation cancelled')
 
-    const group = await buildKeycapGroup(
-      state,
-      resolved,
-      baseGeom,
-      () => yieldWithCancellationCheck('Generation cancelled')
+    const group = await buildKeycapGroup(state, resolved, baseGeom, () =>
+      yieldWithCancellationCheck('Generation cancelled')
     )
 
     const blob = await exportTo3MF(group)
@@ -143,10 +141,7 @@ async function handleBatchGeneration(
 
   if (!cancelled) {
     const transfers = Object.values(files).map(u => u.buffer)
-    self.postMessage(
-      { type: 'batch-complete', payload: { files } } satisfies WorkerResponse,
-      transfers
-    )
+    self.postMessage({ type: 'batch-complete', payload: { files } } satisfies WorkerResponse, transfers)
   }
 }
 
@@ -155,10 +150,7 @@ async function handleZip(payload: ZipPayload): Promise<void> {
   const zipData = zipSync(files)
 
   if (!cancelled) {
-    self.postMessage(
-      { type: 'zip-complete', payload: { zipData } } satisfies WorkerResponse,
-      [zipData.buffer]
-    )
+    self.postMessage({ type: 'zip-complete', payload: { zipData } } satisfies WorkerResponse, [zipData.buffer])
   }
 }
 

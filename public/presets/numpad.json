@@ -98,136 +98,187 @@
       "id": "key_numlock",
       "name": "Equal",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "="
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "="
+        }
       }
     },
     {
       "id": "key_divide",
       "name": "/",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "/"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "/"
+        }
       }
     },
     {
       "id": "key_multiply",
       "name": "*",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "*"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "*"
+        }
       }
     },
     {
       "id": "key_subtract",
       "name": "-",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "-"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "-"
+        }
       }
     },
     {
       "id": "key_7",
       "name": "7",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "7"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "7"
+        }
       }
     },
     {
       "id": "key_8",
       "name": "8",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "8"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "8"
+        }
       }
     },
     {
       "id": "key_9",
       "name": "9",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "9"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "9"
+        }
       }
     },
     {
       "id": "key_4",
       "name": "4",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "4"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "4"
+        }
       }
     },
     {
       "id": "key_5",
       "name": "5",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "5"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "5"
+        }
       }
     },
     {
       "id": "key_6",
       "name": "6",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "6"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "6"
+        }
       }
     },
     {
       "id": "key_1",
       "name": "1",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "1"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "1"
+        }
       }
     },
     {
       "id": "key_2",
       "name": "2",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "2"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "2"
+        }
       }
     },
     {
       "id": "key_3",
       "name": "3",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "3"
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "3"
+        }
       }
     },
     {
       "id": "key_decimal",
       "name": "0",
       "templateId": "tpl_6729b3a920b824b7",
-      "textsBySymbolId": {
-        "sym_752fc5f226f1d13": "0"
+      "contentBySymbolId": {
+        "sym_752fc5f226f1d13": {
+          "kind": "text",
+          "value": "0"
+        }
       }
     },
     {
       "id": "key_af693af4a6dfb9c3",
       "name": "Dot",
       "templateId": "tpl_1u_single",
-      "textsBySymbolId": {
-        "sym_1u_single": "."
+      "contentBySymbolId": {
+        "sym_1u_single": {
+          "kind": "text",
+          "value": "."
+        }
       }
     },
     {
       "id": "key_adedc509ca452c17",
       "name": "Plus",
       "templateId": "tpl_2u_single",
-      "textsBySymbolId": {
-        "sym_2u_single": "+"
+      "contentBySymbolId": {
+        "sym_2u_single": {
+          "kind": "text",
+          "value": "+"
+        }
       }
     },
     {
       "id": "key_c88af61e60141a3",
       "name": "Enter",
       "templateId": "tpl_2u_single",
-      "textsBySymbolId": {
-        "sym_2u_single": "→"
+      "contentBySymbolId": {
+        "sym_2u_single": {
+          "kind": "text",
+          "value": "→"
+        }
       }
     }
   ],

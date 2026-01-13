@@ -6,13 +6,13 @@
   import LabelPreview from './LabelPreview.svelte'
   import Model3DViewer from './Model3DViewer.svelte'
   import { showMessage } from '../state/modalStore'
-  import type { Template } from '../state/types'
+  import type { SymbolContent, Template } from '../state/types'
   import type { Group } from 'three'
   import { RefreshCw } from 'lucide-svelte'
   import { Button } from '@/lib/components/ui/button'
 
   export let template: Template | null = null
-  export let textsBySymbolId: Record<string, string> = {}
+  export let contentBySymbolId: Record<string, SymbolContent> = {}
   export let widthMm: number
   export let heightMm: number
   export let keyId: string | null = null // For generating 3D preview (null for templates)
@@ -27,9 +27,9 @@
   let lastGeneratedTextsHash: string = ''
   let lastGeneratedTemplateHash: string = ''
 
-  // Compute hash of texts for change detection
-  function getTextsHash(texts: Record<string, string>): string {
-    return JSON.stringify(Object.entries(texts).sort(([a], [b]) => a.localeCompare(b)))
+  // Compute hash of content for change detection
+  function getContentHash(content: Record<string, SymbolContent>): string {
+    return JSON.stringify(Object.entries(content).sort(([a], [b]) => a.localeCompare(b)))
   }
 
   // Compute hash of template symbol properties for change detection
@@ -53,7 +53,7 @@
   $: needsRegenerate =
     lastGeneratedKeyId !== keyId ||
     lastGeneratedTemplateHash !== getTemplateHash(template) ||
-    lastGeneratedTextsHash !== getTextsHash(textsBySymbolId)
+    lastGeneratedTextsHash !== getContentHash(contentBySymbolId)
 
   // Check if 3D preview is out of date (only relevant when viewing 3D)
   $: isOutOfDate = viewMode === '3d' && needsRegenerate
@@ -74,16 +74,14 @@
     try {
       const model = await generatePreview({
         state: $app,
-        input: keyId
-          ? { kind: 'keyId', keyId }
-          : { kind: 'template', template, textsBySymbolId },
+        input: keyId ? { kind: 'keyId', keyId } : { kind: 'template', template, contentBySymbolId },
         stlBuffersByModelId: $stlBuffersByModelId,
         signal: previewAbortController.signal,
       })
       previewModel = model
       lastGeneratedKeyId = keyId ?? null
       lastGeneratedTemplateHash = getTemplateHash(template)
-      lastGeneratedTextsHash = getTextsHash(textsBySymbolId)
+      lastGeneratedTextsHash = getContentHash(contentBySymbolId)
     } catch (e) {
       console.error(e)
       if (!(e instanceof Error && e.message === 'Preview generation cancelled')) {
@@ -133,7 +131,7 @@
       <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">Select a key to preview</div>
     {:else if viewMode === '2d'}
       <div class="flex items-center justify-center">
-        <LabelPreview {template} {textsBySymbolId} {widthMm} {heightMm} className="max-w-[340px]" />
+        <LabelPreview {template} {contentBySymbolId} {widthMm} {heightMm} className="max-w-[340px]" />
       </div>
     {:else}
       <!-- 3D View -->

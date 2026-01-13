@@ -256,7 +256,7 @@
       current={progressCurrent}
       total={progressTotal}
       previewTemplate={currentTemplate ?? null}
-      previewTextsBySymbolId={currentKey?.textsBySymbolId ?? {}}
+      previewContentBySymbolId={currentKey?.contentBySymbolId ?? {}}
       previewWidthMm={currentModel?.widthMm ?? 0}
       previewHeightMm={currentModel?.heightMm ?? 0}
     />

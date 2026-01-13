@@ -252,534 +252,746 @@
       "id": "key_esc",
       "name": "Esc",
       "templateId": "tpl_1u_center",
-      "textsBySymbolId": {
-        "sym_1u_center": "Esc"
+      "contentBySymbolId": {
+        "sym_1u_center": {
+          "kind": "text",
+          "value": "Esc"
+        }
       }
     },
     {
       "id": "key_1",
       "name": "1",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "1",
-        "sym_1u_secondary": "!"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "1"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "!"
+        }
       }
     },
     {
       "id": "key_2",
       "name": "2",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "2",
-        "sym_1u_secondary": "@"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "2"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "@"
+        }
       }
     },
     {
       "id": "key_3",
       "name": "3",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "3",
-        "sym_1u_secondary": "#"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "3"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "#"
+        }
       }
     },
     {
       "id": "key_4",
       "name": "4",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "4",
-        "sym_1u_secondary": "$"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "4"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "$"
+        }
       }
     },
     {
       "id": "key_5",
       "name": "5",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "5",
-        "sym_1u_secondary": "%"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "5"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "%"
+        }
       }
     },
     {
       "id": "key_6",
       "name": "6",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "6",
-        "sym_1u_secondary": "^"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "6"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "^"
+        }
       }
     },
     {
       "id": "key_7",
       "name": "7",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "7",
-        "sym_1u_secondary": "&"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "7"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "&"
+        }
       }
     },
     {
       "id": "key_8",
       "name": "8",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "8",
-        "sym_1u_secondary": "*"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "8"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "*"
+        }
       }
     },
     {
       "id": "key_9",
       "name": "9",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "9",
-        "sym_1u_secondary": "("
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "9"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "("
+        }
       }
     },
     {
       "id": "key_0",
       "name": "0",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "0",
-        "sym_1u_secondary": ")"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "0"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": ")"
+        }
       }
     },
     {
       "id": "key_minus",
       "name": "-",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "-",
-        "sym_1u_secondary": "_"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "-"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "_"
+        }
       }
     },
     {
       "id": "key_equals",
       "name": "=",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "=",
-        "sym_1u_secondary": "+"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "="
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "+"
+        }
       }
     },
     {
       "id": "key_backspace",
       "name": "Backspace",
       "templateId": "tpl_2u",
-      "textsBySymbolId": {
-        "sym_2u_center": "←"
+      "contentBySymbolId": {
+        "sym_2u_center": {
+          "kind": "text",
+          "value": "←"
+        }
       }
     },
     {
       "id": "key_tab",
       "name": "Tab",
       "templateId": "tpl_30292c62a97ace66",
-      "textsBySymbolId": {
-        "sym_fb18f12cec7cc46a": "Tab"
+      "contentBySymbolId": {
+        "sym_fb18f12cec7cc46a": {
+          "kind": "text",
+          "value": "Tab"
+        }
       }
     },
     {
       "id": "key_q",
       "name": "Q",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "Q"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "Q"
+        }
       }
     },
     {
       "id": "key_w",
       "name": "W",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "W"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "W"
+        }
       }
     },
     {
       "id": "key_e",
       "name": "E",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "E"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "E"
+        }
       }
     },
     {
       "id": "key_r",
       "name": "R",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "R"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "R"
+        }
       }
     },
     {
       "id": "key_t",
       "name": "T",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "T"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "T"
+        }
       }
     },
     {
       "id": "key_y",
       "name": "Y",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "Y"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "Y"
+        }
       }
     },
     {
       "id": "key_u",
       "name": "U",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "U"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "U"
+        }
       }
     },
     {
       "id": "key_i",
       "name": "I",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "I"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "I"
+        }
       }
     },
     {
       "id": "key_o",
       "name": "O",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "O"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "O"
+        }
       }
     },
     {
       "id": "key_p",
       "name": "P",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "P"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "P"
+        }
       }
     },
     {
       "id": "key_lbracket",
       "name": "[",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "[",
-        "sym_1u_secondary": "{"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "["
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "{"
+        }
       }
     },
     {
       "id": "key_rbracket",
       "name": "]",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "]",
-        "sym_1u_secondary": "}"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "]"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "}"
+        }
       }
     },
     {
       "id": "key_backslash",
       "name": "\\",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "\\",
-        "sym_1u_secondary": "|"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "\\"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "|"
+        }
       }
     },
     {
       "id": "key_capslock",
       "name": "Caps Lock",
       "templateId": "tpl_30292c62a97ace66",
-      "textsBySymbolId": {
-        "sym_fb18f12cec7cc46a": "Caps"
+      "contentBySymbolId": {
+        "sym_fb18f12cec7cc46a": {
+          "kind": "text",
+          "value": "Caps"
+        }
       }
     },
     {
       "id": "key_a",
       "name": "A",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "A"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "A"
+        }
       }
     },
     {
       "id": "key_s",
       "name": "S",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "S"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "S"
+        }
       }
     },
     {
       "id": "key_d",
       "name": "D",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "D"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "D"
+        }
       }
     },
     {
       "id": "key_f",
       "name": "F",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "F"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "F"
+        }
       }
     },
     {
       "id": "key_g",
       "name": "G",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "G"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "G"
+        }
       }
     },
     {
       "id": "key_h",
       "name": "H",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "H"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "H"
+        }
       }
     },
     {
       "id": "key_j",
       "name": "J",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "J"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "J"
+        }
       }
     },
     {
       "id": "key_k",
       "name": "K",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "K"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "K"
+        }
       }
     },
     {
       "id": "key_l",
       "name": "L",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "L"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "L"
+        }
       }
     },
     {
       "id": "key_semicolon",
       "name": ";",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": ";",
-        "sym_1u_secondary": ":"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": ";"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": ":"
+        }
       }
     },
     {
       "id": "key_quote",
       "name": "'",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "'",
-        "sym_1u_secondary": "\""
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "'"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "\""
+        }
       }
     },
     {
       "id": "key_enter",
       "name": "Enter",
       "templateId": "tpl_2u",
-      "textsBySymbolId": {
-        "sym_2u_center": "Enter"
+      "contentBySymbolId": {
+        "sym_2u_center": {
+          "kind": "text",
+          "value": "Enter"
+        }
       }
     },
     {
       "id": "key_lshift",
       "name": "Left Shift",
       "templateId": "tpl_225u",
-      "textsBySymbolId": {
-        "sym_225u_center": "Shift"
+      "contentBySymbolId": {
+        "sym_225u_center": {
+          "kind": "text",
+          "value": "Shift"
+        }
       }
     },
     {
       "id": "key_z",
       "name": "Z",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "Z"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "Z"
+        }
       }
     },
     {
       "id": "key_x",
       "name": "X",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "X"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "X"
+        }
       }
     },
     {
       "id": "key_c",
       "name": "C",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "C"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "C"
+        }
       }
     },
     {
       "id": "key_v",
       "name": "V",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "V"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "V"
+        }
       }
     },
     {
       "id": "key_b",
       "name": "B",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "B"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "B"
+        }
       }
     },
     {
       "id": "key_n",
       "name": "N",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "N"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "N"
+        }
       }
     },
     {
       "id": "key_m",
       "name": "M",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "",
-        "sym_1u_secondary": "M"
+      "contentBySymbolId": {
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "M"
+        }
       }
     },
     {
       "id": "key_comma",
       "name": ",",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": ",",
-        "sym_1u_secondary": "<"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": ","
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "<"
+        }
       }
     },
     {
       "id": "key_period",
       "name": ".",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": ".",
-        "sym_1u_secondary": ">"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "."
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": ">"
+        }
       }
     },
     {
       "id": "key_slash",
       "name": "/",
       "templateId": "tpl_1u",
-      "textsBySymbolId": {
-        "sym_1u_primary": "/",
-        "sym_1u_secondary": "?"
+      "contentBySymbolId": {
+        "sym_1u_primary": {
+          "kind": "text",
+          "value": "/"
+        },
+        "sym_1u_secondary": {
+          "kind": "text",
+          "value": "?"
+        }
       }
     },
     {
       "id": "key_rshift",
       "name": "Right Shift",
       "templateId": "tpl_275u",
-      "textsBySymbolId": {
-        "sym_275u_center": "Shift"
+      "contentBySymbolId": {
+        "sym_275u_center": {
+          "kind": "text",
+          "value": "Shift"
+        }
       }
     },
     {
       "id": "key_lctrl",
       "name": "Left Ctrl",
       "templateId": "tpl_30292c62a97ace66",
-      "textsBySymbolId": {
-        "sym_fb18f12cec7cc46a": "Ctrl"
+      "contentBySymbolId": {
+        "sym_fb18f12cec7cc46a": {
+          "kind": "text",
+          "value": "Ctrl"
+        }
       }
     },
     {
       "id": "key_lgui",
       "name": "Left GUI",
       "templateId": "tpl_30292c62a97ace66",
-      "textsBySymbolId": {
-        "sym_fb18f12cec7cc46a": "Win"
+      "contentBySymbolId": {
+        "sym_fb18f12cec7cc46a": {
+          "kind": "text",
+          "value": "Win"
+        }
       }
     },
     {
       "id": "key_lalt",
       "name": "Left Alt",
       "templateId": "tpl_30292c62a97ace66",
-      "textsBySymbolId": {
-        "sym_fb18f12cec7cc46a": "Alt"
+      "contentBySymbolId": {
+        "sym_fb18f12cec7cc46a": {
+          "kind": "text",
+          "value": "Alt"
+        }
       }
     },
     {
       "id": "key_space",
       "name": "Space",
       "templateId": "tpl_625u",
-      "textsBySymbolId": {
-        "sym_625u_center": ""
-      }
+      "contentBySymbolId": {}
     },
     {
       "id": "key_ralt",
       "name": "Right Alt",
       "templateId": "tpl_30292c62a97ace66",
-      "textsBySymbolId": {
-        "sym_fb18f12cec7cc46a": "Alt"
+      "contentBySymbolId": {
+        "sym_fb18f12cec7cc46a": {
+          "kind": "text",
+          "value": "Alt"
+        }
       }
     },
     {
       "id": "key_rgui",
       "name": "Right GUI",
       "templateId": "tpl_30292c62a97ace66",
-      "textsBySymbolId": {
-        "sym_fb18f12cec7cc46a": "Win"
+      "contentBySymbolId": {
+        "sym_fb18f12cec7cc46a": {
+          "kind": "text",
+          "value": "Win"
+        }
       }
     },
     {
       "id": "key_menu",
       "name": "Function",
       "templateId": "tpl_30292c62a97ace66",
-      "textsBySymbolId": {
-        "sym_fb18f12cec7cc46a": "Fn"
+      "contentBySymbolId": {
+        "sym_fb18f12cec7cc46a": {
+          "kind": "text",
+          "value": "Fn"
+        }
       }
     },
     {
       "id": "key_rctrl",
       "name": "Right Ctrl",
       "templateId": "tpl_30292c62a97ace66",
-      "textsBySymbolId": {
-        "sym_fb18f12cec7cc46a": "Ctrl"
+      "contentBySymbolId": {
+        "sym_fb18f12cec7cc46a": {
+          "kind": "text",
+          "value": "Ctrl"
+        }
       }
     }
   ],

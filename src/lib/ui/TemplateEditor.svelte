@@ -64,7 +64,10 @@
   $: modelWidthMm = model?.widthMm ?? 0
   $: modelHeightMm = model?.heightMm ?? 0
 
-  $: previewTextsBySymbolId = tpl ? Object.fromEntries(tpl.symbols.map((s, index) => [s.id, getSlotSymbol(index)])) : {}
+  // Create preview content with text symbols for template preview
+  $: previewContentBySymbolId = tpl
+    ? Object.fromEntries(tpl.symbols.map((s, index) => [s.id, { kind: 'text', value: getSlotSymbol(index) } as const]))
+    : {}
 
   let previewIs3d = false
 
@@ -208,9 +211,12 @@
                 >
                   <div class="h-10 w-10 flex-shrink-0 flex items-center justify-start">
                     {#if tModel}
+                      {@const previewContent = Object.fromEntries(
+                        t.symbols.map((s, index) => [s.id, { kind: 'text', value: getSlotSymbol(index) } as const])
+                      )}
                       <LabelPreview
                         template={t}
-                        textsBySymbolId={previewTexts}
+                        contentBySymbolId={previewContent}
                         widthMm={tModel.widthMm}
                         heightMm={tModel.heightMm}
                         className="rounded"
@@ -479,7 +485,7 @@
     <CardContent>
       <KeycapPreview
         template={tpl}
-        textsBySymbolId={previewTextsBySymbolId}
+        contentBySymbolId={previewContentBySymbolId}
         widthMm={modelWidthMm}
         heightMm={modelHeightMm}
         keyId={null}

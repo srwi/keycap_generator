@@ -1,14 +1,20 @@
-import type { AppState, KeyDef, KeycapModel, Template } from '../state/types'
+import type { AppState, KeyDef, KeycapModel, SymbolContent, Template } from '../state/types'
 import { processStlForModel, centerGeometryXY, alignBottomTo } from './stl'
 import { makeMesh, csgIntersect, csgSubtract, csgUnionMeshes } from './csg'
 import { KEYCAP_BODY_COLOR } from './materials'
 import { getFont } from './fonts'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
-import { BufferGeometry, Group, MathUtils, Mesh } from 'three'
+import { BufferGeometry, Group, MathUtils, Mesh, Matrix4 } from 'three'
+import { createIconGeometry } from './svg-geometry'
+import { loadRawIconPath, PHOSPHOR_ICON_VIEWBOX } from '../services/icons'
 
 export type GenerationInput =
   | { kind: 'keyId'; keyId: string }
-  | { kind: 'template'; template: Template; textsBySymbolId: Record<string, string> }
+  | { kind: 'template'; template: Template; contentBySymbolId: Record<string, SymbolContent> }
+
+export function getSymbolContent(key: KeyDef, symbolId: string): SymbolContent | null {
+  return key.contentBySymbolId[symbolId] ?? null
+}
 
 export interface ResolvedKeycap {
   key: KeyDef
@@ -40,8 +46,7 @@ export function resolveKeycap(state: AppState, input: GenerationInput): Resolved
     return { key, template, model }
   }
 
-  // Template mode - create synthetic key
-  const { template, textsBySymbolId } = input
+  const { template, contentBySymbolId } = input
 
   const model = getModel(state, template.keycapModelId)
   if (!model) return null
@@ -50,7 +55,7 @@ export function resolveKeycap(state: AppState, input: GenerationInput): Resolved
     id: '__preview__',
     name: 'Preview',
     templateId: template.id,
-    textsBySymbolId,
+    contentBySymbolId,
   }
 
   return { key, template, model }
@@ -90,10 +95,7 @@ export class BaseGeometryCache {
     return `${model.id}:${model.rotationX}:${model.rotationY}:${model.rotationZ}`
   }
 
-  async get(
-    model: KeycapModel,
-    stlBuffersByModelId: Record<string, ArrayBuffer | null>
-  ): Promise<BufferGeometry> {
+  async get(model: KeycapModel, stlBuffersByModelId: Record<string, ArrayBuffer | null>): Promise<BufferGeometry> {
     const key = this.getCacheKey(model)
     const cached = this.cache.get(key)
     if (cached) return cached
@@ -117,42 +119,54 @@ export async function buildKeycapGroup(
   if (checkCancelled) await checkCancelled()
 
   const baseMinZ = baseGeom.boundingBox!.min.z
-  const textMeshes: { mesh: Mesh; color: number; name?: string }[] = []
+  const symbolMeshes: { mesh: Mesh; color: number; name?: string }[] = []
   const extrusionMeshes: Mesh[] = []
 
-  // Process each text symbol
+  // Process each symbol
   for (const sym of template.symbols) {
     if (checkCancelled) await checkCancelled()
 
-    const text = (key.textsBySymbolId[sym.id] ?? '').trim()
-    if (!text) continue
+    const content = getSymbolContent(key, sym.id)
+    if (!content) continue
 
-    const fontResult = getFont(sym.fontName)
-    const font = fontResult instanceof Promise ? await fontResult : fontResult
+    let symbolGeom: BufferGeometry
 
-    const textGeom = new TextGeometry(text, {
-      font,
-      size: sym.fontSizeMm,
-      depth: model.extrusionDepthMm,
-      curveSegments: 3,
-      bevelEnabled: false,
-    } as any)
+    if (content.kind === 'text') {
+      // Text content - use font geometry
+      const fontResult = getFont(sym.fontName)
+      const font = fontResult instanceof Promise ? await fontResult : fontResult
 
-    textGeom.computeVertexNormals()
-    centerGeometryXY(textGeom)
+      symbolGeom = new TextGeometry(content.value, {
+        font,
+        size: sym.fontSizeMm,
+        depth: model.extrusionDepthMm,
+        curveSegments: 3,
+        bevelEnabled: false,
+      } as any)
+      symbolGeom.rotateY(Math.PI)
+    } else {
+      // Icon content - use SVG geometry
+      const iconPath = await loadRawIconPath(content.iconName)
+      if (!iconPath) continue
+
+      symbolGeom = createIconGeometry(iconPath, sym.fontSizeMm, model.extrusionDepthMm, PHOSPHOR_ICON_VIEWBOX)
+    }
+
+    symbolGeom.computeVertexNormals()
+    centerGeometryXY(symbolGeom)
 
     const rz = MathUtils.degToRad(sym.rotationDeg)
-    textGeom.rotateY(Math.PI)
-    if (rz !== 0) textGeom.rotateZ(rz)
-    textGeom.translate(-sym.x, sym.y, 0)
-    alignBottomTo(textGeom, baseMinZ)
+    if (rz !== 0) symbolGeom.rotateZ(rz)
+    symbolGeom.translate(-sym.x, sym.y, 0)
+    alignBottomTo(symbolGeom, baseMinZ)
 
     const color = parseInt(sym.color.replace('#', '0x'))
-    const extrMesh = makeMesh(textGeom, color)
+    const extrMesh = makeMesh(symbolGeom, color)
     extrusionMeshes.push(extrMesh)
 
-    const interMesh = makeMesh(textGeom.clone() as BufferGeometry, color)
-    textMeshes.push({ mesh: interMesh, color, name: text })
+    const interMesh = makeMesh(symbolGeom.clone() as BufferGeometry, color)
+    const name = content.kind === 'text' ? content.value : content.iconName
+    symbolMeshes.push({ mesh: interMesh, color, name })
   }
 
   if (checkCancelled) await checkCancelled()
@@ -170,12 +184,12 @@ export async function buildKeycapGroup(
   bodyResult.name = 'body'
   group.add(bodyResult)
 
-  for (let j = 0; j < textMeshes.length; j++) {
+  for (let j = 0; j < symbolMeshes.length; j++) {
     if (checkCancelled) await checkCancelled()
-    const tr = textMeshes[j]
+    const tr = symbolMeshes[j]
     const r = csgIntersect(baseMesh, tr.mesh)
     r.material = tr.mesh.material
-    r.name = tr.name || `text_${j}`
+    r.name = tr.name || `symbol_${j}`
     group.add(r)
   }
 

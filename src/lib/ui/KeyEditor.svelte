@@ -1,7 +1,9 @@
 <script lang="ts">
   import { app, actions, selectedKey, getSlotName, getSlotSymbol } from '../state/store'
+  import type { SymbolContent } from '../state/types'
   import LabelPreview from './LabelPreview.svelte'
   import KeycapPreview from './KeycapPreview.svelte'
+  import SymbolInput from './SymbolInput.svelte'
   import { X, Plus } from 'lucide-svelte'
   import HelpTooltip from './HelpTooltip.svelte'
   import { Button } from '@/lib/components/ui/button'
@@ -13,6 +15,12 @@
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/lib/components/ui/select'
   import { Switch } from '@/lib/components/ui/switch'
   import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/lib/components/ui/tooltip'
+
+  function getSymbolContent(keyId: string, symbolId: string): SymbolContent | null {
+    const k = $app.keys.find(k => k.id === keyId)
+    if (!k) return null
+    return k.contentBySymbolId[symbolId] ?? null
+  }
 
   $: key = $selectedKey
   $: tpl = key == null ? null : ($app.templates.find(t => t.id === key.templateId) ?? null)
@@ -110,7 +118,7 @@
                     {#if kTpl && kModel}
                       <LabelPreview
                         template={kTpl}
-                        textsBySymbolId={k.textsBySymbolId}
+                        contentBySymbolId={k.contentBySymbolId}
                         widthMm={kModel.widthMm}
                         heightMm={kModel.heightMm}
                         className="rounded"
@@ -195,21 +203,15 @@
           {:else}
             <div class="grid gap-2">
               <div class="text-sm font-medium">Symbols</div>
-              <div class="grid gap-2">
+              <div class="grid gap-3">
                 {#each tpl.symbols as sym, index (sym.id)}
-                  {@const symInputId = `key-${key.id}-symbol-${sym.id}`}
-                  <div class="card-box w-full px-3 py-2">
-                    <Field>
-                      <FieldLabel for={symInputId} class="text-xs font-medium text-muted-foreground capitalize">
-                        {getSlotName(index)} ({getSlotSymbol(index)})
-                      </FieldLabel>
-                      <Input
-                        id={symInputId}
-                        placeholder="Enter text..."
-                        value={key.textsBySymbolId[sym.id] ?? ''}
-                        oninput={e => actions.setKeyText(key.id, sym.id, (e.currentTarget as HTMLInputElement).value)}
-                      />
-                    </Field>
+                  <div class="card-box w-full px-3 py-3">
+                    <SymbolInput
+                      label="{getSlotName(index)} ({getSlotSymbol(index)})"
+                      content={getSymbolContent(key.id, sym.id)}
+                      placeholder="Enter text..."
+                      onContentChange={content => actions.setKeyContent(key.id, sym.id, content)}
+                    />
                   </div>
                 {/each}
               </div>
@@ -234,7 +236,7 @@
     <CardContent>
       <KeycapPreview
         template={tpl}
-        textsBySymbolId={key?.textsBySymbolId ?? {}}
+        contentBySymbolId={key?.contentBySymbolId ?? {}}
         widthMm={modelWidthMm}
         heightMm={modelHeightMm}
         keyId={key?.id ?? null}
