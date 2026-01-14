@@ -219,7 +219,7 @@
     </div>
   </header>
 
-  <div class="mx-auto flex-1 w-full max-w-6xl px-3 py-4 sm:px-4">
+  <div class="mx-auto flex-1 w-full max-w-6xl px-3 py-4 sm:px-4 min-h-0 overflow-hidden">
     <Tabs bind:value={tab} class="gap-4">
       <div class="flex flex-wrap items-center gap-2">
         <TabsList>

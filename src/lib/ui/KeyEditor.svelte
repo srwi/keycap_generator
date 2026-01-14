@@ -64,7 +64,7 @@
 </script>
 
 <div class="grid gap-4 lg:grid-cols-12">
-  <Card class="lg:col-span-4">
+  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <div class="flex items-center gap-2 min-w-0">
@@ -80,9 +80,9 @@
       </div>
     </CardHeader>
 
-    <CardContent>
-      <ScrollArea class="h-[32rem] w-full">
-        <div class="grid gap-2 p-1">
+    <CardContent class="flex-1 min-h-0 px-1">
+      <ScrollArea class="h-full w-full min-h-0 px-3">
+        <div class="grid gap-2 px-1 py-6">
           {#each $app.keys as k (k.id)}
             {@const kTpl = getKeyTemplate(k.id)}
             {@const kModel = getKeyModel(k.id)}
@@ -141,76 +141,78 @@
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4">
+  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Key configuration</CardTitle>
       </div>
     </CardHeader>
 
-    <CardContent>
-      {#if !key}
-        <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
-          Create/select a key to edit.
-        </div>
-      {:else}
-        {@const nameId = `key-${key.id}-name`}
-        {@const templateId = `key-${key.id}-template`}
+    <CardContent class="flex-1 min-h-0 px-1">
+      <ScrollArea class="h-full w-full min-h-0 px-3">
+        {#if !key}
+          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
+            Create/select a key to edit.
+          </div>
+        {:else}
+          {@const nameId = `key-${key.id}-name`}
+          {@const templateId = `key-${key.id}-template`}
 
-        <FieldGroup>
-          <Field>
-            <FieldLabel for={nameId}>Name</FieldLabel>
-            <Input
-              id={nameId}
-              value={key.name}
-              oninput={e => actions.renameKey(key.id, (e.currentTarget as HTMLInputElement).value)}
-            />
-          </Field>
+          <FieldGroup class="py-5">
+            <Field>
+              <FieldLabel for={nameId}>Name</FieldLabel>
+              <Input
+                id={nameId}
+                value={key.name}
+                oninput={e => actions.renameKey(key.id, (e.currentTarget as HTMLInputElement).value)}
+              />
+            </Field>
 
-          <Field>
-            <FieldLabel for={templateId}>Template</FieldLabel>
-            <Select type="single" bind:value={selectedTemplateId}>
-              <SelectTrigger id={templateId} class="w-full" data-placeholder={!selectedTemplateId}>
-                <SelectValue
-                  placeholder="Select a template"
-                  value={$app.templates.find(t => t.id === selectedTemplateId)?.name ?? null}
-                />
-              </SelectTrigger>
-              <SelectContent class="w-full">
-                {#each $app.templates as t (t.id)}
-                  <SelectItem value={t.id} label={t.name} />
-                {/each}
-              </SelectContent>
-            </Select>
-          </Field>
+            <Field>
+              <FieldLabel for={templateId}>Template</FieldLabel>
+              <Select type="single" bind:value={selectedTemplateId}>
+                <SelectTrigger id={templateId} class="w-full" data-placeholder={!selectedTemplateId}>
+                  <SelectValue
+                    placeholder="Select a template"
+                    value={$app.templates.find(t => t.id === selectedTemplateId)?.name ?? null}
+                  />
+                </SelectTrigger>
+                <SelectContent class="w-full">
+                  {#each $app.templates as t (t.id)}
+                    <SelectItem value={t.id} label={t.name} />
+                  {/each}
+                </SelectContent>
+              </Select>
+            </Field>
 
-          {#if !tpl}
-            <div class="text-sm text-muted-foreground">This key references a missing template.</div>
-          {:else}
-            <div class="grid gap-2">
-              <div class="text-sm font-medium">Symbols</div>
-              <div class="grid gap-3">
-                {#each tpl.symbols as sym, index (sym.id)}
-                  <div class="card-box w-full px-3 py-3">
-                    <SymbolInput
-                      label="{getSlotName(index)} ({getSlotSymbol(index)})"
-                      content={getSymbolContent(key.id, sym.id)}
-                      placeholder="Enter text..."
-                      keyId={key.id}
-                      symbolId={sym.id}
-                      onContentChange={content => actions.setKeyContent(key.id, sym.id, content)}
-                    />
-                  </div>
-                {/each}
+            {#if !tpl}
+              <div class="text-sm text-muted-foreground">This key references a missing template.</div>
+            {:else}
+              <div class="grid gap-2">
+                <div class="text-sm font-medium">Symbols</div>
+                <div class="grid gap-3">
+                  {#each tpl.symbols as sym, index (sym.id)}
+                    <div class="card-box w-full px-3 py-3">
+                      <SymbolInput
+                        label="{getSlotName(index)} ({getSlotSymbol(index)})"
+                        content={getSymbolContent(key.id, sym.id)}
+                        placeholder="Enter text..."
+                        keyId={key.id}
+                        symbolId={sym.id}
+                        onContentChange={content => actions.setKeyContent(key.id, sym.id, content)}
+                      />
+                    </div>
+                  {/each}
+                </div>
               </div>
-            </div>
-          {/if}
-        </FieldGroup>
-      {/if}
+            {/if}
+          </FieldGroup>
+        {/if}
+      </ScrollArea>
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4">
+  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Preview</CardTitle>
@@ -221,15 +223,17 @@
         </div>
       </div>
     </CardHeader>
-    <CardContent>
-      <KeycapPreview
-        template={tpl}
-        contentBySymbolId={key?.contentBySymbolId ?? {}}
-        widthMm={modelWidthMm}
-        heightMm={modelHeightMm}
-        keyId={key?.id ?? null}
-        bind:is3d={previewIs3d}
-      />
+    <CardContent class="flex-1 min-h-0 px-1">
+      <ScrollArea class="h-full w-full min-h-0 flex items-start justify-start px-3 py-5">
+        <KeycapPreview
+          template={tpl}
+          contentBySymbolId={key?.contentBySymbolId ?? {}}
+          widthMm={modelWidthMm}
+          heightMm={modelHeightMm}
+          keyId={key?.id ?? null}
+          bind:is3d={previewIs3d}
+        />
+      </ScrollArea>
     </CardContent>
   </Card>
 </div>

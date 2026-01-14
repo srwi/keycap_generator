@@ -221,7 +221,7 @@
 </script>
 
 <div class="grid gap-4 lg:grid-cols-12">
-  <Card class="lg:col-span-4">
+  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <div class="flex items-center gap-2 min-w-0">
@@ -237,9 +237,9 @@
       </div>
     </CardHeader>
 
-    <CardContent>
-      <ScrollArea class="h-[32rem] w-full">
-        <div class="grid gap-2 p-1">
+    <CardContent class="flex-1 min-h-0 px-1">
+      <ScrollArea class="h-full w-full min-h-0 px-3">
+        <div class="grid gap-2 px-1 py-6">
           {#each $app.keycapModels as m (m.id)}
             <Item size="sm" variant={selectedId === m.id ? 'muted' : 'outline'} class="w-full justify-between">
               {#snippet child({ props })}
@@ -281,287 +281,289 @@
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4">
+  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Model configuration</CardTitle>
       </div>
     </CardHeader>
 
-    <CardContent>
-          {#if !model}
-        <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
-          Create/select a model to edit.
-        </div>
-      {:else}
-        {@const modelNameId = `model-${model.id}-name`}
-        {@const extrusionDepthId = `model-${model.id}-extrusion-depth`}
-        {@const stlSourceServerId = `stl-source-${model.id}-server`}
-        {@const stlSourceUploadId = `stl-source-${model.id}-upload`}
-        {@const categoryId = `model-${model.id}-category`}
-        {@const keycapId = `model-${model.id}-keycap`}
-
-        <FieldGroup>
-          <Field>
-            <FieldLabel for={modelNameId}>Name</FieldLabel>
-            <Input
-              id={modelNameId}
-              value={model.name}
-              oninput={e => actions.renameKeycapModel(model.id, (e.currentTarget as HTMLInputElement).value)}
-            />
-          </Field>
-
-          <Field>
-            <FieldLabel for={extrusionDepthId}>
-              Symbol extrusion depth (mm)
-              <HelpTooltip
-                text="The depth at which text is extruded into the keycap surface. Higher values result in deeper engraving. Setting this too high may cause the text to break through to the inside of the keycap. When printing on the top surface, use a multiple of your layer height."
-              />
-            </FieldLabel>
-            <Input
-              id={extrusionDepthId}
-              type="number"
-              min="0.1"
-              step="0.1"
-              value={model.extrusionDepthMm}
-              oninput={e =>
-                actions.updateKeycapModel(model.id, {
-                  extrusionDepthMm: Number((e.currentTarget as HTMLInputElement).value),
-                })}
-            />
-          </Field>
-
-          <div class="grid gap-3">
-            <div class="text-sm font-medium">STL source</div>
-
-            <div class="card-box grid gap-2 p-3">
-              <RadioGroup
-                bind:value={stlSourceKind}
-                onValueChange={(next: string) => onStlSourceKindChange(next as 'server' | 'upload')}
-                class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"
-              >
-                <div class="flex items-center gap-3">
-                  <RadioGroupItem value="server" id={stlSourceServerId} />
-                  <Label for={stlSourceServerId}>From server</Label>
-                </div>
-                <div class="flex items-center gap-3">
-                  <RadioGroupItem value="upload" id={stlSourceUploadId} />
-                  <Label for={stlSourceUploadId}>Upload file</Label>
-                </div>
-              </RadioGroup>
-
-              {#if model.source.kind === 'server'}
-                {#if registry}
-                  <div class="grid gap-2">
-                    <div class="grid grid-cols-2 gap-2">
-                      <Field>
-                        <FieldLabel for={categoryId}>Category</FieldLabel>
-                        <Select type="single" bind:value={categoryValue}>
-                          <SelectTrigger id={categoryId} class="w-full" data-placeholder={!categoryValue}>
-                            <SelectValue placeholder="Select a category" value={categoryValue || null} />
-                          </SelectTrigger>
-                          <SelectContent class="w-full">
-                            {#each categories as cat}
-                              <SelectItem value={cat} label={cat} />
-                            {/each}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                      <Field>
-                        <FieldLabel for={keycapId}>Keycap</FieldLabel>
-                        <Select type="single" bind:value={keycapPathValue}>
-                          <SelectTrigger id={keycapId} class="w-full" data-placeholder={!keycapPathValue}>
-                            <SelectValue
-                              placeholder="Select a keycap"
-                              value={keycapsInCategory.find(k => k.path === keycapPathValue)?.displayName ?? null}
-                            />
-                          </SelectTrigger>
-                          <SelectContent class="w-full">
-                            {#each keycapsInCategory as keycap}
-                              <SelectItem value={keycap.path} label={keycap.displayName} />
-                            {/each}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    </div>
-                    {#if selectedKeycap}
-                      <div class="mt-2 pt-2 border-t text-xs text-muted-foreground">
-                        {#if selectedKeycap.author}
-                          <div class="mb-1">
-                            Author:
-                            {#if selectedKeycap.authorLink}
-                              <a
-                                href={selectedKeycap.authorLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="text-primary hover:text-primary/90 underline"
-                              >
-                                {selectedKeycap.author}
-                              </a>
-                            {:else}
-                              <span class="text-foreground">{selectedKeycap.author}</span>
-                            {/if}
-                          </div>
-                        {/if}
-                        {#if selectedKeycap.license}
-                          <div>
-                            License: <span class="text-foreground">{selectedKeycap.license}</span>
-                          </div>
-                        {/if}
-                      </div>
-                    {/if}
-                  </div>
-                {:else}
-                  <div class="text-xs text-muted-foreground">Loading registry...</div>
-                {/if}
-              {:else}
-                <Field>
-                  <FieldLabel for="file-input-{model.id}">Choose STL file</FieldLabel>
-                  <div class="flex items-center gap-2">
-                    <input
-                      id="file-input-{model.id}"
-                      class="hidden"
-                      type="file"
-                      accept=".stl,model/stl"
-                      onchange={onUploadStl}
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      type="button"
-                      onclick={() => {
-                        const fileInput = document.getElementById(`file-input-${model.id}`) as HTMLInputElement
-                        fileInput?.click()
-                      }}
-                    >
-                      Browse...
-                    </Button>
-                    {#if model.source.stl?.fileName}
-                      <span class="text-xs text-foreground truncate flex-1">
-                        {model.source.stl.fileName}
-                      </span>
-                    {:else}
-                      <span class="text-xs text-muted-foreground">No file selected</span>
-                    {/if}
-                  </div>
-                </Field>
-              {/if}
-            </div>
+    <CardContent class="flex-1 min-h-0 px-1">
+      <ScrollArea class="h-full w-full min-h-0 px-3">
+        {#if !model}
+          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
+            Create/select a model to edit.
           </div>
+        {:else}
+          {@const modelNameId = `model-${model.id}-name`}
+          {@const extrusionDepthId = `model-${model.id}-extrusion-depth`}
+          {@const stlSourceServerId = `stl-source-${model.id}-server`}
+          {@const stlSourceUploadId = `stl-source-${model.id}-upload`}
+          {@const categoryId = `model-${model.id}-category`}
+          {@const keycapId = `model-${model.id}-keycap`}
 
-          {#if model.source.kind === 'upload' && model.source.stl}
-            <div class="grid gap-3">
-              <div class="flex items-center gap-2">
-                <div class="text-sm font-medium">Model Orientation</div>
+          <FieldGroup class="py-5">
+            <Field>
+              <FieldLabel for={modelNameId}>Name</FieldLabel>
+              <Input
+                id={modelNameId}
+                value={model.name}
+                oninput={e => actions.renameKeycapModel(model.id, (e.currentTarget as HTMLInputElement).value)}
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel for={extrusionDepthId}>
+                Symbol extrusion depth (mm)
                 <HelpTooltip
-                  text="The model must be oriented with its face pointing forward (towards the camera) so that labels are correctly positioned and extruded into the keycap surface. If the model is rotated incorrectly, the text will appear on the wrong side or be extruded in the wrong direction when generating the final keycap."
+                  text="The depth at which text is extruded into the keycap surface. Higher values result in deeper engraving. Setting this too high may cause the text to break through to the inside of the keycap. When printing on the top surface, use a multiple of your layer height."
                 />
-              </div>
+              </FieldLabel>
+              <Input
+                id={extrusionDepthId}
+                type="number"
+                min="0.1"
+                step="0.1"
+                value={model.extrusionDepthMm}
+                oninput={e =>
+                  actions.updateKeycapModel(model.id, {
+                    extrusionDepthMm: Number((e.currentTarget as HTMLInputElement).value),
+                  })}
+              />
+            </Field>
+
+            <div class="grid gap-3">
+              <div class="text-sm font-medium">STL source</div>
+
               <div class="card-box grid gap-2 p-3">
-                <div class="text-xs text-muted-foreground mb-1">
-                  Rotate the model until the face points towards the camera.
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                  <div class="grid gap-1">
-                    <div class="text-xs text-muted-foreground text-center">X-axis</div>
-                    <ButtonGroup class="w-full">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        class="flex-1"
-                        title="-90°"
-                        onclick={() => {
-                          const current = model.rotationX
-                          actions.updateKeycapModel(model.id, { rotationX: (current - 90 + 360) % 360 })
-                        }}
-                      >
-                        <RotateCcw class="size-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        class="flex-1"
-                        title="+90°"
-                        onclick={() => {
-                          const current = model.rotationX
-                          actions.updateKeycapModel(model.id, { rotationX: (current + 90) % 360 })
-                        }}
-                      >
-                        <RotateCw class="size-4" />
-                      </Button>
-                    </ButtonGroup>
-                    <div class="text-xs text-muted-foreground text-center">{model.rotationX}°</div>
+                <RadioGroup
+                  bind:value={stlSourceKind}
+                  onValueChange={(next: string) => onStlSourceKindChange(next as 'server' | 'upload')}
+                  class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"
+                >
+                  <div class="flex items-center gap-3">
+                    <RadioGroupItem value="server" id={stlSourceServerId} />
+                    <Label for={stlSourceServerId}>From server</Label>
                   </div>
-                  <div class="grid gap-1">
-                    <div class="text-xs text-muted-foreground text-center">Y-axis</div>
-                    <ButtonGroup class="w-full">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        class="flex-1"
-                        title="-90°"
-                        onclick={() => {
-                          const current = model.rotationY
-                          actions.updateKeycapModel(model.id, { rotationY: (current - 90 + 360) % 360 })
-                        }}
-                      >
-                        <RotateCcw class="size-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        class="flex-1"
-                        title="+90°"
-                        onclick={() => {
-                          const current = model.rotationY
-                          actions.updateKeycapModel(model.id, { rotationY: (current + 90) % 360 })
-                        }}
-                      >
-                        <RotateCw class="size-4" />
-                      </Button>
-                    </ButtonGroup>
-                    <div class="text-xs text-muted-foreground text-center">{model.rotationY}°</div>
+                  <div class="flex items-center gap-3">
+                    <RadioGroupItem value="upload" id={stlSourceUploadId} />
+                    <Label for={stlSourceUploadId}>Upload file</Label>
                   </div>
-                  <div class="grid gap-1">
-                    <div class="text-xs text-muted-foreground text-center">Z-axis</div>
-                    <ButtonGroup class="w-full">
+                </RadioGroup>
+
+                {#if model.source.kind === 'server'}
+                  {#if registry}
+                    <div class="grid gap-2">
+                      <div class="grid grid-cols-2 gap-2">
+                        <Field>
+                          <FieldLabel for={categoryId}>Category</FieldLabel>
+                          <Select type="single" bind:value={categoryValue}>
+                            <SelectTrigger id={categoryId} class="w-full" data-placeholder={!categoryValue}>
+                              <SelectValue placeholder="Select a category" value={categoryValue || null} />
+                            </SelectTrigger>
+                            <SelectContent class="w-full">
+                              {#each categories as cat}
+                                <SelectItem value={cat} label={cat} />
+                              {/each}
+                            </SelectContent>
+                          </Select>
+                        </Field>
+                        <Field>
+                          <FieldLabel for={keycapId}>Keycap</FieldLabel>
+                          <Select type="single" bind:value={keycapPathValue}>
+                            <SelectTrigger id={keycapId} class="w-full" data-placeholder={!keycapPathValue}>
+                              <SelectValue
+                                placeholder="Select a keycap"
+                                value={keycapsInCategory.find(k => k.path === keycapPathValue)?.displayName ?? null}
+                              />
+                            </SelectTrigger>
+                            <SelectContent class="w-full">
+                              {#each keycapsInCategory as keycap}
+                                <SelectItem value={keycap.path} label={keycap.displayName} />
+                              {/each}
+                            </SelectContent>
+                          </Select>
+                        </Field>
+                      </div>
+                      {#if selectedKeycap}
+                        <div class="mt-2 pt-2 border-t text-xs text-muted-foreground">
+                          {#if selectedKeycap.author}
+                            <div class="mb-1">
+                              Author:
+                              {#if selectedKeycap.authorLink}
+                                <a
+                                  href={selectedKeycap.authorLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  class="text-primary hover:text-primary/90 underline"
+                                >
+                                  {selectedKeycap.author}
+                                </a>
+                              {:else}
+                                <span class="text-foreground">{selectedKeycap.author}</span>
+                              {/if}
+                            </div>
+                          {/if}
+                          {#if selectedKeycap.license}
+                            <div>
+                              License: <span class="text-foreground">{selectedKeycap.license}</span>
+                            </div>
+                          {/if}
+                        </div>
+                      {/if}
+                    </div>
+                  {:else}
+                    <div class="text-xs text-muted-foreground">Loading registry...</div>
+                  {/if}
+                {:else}
+                  <Field>
+                    <FieldLabel for="file-input-{model.id}">Choose STL file</FieldLabel>
+                    <div class="flex items-center gap-2">
+                      <input
+                        id="file-input-{model.id}"
+                        class="hidden"
+                        type="file"
+                        accept=".stl,model/stl"
+                        onchange={onUploadStl}
+                      />
                       <Button
                         variant="outline"
                         size="sm"
-                        class="flex-1"
-                        title="-90°"
+                        type="button"
                         onclick={() => {
-                          const current = model.rotationZ
-                          actions.updateKeycapModel(model.id, { rotationZ: (current - 90 + 360) % 360 })
+                          const fileInput = document.getElementById(`file-input-${model.id}`) as HTMLInputElement
+                          fileInput?.click()
                         }}
                       >
-                        <RotateCcw class="size-4" />
+                        Browse...
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        class="flex-1"
-                        title="+90°"
-                        onclick={() => {
-                          const current = model.rotationZ
-                          actions.updateKeycapModel(model.id, { rotationZ: (current + 90) % 360 })
-                        }}
-                      >
-                        <RotateCw class="size-4" />
-                      </Button>
-                    </ButtonGroup>
-                    <div class="text-xs text-muted-foreground text-center">{model.rotationZ}°</div>
-                  </div>
-                </div>
+                      {#if model.source.stl?.fileName}
+                        <span class="text-xs text-foreground truncate flex-1">
+                          {model.source.stl.fileName}
+                        </span>
+                      {:else}
+                        <span class="text-xs text-muted-foreground">No file selected</span>
+                      {/if}
+                    </div>
+                  </Field>
+                {/if}
               </div>
             </div>
-          {/if}
-        </FieldGroup>
-      {/if}
+
+            {#if model.source.kind === 'upload' && model.source.stl}
+              <div class="grid gap-3">
+                <div class="flex items-center gap-2">
+                  <div class="text-sm font-medium">Model Orientation</div>
+                  <HelpTooltip
+                    text="The model must be oriented with its face pointing forward (towards the camera) so that labels are correctly positioned and extruded into the keycap surface. If the model is rotated incorrectly, the text will appear on the wrong side or be extruded in the wrong direction when generating the final keycap."
+                  />
+                </div>
+                <div class="card-box grid gap-2 p-3">
+                  <div class="text-xs text-muted-foreground mb-1">
+                    Rotate the model until the face points towards the camera.
+                  </div>
+                  <div class="grid grid-cols-3 gap-2">
+                    <div class="grid gap-1">
+                      <div class="text-xs text-muted-foreground text-center">X-axis</div>
+                      <ButtonGroup class="w-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          class="flex-1"
+                          title="-90°"
+                          onclick={() => {
+                            const current = model.rotationX
+                            actions.updateKeycapModel(model.id, { rotationX: (current - 90 + 360) % 360 })
+                          }}
+                        >
+                          <RotateCcw class="size-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          class="flex-1"
+                          title="+90°"
+                          onclick={() => {
+                            const current = model.rotationX
+                            actions.updateKeycapModel(model.id, { rotationX: (current + 90) % 360 })
+                          }}
+                        >
+                          <RotateCw class="size-4" />
+                        </Button>
+                      </ButtonGroup>
+                      <div class="text-xs text-muted-foreground text-center">{model.rotationX}°</div>
+                    </div>
+                    <div class="grid gap-1">
+                      <div class="text-xs text-muted-foreground text-center">Y-axis</div>
+                      <ButtonGroup class="w-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          class="flex-1"
+                          title="-90°"
+                          onclick={() => {
+                            const current = model.rotationY
+                            actions.updateKeycapModel(model.id, { rotationY: (current - 90 + 360) % 360 })
+                          }}
+                        >
+                          <RotateCcw class="size-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          class="flex-1"
+                          title="+90°"
+                          onclick={() => {
+                            const current = model.rotationY
+                            actions.updateKeycapModel(model.id, { rotationY: (current + 90) % 360 })
+                          }}
+                        >
+                          <RotateCw class="size-4" />
+                        </Button>
+                      </ButtonGroup>
+                      <div class="text-xs text-muted-foreground text-center">{model.rotationY}°</div>
+                    </div>
+                    <div class="grid gap-1">
+                      <div class="text-xs text-muted-foreground text-center">Z-axis</div>
+                      <ButtonGroup class="w-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          class="flex-1"
+                          title="-90°"
+                          onclick={() => {
+                            const current = model.rotationZ
+                            actions.updateKeycapModel(model.id, { rotationZ: (current - 90 + 360) % 360 })
+                          }}
+                        >
+                          <RotateCcw class="size-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          class="flex-1"
+                          title="+90°"
+                          onclick={() => {
+                            const current = model.rotationZ
+                            actions.updateKeycapModel(model.id, { rotationZ: (current + 90) % 360 })
+                          }}
+                        >
+                          <RotateCw class="size-4" />
+                        </Button>
+                      </ButtonGroup>
+                      <div class="text-xs text-muted-foreground text-center">{model.rotationZ}°</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/if}
+          </FieldGroup>
+        {/if}
+      </ScrollArea>
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4">
+  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <div class="flex items-center gap-2 min-w-0">
@@ -572,26 +574,28 @@
         </div>
       </div>
     </CardHeader>
-    <CardContent>
-          {#if !model}
-        <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">Select a model to preview</div>
-          {:else if modelStlUrl || modelStlBuffer}
-        <div class="h-96 overflow-hidden">
-          {#key model.id}
-            <Model3DViewer
-              stlUrl={modelStlUrl}
-              stlBuffer={modelStlBuffer}
-              rotationX={model.rotationX}
-              rotationY={model.rotationY}
-              rotationZ={model.rotationZ}
-            />
-          {/key}
-        </div>
-      {:else}
-        <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
-          Upload or select an STL file to preview
-        </div>
-      {/if}
+    <CardContent class="flex-1 min-h-0 px-1">
+      <ScrollArea class="h-full w-full min-h-0 px-3 py-5">
+        {#if !model}
+          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">Select a model to preview</div>
+        {:else if modelStlUrl || modelStlBuffer}
+          <div class="h-96 overflow-hidden">
+            {#key model.id}
+              <Model3DViewer
+                stlUrl={modelStlUrl}
+                stlBuffer={modelStlBuffer}
+                rotationX={model.rotationX}
+                rotationY={model.rotationY}
+                rotationZ={model.rotationZ}
+              />
+            {/key}
+          </div>
+        {:else}
+          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
+            Upload or select an STL file to preview
+          </div>
+        {/if}
+      </ScrollArea>
     </CardContent>
   </Card>
 </div>

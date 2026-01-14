@@ -153,7 +153,7 @@
 </script>
 
 <div class="grid gap-4 lg:grid-cols-12">
-  <Card class="lg:col-span-4">
+  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <div class="flex items-center gap-2 min-w-0">
@@ -169,9 +169,9 @@
       </div>
     </CardHeader>
 
-    <CardContent>
-      <ScrollArea class="h-[32rem] w-full">
-        <div class="grid gap-2 p-1">
+    <CardContent class="flex-1 min-h-0 px-1">
+      <ScrollArea class="h-full w-full min-h-0 px-3">
+        <div class="grid gap-2 px-1 py-6">
           {#each $app.templates as t (t.id)}
             {@const tModel = getTemplateModel(t.id)}
             {@const previewTexts = Object.fromEntries(t.symbols.map((s, index) => [s.id, getSlotSymbol(index)]))}
@@ -233,68 +233,69 @@
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4">
+  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Template configuration</CardTitle>
       </div>
     </CardHeader>
 
-    <CardContent>
-      {#if !tpl}
-        <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
-          Create/select a template to edit.
-        </div>
-      {:else}
-        {@const nameId = `template-${tpl.id}-name`}
-        {@const modelId = `template-${tpl.id}-keycap-model`}
+    <CardContent class="flex-1 min-h-0 px-1">
+      <ScrollArea class="h-full w-full min-h-0 px-3">
+        {#if !tpl}
+          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
+            Create/select a template to edit.
+          </div>
+        {:else}
+          {@const nameId = `template-${tpl.id}-name`}
+          {@const modelId = `template-${tpl.id}-keycap-model`}
 
-        <FieldGroup>
-          <Field>
-            <FieldLabel for={nameId}>Name</FieldLabel>
-            <Input
-              id={nameId}
-              value={tpl.name}
-              oninput={e => actions.renameTemplate(tpl.id, (e.currentTarget as HTMLInputElement).value)}
-            />
-          </Field>
+          <FieldGroup class="py-5">
+            <Field>
+              <FieldLabel for={nameId}>Name</FieldLabel>
+              <Input
+                id={nameId}
+                value={tpl.name}
+                oninput={e => actions.renameTemplate(tpl.id, (e.currentTarget as HTMLInputElement).value)}
+              />
+            </Field>
 
-          <Field>
-            <FieldLabel for={modelId}>Keycap model</FieldLabel>
-            <Select type="single" bind:value={selectedKeycapModelId}>
-              <SelectTrigger id={modelId} class="w-full" data-placeholder={!selectedKeycapModelId}>
-                <SelectValue
-                  placeholder="Select a model"
-                  value={$app.keycapModels.find(m => m.id === selectedKeycapModelId)?.name ?? null}
-                />
-              </SelectTrigger>
-              <SelectContent class="w-full">
-                {#each $app.keycapModels as km (km.id)}
-                  <SelectItem value={km.id} label={km.name} />
-                {/each}
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <div class="grid gap-3">
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <div class="text-sm font-medium">Symbols</div>
-                <HelpTooltip
-                  text="Symbols represent different label positions on a keycap (e.g., primary, secondary, tertiary). You can add multiple symbols to create keys with multiple labels, each with its own position, font, size, rotation, and color. This allows you to create keys with legends, modifiers, or multi-character labels."
-                />
-              </div>
-              <Button size="sm" disabled={tpl.symbols.length >= MAX_SLOTS} onclick={() => actions.addSymbol(tpl.id)}>
-                <Plus class="size-4" />
-                Add
-              </Button>
-            </div>
+            <Field>
+              <FieldLabel for={modelId}>Keycap model</FieldLabel>
+              <Select type="single" bind:value={selectedKeycapModelId}>
+                <SelectTrigger id={modelId} class="w-full" data-placeholder={!selectedKeycapModelId}>
+                  <SelectValue
+                    placeholder="Select a model"
+                    value={$app.keycapModels.find(m => m.id === selectedKeycapModelId)?.name ?? null}
+                  />
+                </SelectTrigger>
+                <SelectContent class="w-full">
+                  {#each $app.keycapModels as km (km.id)}
+                    <SelectItem value={km.id} label={km.name} />
+                  {/each}
+                </SelectContent>
+              </Select>
+            </Field>
 
             <div class="grid gap-3">
-              {#each tpl.symbols as sym (sym.id)}
-                {@const isCollapsed = collapsedSymbols.has(sym.id)}
-                <div class="card-box overflow-hidden">
-                  <div class="flex items-center justify-between gap-2 px-2 py-2">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <div class="text-sm font-medium">Symbols</div>
+                  <HelpTooltip
+                    text="Symbols represent different label positions on a keycap (e.g., primary, secondary, tertiary). You can add multiple symbols to create keys with multiple labels, each with its own position, font, size, rotation, and color. This allows you to create keys with legends, modifiers, or multi-character labels."
+                  />
+                </div>
+                <Button size="sm" disabled={tpl.symbols.length >= MAX_SLOTS} onclick={() => actions.addSymbol(tpl.id)}>
+                  <Plus class="size-4" />
+                  Add
+                </Button>
+              </div>
+
+              <div class="grid gap-3">
+                {#each tpl.symbols as sym (sym.id)}
+                  {@const isCollapsed = collapsedSymbols.has(sym.id)}
+                  <div class="card-box overflow-hidden">
+                    <div class="flex items-center justify-between gap-2 px-2 py-2">
                     <Button
                       variant="ghost"
                       class="h-auto flex-1 justify-start hover:bg-accent/40 dark:hover:bg-accent/20"
@@ -316,9 +317,9 @@
                     >
                       <X class="size-4" />
                     </Button>
-                  </div>
+                    </div>
 
-                  {#if !isCollapsed}
+                    {#if !isCollapsed}
                     <div class="p-3 pt-0" transition:slide={{ duration: 200 }}>
                       <FieldGroup>
                         <div class="grid grid-cols-2 gap-3">
@@ -433,13 +434,14 @@
                         </Field>
                       </FieldGroup>
                     </div>
-                  {/if}
-                </div>
-              {/each}
+                    {/if}
+                  </div>
+                {/each}
+              </div>
             </div>
-          </div>
-        </FieldGroup>
-      {/if}
+          </FieldGroup>
+        {/if}
+      </ScrollArea>
     </CardContent>
   </Card>
 
@@ -451,7 +453,7 @@
     onchange={onFontUploadChange}
   />
 
-  <Card class="lg:col-span-4">
+  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Preview</CardTitle>
@@ -462,15 +464,17 @@
         </div>
       </div>
     </CardHeader>
-    <CardContent>
-      <KeycapPreview
-        template={tpl}
-        contentBySymbolId={previewContentBySymbolId}
-        widthMm={modelWidthMm}
-        heightMm={modelHeightMm}
-        keyId={null}
-        bind:is3d={previewIs3d}
-      />
+    <CardContent class="flex-1 min-h-0 px-1">
+      <ScrollArea class="h-full w-full min-h-0 flex items-start justify-start px-3 py-5">
+        <KeycapPreview
+          template={tpl}
+          contentBySymbolId={previewContentBySymbolId}
+          widthMm={modelWidthMm}
+          heightMm={modelHeightMm}
+          keyId={null}
+          bind:is3d={previewIs3d}
+        />
+      </ScrollArea>
     </CardContent>
   </Card>
 </div>
