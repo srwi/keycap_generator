@@ -162,12 +162,7 @@
             text="A template defines the layout and styling of symbols (labels) on a keycap. It specifies where text appears, what font, size, color, and rotation to use. Multiple keys can share the same template but display different text values. Templates are linked to a specific keycap model size."
           />
         </div>
-        <Button
-          size="sm"
-          disabled={!hasModels}
-          title="New template"
-          onclick={actions.createTemplate}
-        >
+        <Button size="sm" disabled={!hasModels} title="New template" onclick={actions.createTemplate}>
           <Plus class="size-4" />
           <span class="hidden sm:inline">New</span>
         </Button>

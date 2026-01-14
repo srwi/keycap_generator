@@ -108,15 +108,13 @@
     </div>
   </div>
 
-  <!-- Input based on mode -->
   {#if iconMode}
-    <!-- Icon mode - InputGroup with icon addon on left -->
     <Popover bind:open={popoverOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger>
         <button type="button" class="w-full text-left">
           <InputGroup>
             {#if selectedIcon}
-            <InputGroupAddon align="inline-start">
+              <InputGroupAddon align="inline-start">
                 <svg
                   viewBox="0 0 {PHOSPHOR_ICON_VIEWBOX} {PHOSPHOR_ICON_VIEWBOX}"
                   class="size-4"
@@ -141,7 +139,6 @@
       </PopoverContent>
     </Popover>
   {:else}
-    <!-- Text mode - simple InputGroup -->
     <InputGroup>
       <InputGroupInput type="text" {placeholder} value={textValue} oninput={handleTextInput} />
     </InputGroup>
