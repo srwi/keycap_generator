@@ -68,9 +68,8 @@ async function loadIconPath(iconName: string): Promise<string | null> {
   if (cached) return cached
 
   try {
-    // Fetch SVG from the assets in node_modules
-    // This works because Vite serves node_modules
-    const response = await fetch(`/node_modules/@phosphor-icons/core/assets/regular/${iconName}.svg`)
+    const baseUrl = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular'
+    const response = await fetch(`${baseUrl}/${iconName}.svg`)
     if (!response.ok) return null
 
     const svg = await response.text()

@@ -3,41 +3,41 @@
   "keycapModels": [
     {
       "id": "model_1u",
-      "name": "1u",
-      "widthMm": 19.05,
-      "heightMm": 19.05,
+      "name": "1.00u (Concave)",
+      "widthMm": 18.299999237060547,
+      "heightMm": 18.29962158203125,
       "source": {
         "kind": "server",
-        "serverId": "JoeScotto_Flat_1.00u",
-        "url": "/stls/JoeScotto_Flat/1.00u.stl",
+        "serverId": "JoeScotto_Scooped_MX_1_00u__Concave__stl",
+        "url": "/stls/JoeScotto_Scooped_MX/1.00u (Concave).stl",
         "stl": {
-          "fileName": "1.00u.stl",
-          "pathHint": "server:JoeScotto_Flat_1.00u"
+          "fileName": "1.00u (Concave).stl",
+          "pathHint": "server:JoeScotto_Scooped_MX_1_00u__Concave__stl"
         }
       },
       "rotationX": 0,
       "rotationY": 0,
       "rotationZ": 0,
-      "extrusionDepthMm": 0.6
+      "extrusionDepthMm": 1.8
     },
     {
       "id": "model_2u",
-      "name": "2u",
-      "widthMm": 38.1,
-      "heightMm": 19.05,
+      "name": "2.00u (Concave)",
+      "widthMm": 37.349998474121094,
+      "heightMm": 18.2984619140625,
       "source": {
         "kind": "server",
-        "serverId": "JoeScotto_Flat_2.00u",
-        "url": "/stls/JoeScotto_Flat/2.00u.stl",
+        "serverId": "JoeScotto_Scooped_MX_2_00u__Concave__stl",
+        "url": "/stls/JoeScotto_Scooped_MX/2.00u (Concave).stl",
         "stl": {
-          "fileName": "2.00u.stl",
-          "pathHint": "server:JoeScotto_Flat_2.00u"
+          "fileName": "2.00u (Concave).stl",
+          "pathHint": "server:JoeScotto_Scooped_MX_2_00u__Concave__stl"
         }
       },
       "rotationX": 0,
       "rotationY": 0,
       "rotationZ": 0,
-      "extrusionDepthMm": 0.6
+      "extrusionDepthMm": 1.8
     }
   ],
   "templates": [
@@ -112,7 +112,7 @@
       "contentBySymbolId": {
         "sym_1u_single": {
           "kind": "text",
-          "value": "/"
+          "value": "÷"
         }
       }
     },
@@ -123,7 +123,7 @@
       "contentBySymbolId": {
         "sym_1u_single": {
           "kind": "text",
-          "value": "*"
+          "value": "×"
         }
       }
     },
@@ -276,8 +276,8 @@
       "templateId": "tpl_2u_single",
       "contentBySymbolId": {
         "sym_2u_single": {
-          "kind": "text",
-          "value": "→"
+          "kind": "icon",
+          "iconName": "arrow-elbow-down-left"
         }
       }
     }

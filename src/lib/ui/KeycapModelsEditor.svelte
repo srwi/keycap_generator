@@ -5,7 +5,7 @@
   import { fetchStlDimensions } from '../services/stlDimensions'
   import { extractPathFromUrl, findKeycapByPath, loadStlRegistry, type Registry } from '../services/stlRegistry'
   import { showConfirm } from '../state/modalStore'
-  import { X, Plus } from 'lucide-svelte'
+  import { X, Plus, RotateCcw, RotateCw } from 'lucide-svelte'
   import { getPublicPath } from '../utils/paths'
   import { onMount } from 'svelte'
   import HelpTooltip from './HelpTooltip.svelte'
@@ -289,7 +289,7 @@
     </CardHeader>
 
     <CardContent>
-      {#if !model}
+          {#if !model}
         <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
           Create/select a model to edit.
         </div>
@@ -469,23 +469,25 @@
                         variant="outline"
                         size="sm"
                         class="flex-1"
+                        title="-90°"
                         onclick={() => {
                           const current = model.rotationX
                           actions.updateKeycapModel(model.id, { rotationX: (current - 90 + 360) % 360 })
                         }}
                       >
-                        -90°
+                        <RotateCcw class="size-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         class="flex-1"
+                        title="+90°"
                         onclick={() => {
                           const current = model.rotationX
                           actions.updateKeycapModel(model.id, { rotationX: (current + 90) % 360 })
                         }}
                       >
-                        +90°
+                        <RotateCw class="size-4" />
                       </Button>
                     </ButtonGroup>
                     <div class="text-xs text-muted-foreground text-center">{model.rotationX}°</div>
@@ -497,23 +499,25 @@
                         variant="outline"
                         size="sm"
                         class="flex-1"
+                        title="-90°"
                         onclick={() => {
                           const current = model.rotationY
                           actions.updateKeycapModel(model.id, { rotationY: (current - 90 + 360) % 360 })
                         }}
                       >
-                        -90°
+                        <RotateCcw class="size-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         class="flex-1"
+                        title="+90°"
                         onclick={() => {
                           const current = model.rotationY
                           actions.updateKeycapModel(model.id, { rotationY: (current + 90) % 360 })
                         }}
                       >
-                        +90°
+                        <RotateCw class="size-4" />
                       </Button>
                     </ButtonGroup>
                     <div class="text-xs text-muted-foreground text-center">{model.rotationY}°</div>
@@ -525,23 +529,25 @@
                         variant="outline"
                         size="sm"
                         class="flex-1"
+                        title="-90°"
                         onclick={() => {
                           const current = model.rotationZ
                           actions.updateKeycapModel(model.id, { rotationZ: (current - 90 + 360) % 360 })
                         }}
                       >
-                        -90°
+                        <RotateCcw class="size-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         class="flex-1"
+                        title="+90°"
                         onclick={() => {
                           const current = model.rotationZ
                           actions.updateKeycapModel(model.id, { rotationZ: (current + 90) % 360 })
                         }}
                       >
-                        +90°
+                        <RotateCw class="size-4" />
                       </Button>
                     </ButtonGroup>
                     <div class="text-xs text-muted-foreground text-center">{model.rotationZ}°</div>
@@ -567,9 +573,9 @@
       </div>
     </CardHeader>
     <CardContent>
-      {#if !model}
+          {#if !model}
         <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">Select a model to preview</div>
-      {:else if modelStlUrl || modelStlBuffer}
+          {:else if modelStlUrl || modelStlBuffer}
         <div class="h-96 overflow-hidden">
           {#key model.id}
             <Model3DViewer

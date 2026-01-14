@@ -445,8 +445,8 @@
       "templateId": "tpl_2u",
       "contentBySymbolId": {
         "sym_2u_center": {
-          "kind": "text",
-          "value": "←"
+          "kind": "icon",
+          "iconName": "backspace"
         }
       }
     },
@@ -456,8 +456,8 @@
       "templateId": "tpl_30292c62a97ace66",
       "contentBySymbolId": {
         "sym_fb18f12cec7cc46a": {
-          "kind": "text",
-          "value": "Tab"
+          "kind": "icon",
+          "iconName": "arrows-left-right"
         }
       }
     },
@@ -622,8 +622,8 @@
       "templateId": "tpl_30292c62a97ace66",
       "contentBySymbolId": {
         "sym_fb18f12cec7cc46a": {
-          "kind": "text",
-          "value": "Caps"
+          "kind": "icon",
+          "iconName": "arrow-fat-line-up"
         }
       }
     },
@@ -762,8 +762,8 @@
       "templateId": "tpl_2u",
       "contentBySymbolId": {
         "sym_2u_center": {
-          "kind": "text",
-          "value": "Enter"
+          "kind": "icon",
+          "iconName": "arrow-elbow-down-left"
         }
       }
     },
@@ -773,8 +773,8 @@
       "templateId": "tpl_225u",
       "contentBySymbolId": {
         "sym_225u_center": {
-          "kind": "text",
-          "value": "Shift"
+          "kind": "icon",
+          "iconName": "arrow-fat-up"
         }
       }
     },
@@ -906,8 +906,8 @@
       "templateId": "tpl_275u",
       "contentBySymbolId": {
         "sym_275u_center": {
-          "kind": "text",
-          "value": "Shift"
+          "kind": "icon",
+          "iconName": "arrow-fat-up"
         }
       }
     },
@@ -924,12 +924,12 @@
     },
     {
       "id": "key_lgui",
-      "name": "Left GUI",
+      "name": "Left Win",
       "templateId": "tpl_30292c62a97ace66",
       "contentBySymbolId": {
         "sym_fb18f12cec7cc46a": {
-          "kind": "text",
-          "value": "Win"
+          "kind": "icon",
+          "iconName": "windows-logo"
         }
       }
     },
@@ -967,8 +967,8 @@
       "templateId": "tpl_30292c62a97ace66",
       "contentBySymbolId": {
         "sym_fb18f12cec7cc46a": {
-          "kind": "text",
-          "value": "Win"
+          "kind": "icon",
+          "iconName": "windows-logo"
         }
       }
     },

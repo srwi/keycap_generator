@@ -73,7 +73,7 @@
           "y": -4.2,
           "fontName": "Dongle",
           "fontSizeMm": 9,
-          "color": "#4d56ce",
+          "color": "#12a5d6",
           "rotationDeg": 0
         },
         {
@@ -83,7 +83,7 @@
           "y": 4.2,
           "fontName": "Dongle",
           "fontSizeMm": 9,
-          "color": "#4d56ce",
+          "color": "#12a5d6",
           "rotationDeg": 0
         }
       ]
@@ -130,8 +130,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "Tab"
+          "kind": "icon",
+          "iconName": "arrows-left-right"
         }
       }
     },
@@ -331,8 +331,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "Del"
+          "kind": "icon",
+          "iconName": "backspace"
         }
       }
     },
@@ -499,8 +499,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "Ent"
+          "kind": "icon",
+          "iconName": "arrow-elbow-down-left"
         }
       }
     },
@@ -510,8 +510,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "Sft"
+          "kind": "icon",
+          "iconName": "arrow-fat-up"
         }
       }
     },
@@ -703,8 +703,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "GUI"
+          "kind": "icon",
+          "iconName": "windows-logo"
         }
       }
     },
@@ -714,8 +714,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "Lw"
+          "kind": "icon",
+          "iconName": "caret-double-down"
         }
       }
     },
@@ -731,8 +731,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "Rs"
+          "kind": "icon",
+          "iconName": "caret-double-up"
         }
       }
     },
@@ -742,8 +742,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "←"
+          "kind": "icon",
+          "iconName": "arrow-left"
         }
       }
     },
@@ -753,8 +753,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "↓"
+          "kind": "icon",
+          "iconName": "arrow-down"
         }
       }
     },
@@ -764,8 +764,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "↑"
+          "kind": "icon",
+          "iconName": "arrow-up"
         }
       }
     },
@@ -775,8 +775,8 @@
       "templateId": "tpl_1u_single",
       "contentBySymbolId": {
         "sym_1u_single": {
-          "kind": "text",
-          "value": "→"
+          "kind": "icon",
+          "iconName": "arrow-right"
         }
       }
     }
