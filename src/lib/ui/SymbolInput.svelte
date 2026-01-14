@@ -31,9 +31,15 @@
     selectedIcon = null
   }
 
+  let prevKeySymbol = ''
+
   $: {
-    // reference keyId/symbolId so Svelte re-runs when selection changes
-    const _trigger = keyId + '|' + symbolId
+    const currentKeySymbol = keyId + '|' + symbolId
+    const selectionChanged = currentKeySymbol !== prevKeySymbol
+
+    if (selectionChanged) {
+      prevKeySymbol = currentKeySymbol
+    }
 
     if (content?.kind === 'icon') {
       iconMode = true
@@ -44,9 +50,13 @@
       textValue = content.value
       iconName = ''
     } else {
-      iconMode = false
       textValue = ''
       iconName = ''
+
+      // Only force default mode (text) if selection changed
+      if (selectionChanged) {
+        iconMode = false
+      }
     }
   }
 
@@ -105,8 +115,8 @@
       <PopoverTrigger asChild>
         <button type="button" class="w-full text-left">
           <InputGroup>
+            {#if selectedIcon}
             <InputGroupAddon align="inline-start">
-              {#if selectedIcon}
                 <svg
                   viewBox="0 0 {PHOSPHOR_ICON_VIEWBOX} {PHOSPHOR_ICON_VIEWBOX}"
                   class="size-4"
@@ -115,8 +125,8 @@
                 >
                   <path d={selectedIcon.path} />
                 </svg>
-              {/if}
-            </InputGroupAddon>
+              </InputGroupAddon>
+            {/if}
             <InputGroupInput
               readonly
               value={selectedIcon?.displayName ?? ''}
