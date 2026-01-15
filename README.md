@@ -2,9 +2,7 @@
 
 [![Deployment](https://github.com/srwi/keycap_generator/actions/workflows/deploy.yml/badge.svg)](https://github.com/srwi/keycap_generator/actions/workflows/deploy.yml) [![CI](https://github.com/srwi/keycap_generator/actions/workflows/ci.yml/badge.svg)](https://github.com/srwi/keycap_generator/actions/workflows/ci.yml)
 
-<p>
-    <a style="font-size: 20px;" href="https://srwi.github.io/keycap_generator/">Open in browser</a>
-</p>
+[Open in browser](https://srwi.github.io/keycap_generator/)
 
 This online keycap generator creates multi-color keycap models for 3D printing from existing or custom STL keycap base models and legend definitions.
 
