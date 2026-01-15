@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { app } from './lib/state/store'
+  import { app, isProjectEmpty } from './lib/state/store'
   import {
     applyLoadedProject,
     downloadStateFile,
@@ -42,11 +42,18 @@
 
   function onLoadPreset(presetValue: string) {
     presetsMenuOpen = false
-    showConfirm('Loading a preset will replace your current project. Continue?', async () => {
+
+    const load = async () => {
       const result = await readPresetProject(presetValue)
       if ('error' in result) showMessage(result.error)
       else applyLoadedProject(result.project)
-    })
+    }
+
+    if (isProjectEmpty($app)) {
+      load()
+    } else {
+      showConfirm('Loading a preset will replace your current project. Continue?', load)
+    }
   }
 
   function onClear() {
@@ -135,7 +142,7 @@
     }
   }
 
-  $: hasUnsavedChanges = $app.keycapModels.length > 0 || $app.templates.length > 0 || $app.keys.length > 0
+  $: hasUnsavedChanges = !isProjectEmpty($app)
 
   function handleBeforeUnload(event: BeforeUnloadEvent) {
     if (hasUnsavedChanges) {

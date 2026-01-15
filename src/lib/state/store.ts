@@ -93,6 +93,15 @@ export const selectedTemplate = derived(
 
 export const selectedKey = derived(app, $app => $app.keys.find(k => k.id === $app.ui.selectedKeyId) ?? null)
 
+export function isProjectEmpty(state: AppState): boolean {
+  return (
+    state.keycapModels.length === 0 &&
+    state.templates.length === 0 &&
+    state.keys.length === 0 &&
+    state.customFonts.length === 0
+  )
+}
+
 export const actions = {
   selectKeycapModel(modelId: string | null) {
     app.update(s => ({ ...s, ui: { ...s.ui, selectedKeycapModelId: modelId } }))
