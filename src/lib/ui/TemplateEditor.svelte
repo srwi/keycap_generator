@@ -153,7 +153,7 @@
 </script>
 
 <div class="grid gap-4 lg:grid-cols-12">
-  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
+  <Card class="lg:col-span-4 lg:h-[calc(100vh-20rem)] lg:min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <div class="flex items-center gap-2 min-w-0">
@@ -170,70 +170,76 @@
     </CardHeader>
 
     <CardContent class="flex-1 min-h-0 px-1">
-      <ScrollArea class="h-full w-full min-h-0 px-3">
-        <div class="grid gap-2 px-1 py-6">
-          {#each $app.templates as t (t.id)}
-            {@const tModel = getTemplateModel(t.id)}
-            {@const previewTexts = Object.fromEntries(t.symbols.map((s, index) => [s.id, getSlotSymbol(index)]))}
-            <Item
-              size="sm"
-              variant={$app.ui.selectedTemplateId === t.id ? 'muted' : 'outline'}
-              class="w-full justify-between"
-            >
-              {#snippet child({ props })}
-                <div
-                  {...props}
-                  class={(props.class as string) + ' w-full flex items-center gap-2'}
-                  role="button"
-                  tabindex="0"
-                  onclick={() => actions.selectTemplate(t.id)}
-                  onkeydown={(ev: KeyboardEvent) => onRowKeydown(ev, () => actions.selectTemplate(t.id))}
-                >
-                  <div class="h-10 w-10 flex-shrink-0 flex items-center justify-start">
-                    {#if tModel}
-                      {@const previewContent = Object.fromEntries(
-                        t.symbols.map((s, index) => [s.id, { kind: 'text', value: getSlotSymbol(index) } as const])
-                      )}
-                      <LabelPreview
-                        template={t}
-                        contentBySymbolId={previewContent}
-                        widthMm={tModel.widthMm}
-                        heightMm={tModel.heightMm}
-                        className="rounded"
-                      />
-                    {/if}
+      <ScrollArea class="lg:h-full w-full min-h-0 px-3">
+        {#if $app.templates.length === 0}
+          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
+            No templates created yet.
+          </div>
+        {:else}
+          <div class="grid gap-2 px-1 py-6">
+            {#each $app.templates as t (t.id)}
+              {@const tModel = getTemplateModel(t.id)}
+              {@const previewTexts = Object.fromEntries(t.symbols.map((s, index) => [s.id, getSlotSymbol(index)]))}
+              <Item
+                size="sm"
+                variant={$app.ui.selectedTemplateId === t.id ? 'muted' : 'outline'}
+                class="w-full justify-between"
+              >
+                {#snippet child({ props })}
+                  <div
+                    {...props}
+                    class={(props.class as string) + ' w-full flex items-center gap-2'}
+                    role="button"
+                    tabindex="0"
+                    onclick={() => actions.selectTemplate(t.id)}
+                    onkeydown={(ev: KeyboardEvent) => onRowKeydown(ev, () => actions.selectTemplate(t.id))}
+                  >
+                    <div class="h-10 w-10 flex-shrink-0 flex items-center justify-start">
+                      {#if tModel}
+                        {@const previewContent = Object.fromEntries(
+                          t.symbols.map((s, index) => [s.id, { kind: 'text', value: getSlotSymbol(index) } as const])
+                        )}
+                        <LabelPreview
+                          template={t}
+                          contentBySymbolId={previewContent}
+                          widthMm={tModel.widthMm}
+                          heightMm={tModel.heightMm}
+                          className="rounded"
+                        />
+                      {/if}
+                    </div>
+                    <ItemContent class="min-w-0 flex-1">
+                      <ItemTitle class="truncate">{t.name}</ItemTitle>
+                      <ItemDescription class="truncate">
+                        {$app.keycapModels.find(m => m.id === t.keycapModelId)?.name ?? '—'}
+                      </ItemDescription>
+                    </ItemContent>
+                    <ItemActions class="ms-auto">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        class="text-foreground/70 hover:text-foreground hover:bg-muted"
+                        title="Delete template"
+                        onclick={(ev: MouseEvent) => {
+                          ev.preventDefault()
+                          ev.stopPropagation()
+                          deleteTemplateById(t.id)
+                        }}
+                      >
+                        <X class="size-4" />
+                      </Button>
+                    </ItemActions>
                   </div>
-                  <ItemContent class="min-w-0 flex-1">
-                    <ItemTitle class="truncate">{t.name}</ItemTitle>
-                    <ItemDescription class="truncate">
-                      {$app.keycapModels.find(m => m.id === t.keycapModelId)?.name ?? '—'}
-                    </ItemDescription>
-                  </ItemContent>
-                  <ItemActions class="ms-auto">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      class="text-foreground/70 hover:text-foreground hover:bg-muted"
-                      title="Delete template"
-                      onclick={(ev: MouseEvent) => {
-                        ev.preventDefault()
-                        ev.stopPropagation()
-                        deleteTemplateById(t.id)
-                      }}
-                    >
-                      <X class="size-4" />
-                    </Button>
-                  </ItemActions>
-                </div>
-              {/snippet}
-            </Item>
-          {/each}
-        </div>
+                {/snippet}
+              </Item>
+            {/each}
+          </div>
+        {/if}
       </ScrollArea>
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
+  <Card class="lg:col-span-4 lg:h-[calc(100vh-20rem)] lg:min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Template configuration</CardTitle>
@@ -241,10 +247,10 @@
     </CardHeader>
 
     <CardContent class="flex-1 min-h-0 px-1">
-      <ScrollArea class="h-full w-full min-h-0 px-3">
+      <ScrollArea class="lg:h-full w-full min-h-0 px-3">
         {#if !tpl}
           <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
-            Create/select a template to edit.
+            Select a template to configure.
           </div>
         {:else}
           {@const nameId = `template-${tpl.id}-name`}
@@ -296,144 +302,146 @@
                   {@const isCollapsed = collapsedSymbols.has(sym.id)}
                   <div class="card-box overflow-hidden">
                     <div class="flex items-center justify-between gap-2 px-2 py-2">
-                    <Button
-                      variant="ghost"
-                      class="h-auto flex-1 justify-start hover:bg-accent/40 dark:hover:bg-accent/20"
-                      onclick={() => toggleSymbol(sym.id)}
-                    >
-                      <ChevronRight
-                        class="size-4 text-muted-foreground transition-transform {isCollapsed ? '' : 'rotate-90'}"
-                      />
-                      <span class="truncate capitalize"
-                        >{getSlotName(tpl.symbols.indexOf(sym))} ({getSlotSymbol(tpl.symbols.indexOf(sym))})</span
+                      <Button
+                        variant="ghost"
+                        class="h-auto flex-1 justify-start hover:bg-accent/40 dark:hover:bg-accent/20"
+                        onclick={() => toggleSymbol(sym.id)}
                       >
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      class="text-foreground/70 hover:text-foreground hover:bg-muted"
-                      title="Remove symbol"
-                      onclick={() => actions.deleteSymbol(tpl.id, sym.id)}
-                    >
-                      <X class="size-4" />
-                    </Button>
+                        <ChevronRight
+                          class="size-4 text-muted-foreground transition-transform {isCollapsed ? '' : 'rotate-90'}"
+                        />
+                        <span class="truncate capitalize"
+                          >{getSlotName(tpl.symbols.indexOf(sym))} ({getSlotSymbol(tpl.symbols.indexOf(sym))})</span
+                        >
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        class="text-foreground/70 hover:text-foreground hover:bg-muted"
+                        title="Remove symbol"
+                        onclick={() => actions.deleteSymbol(tpl.id, sym.id)}
+                      >
+                        <X class="size-4" />
+                      </Button>
                     </div>
 
                     {#if !isCollapsed}
-                    <div class="p-3 pt-0" transition:slide={{ duration: 200 }}>
-                      <FieldGroup>
-                        <div class="grid grid-cols-2 gap-3">
-                          <Field>
-                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-x`}>X (mm)</FieldLabel>
-                            <Input
-                              id={`template-${tpl.id}-symbol-${sym.id}-x`}
-                              type="number"
-                              step="0.1"
-                              value={sym.x}
-                              oninput={e =>
-                                actions.updateSymbol(tpl.id, sym.id, {
-                                  x: Number((e.currentTarget as HTMLInputElement).value),
-                                })}
-                            />
-                          </Field>
+                      <div class="p-3 pt-0" transition:slide={{ duration: 200 }}>
+                        <FieldGroup>
+                          <div class="grid grid-cols-2 gap-3">
+                            <Field>
+                              <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-x`}>X (mm)</FieldLabel>
+                              <Input
+                                id={`template-${tpl.id}-symbol-${sym.id}-x`}
+                                type="number"
+                                step="0.1"
+                                value={sym.x}
+                                oninput={e =>
+                                  actions.updateSymbol(tpl.id, sym.id, {
+                                    x: Number((e.currentTarget as HTMLInputElement).value),
+                                  })}
+                              />
+                            </Field>
+
+                            <Field>
+                              <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-y`}>Y (mm)</FieldLabel>
+                              <Input
+                                id={`template-${tpl.id}-symbol-${sym.id}-y`}
+                                type="number"
+                                step="0.1"
+                                value={sym.y}
+                                oninput={e =>
+                                  actions.updateSymbol(tpl.id, sym.id, {
+                                    y: Number((e.currentTarget as HTMLInputElement).value),
+                                  })}
+                              />
+                            </Field>
+                          </div>
 
                           <Field>
-                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-y`}>Y (mm)</FieldLabel>
-                            <Input
-                              id={`template-${tpl.id}-symbol-${sym.id}-y`}
-                              type="number"
-                              step="0.1"
-                              value={sym.y}
-                              oninput={e =>
-                                actions.updateSymbol(tpl.id, sym.id, {
-                                  y: Number((e.currentTarget as HTMLInputElement).value),
-                                })}
-                            />
-                          </Field>
-                        </div>
-
-                        <Field>
-                          <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-font`}>Font</FieldLabel>
-                          <div class="flex items-center gap-2">
-                            <Select
-                              type="single"
-                              value={sym.fontName}
-                              onValueChange={(fontName: string) => actions.updateSymbol(tpl.id, sym.id, { fontName })}
-                            >
-                              <SelectTrigger
-                                id={`template-${tpl.id}-symbol-${sym.id}-font`}
-                                class="w-full flex-1"
-                                data-placeholder={!sym.fontName}
+                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-font`}>Font</FieldLabel>
+                            <div class="flex items-center gap-2">
+                              <Select
+                                type="single"
+                                value={sym.fontName}
+                                onValueChange={(fontName: string) => actions.updateSymbol(tpl.id, sym.id, { fontName })}
                               >
-                                <SelectValue placeholder="Select a font" value={sym.fontName} />
-                              </SelectTrigger>
-                              <SelectContent class="w-full">
-                                {#each fontOptions as fontName}
-                                  <SelectItem value={fontName} label={fontName} />
-                                {/each}
-                              </SelectContent>
-                            </Select>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              type="button"
-                              title="Add font"
-                              onclick={() => onClickAddFont(tpl.id, sym.id)}
-                            >
-                              <Plus class="size-4" />
-                            </Button>
-                          </div>
-                        </Field>
-
-                        <div class="grid grid-cols-2 gap-3">
-                          <Field>
-                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-size`}>Size (mm)</FieldLabel>
-                            <Input
-                              id={`template-${tpl.id}-symbol-${sym.id}-size`}
-                              type="number"
-                              min="0.1"
-                              step="0.1"
-                              value={sym.fontSizeMm}
-                              oninput={e =>
-                                actions.updateSymbol(tpl.id, sym.id, {
-                                  fontSizeMm: Number((e.currentTarget as HTMLInputElement).value),
-                                })}
-                            />
+                                <SelectTrigger
+                                  id={`template-${tpl.id}-symbol-${sym.id}-font`}
+                                  class="w-full flex-1"
+                                  data-placeholder={!sym.fontName}
+                                >
+                                  <SelectValue placeholder="Select a font" value={sym.fontName} />
+                                </SelectTrigger>
+                                <SelectContent class="w-full">
+                                  {#each fontOptions as fontName}
+                                    <SelectItem value={fontName} label={fontName} />
+                                  {/each}
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                type="button"
+                                title="Add font"
+                                onclick={() => onClickAddFont(tpl.id, sym.id)}
+                              >
+                                <Plus class="size-4" />
+                              </Button>
+                            </div>
                           </Field>
 
-                          <Field>
-                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-rotation`}>Rotation (deg)</FieldLabel>
-                            <Input
-                              id={`template-${tpl.id}-symbol-${sym.id}-rotation`}
-                              type="number"
-                              step="1"
-                              value={sym.rotationDeg}
-                              oninput={e =>
-                                actions.updateSymbol(tpl.id, sym.id, {
-                                  rotationDeg: Number((e.currentTarget as HTMLInputElement).value),
-                                })}
-                            />
-                          </Field>
-                        </div>
+                          <div class="grid grid-cols-2 gap-3">
+                            <Field>
+                              <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-size`}>Size (mm)</FieldLabel>
+                              <Input
+                                id={`template-${tpl.id}-symbol-${sym.id}-size`}
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                value={sym.fontSizeMm}
+                                oninput={e =>
+                                  actions.updateSymbol(tpl.id, sym.id, {
+                                    fontSizeMm: Number((e.currentTarget as HTMLInputElement).value),
+                                  })}
+                              />
+                            </Field>
 
-                        <Field>
-                          <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-color`}>Color</FieldLabel>
-                          <div class="flex items-center gap-2">
-                            <input
-                              id={`template-${tpl.id}-symbol-${sym.id}-color`}
-                              class="h-9 w-20 rounded-md border border-input bg-background"
-                              type="color"
-                              value={sym.color}
-                              oninput={e =>
-                                actions.updateSymbol(tpl.id, sym.id, {
-                                  color: (e.currentTarget as HTMLInputElement).value,
-                                })}
-                            />
-                            <span class="text-xs text-muted-foreground font-mono">{sym.color}</span>
+                            <Field>
+                              <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-rotation`}
+                                >Rotation (deg)</FieldLabel
+                              >
+                              <Input
+                                id={`template-${tpl.id}-symbol-${sym.id}-rotation`}
+                                type="number"
+                                step="1"
+                                value={sym.rotationDeg}
+                                oninput={e =>
+                                  actions.updateSymbol(tpl.id, sym.id, {
+                                    rotationDeg: Number((e.currentTarget as HTMLInputElement).value),
+                                  })}
+                              />
+                            </Field>
                           </div>
-                        </Field>
-                      </FieldGroup>
-                    </div>
+
+                          <Field>
+                            <FieldLabel for={`template-${tpl.id}-symbol-${sym.id}-color`}>Color</FieldLabel>
+                            <div class="flex items-center gap-2">
+                              <input
+                                id={`template-${tpl.id}-symbol-${sym.id}-color`}
+                                class="h-9 w-20 rounded-md border border-input bg-background"
+                                type="color"
+                                value={sym.color}
+                                oninput={e =>
+                                  actions.updateSymbol(tpl.id, sym.id, {
+                                    color: (e.currentTarget as HTMLInputElement).value,
+                                  })}
+                              />
+                              <span class="text-xs text-muted-foreground font-mono">{sym.color}</span>
+                            </div>
+                          </Field>
+                        </FieldGroup>
+                      </div>
                     {/if}
                   </div>
                 {/each}
@@ -453,7 +461,7 @@
     onchange={onFontUploadChange}
   />
 
-  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
+  <Card class="lg:col-span-4 flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Preview</CardTitle>
@@ -464,8 +472,12 @@
         </div>
       </div>
     </CardHeader>
-    <CardContent class="flex-1 min-h-0 px-1">
-      <ScrollArea class="h-full w-full min-h-0 flex items-start justify-start px-3 py-5">
+    <CardContent class="px-4 py-5">
+      {#if !tpl}
+        <div class="flex items-center justify-center h-54 text-sm text-muted-foreground">
+          Select a template to preview.
+        </div>
+      {:else}
         <KeycapPreview
           template={tpl}
           contentBySymbolId={previewContentBySymbolId}
@@ -474,7 +486,7 @@
           keyId={null}
           bind:is3d={previewIs3d}
         />
-      </ScrollArea>
+      {/if}
     </CardContent>
   </Card>
 </div>

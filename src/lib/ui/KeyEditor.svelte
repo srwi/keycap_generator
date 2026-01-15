@@ -64,7 +64,7 @@
 </script>
 
 <div class="grid gap-4 lg:grid-cols-12">
-  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
+  <Card class="lg:col-span-4 lg:h-[calc(100vh-20rem)] lg:min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <div class="flex items-center gap-2 min-w-0">
@@ -81,67 +81,71 @@
     </CardHeader>
 
     <CardContent class="flex-1 min-h-0 px-1">
-      <ScrollArea class="h-full w-full min-h-0 px-3">
-        <div class="grid gap-2 px-1 py-6">
-          {#each $app.keys as k (k.id)}
-            {@const kTpl = getKeyTemplate(k.id)}
-            {@const kModel = getKeyModel(k.id)}
-            <Item
-              size="sm"
-              variant={$app.ui.selectedKeyId === k.id ? 'muted' : 'outline'}
-              class="w-full justify-between"
-            >
-              {#snippet child({ props })}
-                <div
-                  {...props}
-                  class={(props.class as string) + ' w-full flex items-center gap-2'}
-                  role="button"
-                  tabindex="0"
-                  onclick={() => actions.selectKey(k.id)}
-                  onkeydown={(ev: KeyboardEvent) => onRowKeydown(ev, () => actions.selectKey(k.id))}
-                >
-                  <div class="h-10 w-10 flex-shrink-0 flex items-center justify-start">
-                    {#if kTpl && kModel}
-                      <LabelPreview
-                        template={kTpl}
-                        contentBySymbolId={k.contentBySymbolId}
-                        widthMm={kModel.widthMm}
-                        heightMm={kModel.heightMm}
-                        className="rounded"
-                      />
-                    {/if}
+      <ScrollArea class="lg:h-full w-full min-h-0 px-3">
+        {#if $app.keys.length === 0}
+          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">No keys created yet.</div>
+        {:else}
+          <div class="grid gap-2 px-1 py-6">
+            {#each $app.keys as k (k.id)}
+              {@const kTpl = getKeyTemplate(k.id)}
+              {@const kModel = getKeyModel(k.id)}
+              <Item
+                size="sm"
+                variant={$app.ui.selectedKeyId === k.id ? 'muted' : 'outline'}
+                class="w-full justify-between"
+              >
+                {#snippet child({ props })}
+                  <div
+                    {...props}
+                    class={(props.class as string) + ' w-full flex items-center gap-2'}
+                    role="button"
+                    tabindex="0"
+                    onclick={() => actions.selectKey(k.id)}
+                    onkeydown={(ev: KeyboardEvent) => onRowKeydown(ev, () => actions.selectKey(k.id))}
+                  >
+                    <div class="h-10 w-10 flex-shrink-0 flex items-center justify-start">
+                      {#if kTpl && kModel}
+                        <LabelPreview
+                          template={kTpl}
+                          contentBySymbolId={k.contentBySymbolId}
+                          widthMm={kModel.widthMm}
+                          heightMm={kModel.heightMm}
+                          className="rounded"
+                        />
+                      {/if}
+                    </div>
+                    <ItemContent class="min-w-0 flex-1">
+                      <ItemTitle class="truncate">{k.name}</ItemTitle>
+                      <ItemDescription class="truncate">
+                        {$app.templates.find(t => t.id === k.templateId)?.name ?? '—'}
+                      </ItemDescription>
+                    </ItemContent>
+                    <ItemActions class="ms-auto">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        class="text-foreground/70 hover:text-foreground hover:bg-muted"
+                        title="Delete key"
+                        onclick={(ev: MouseEvent) => {
+                          ev.preventDefault()
+                          ev.stopPropagation()
+                          deleteKeyById(k.id)
+                        }}
+                      >
+                        <X class="size-4" />
+                      </Button>
+                    </ItemActions>
                   </div>
-                  <ItemContent class="min-w-0 flex-1">
-                    <ItemTitle class="truncate">{k.name}</ItemTitle>
-                    <ItemDescription class="truncate">
-                      {$app.templates.find(t => t.id === k.templateId)?.name ?? '—'}
-                    </ItemDescription>
-                  </ItemContent>
-                  <ItemActions class="ms-auto">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      class="text-foreground/70 hover:text-foreground hover:bg-muted"
-                      title="Delete key"
-                      onclick={(ev: MouseEvent) => {
-                        ev.preventDefault()
-                        ev.stopPropagation()
-                        deleteKeyById(k.id)
-                      }}
-                    >
-                      <X class="size-4" />
-                    </Button>
-                  </ItemActions>
-                </div>
-              {/snippet}
-            </Item>
-          {/each}
-        </div>
+                {/snippet}
+              </Item>
+            {/each}
+          </div>
+        {/if}
       </ScrollArea>
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
+  <Card class="lg:col-span-4 lg:h-[calc(100vh-20rem)] lg:min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Key configuration</CardTitle>
@@ -149,10 +153,10 @@
     </CardHeader>
 
     <CardContent class="flex-1 min-h-0 px-1">
-      <ScrollArea class="h-full w-full min-h-0 px-3">
+      <ScrollArea class="lg:h-full w-full min-h-0 px-3">
         {#if !key}
           <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
-            Create/select a key to edit.
+            Select a key to configure.
           </div>
         {:else}
           {@const nameId = `key-${key.id}-name`}
@@ -212,7 +216,7 @@
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
+  <Card class="lg:col-span-4 flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Preview</CardTitle>
@@ -223,8 +227,10 @@
         </div>
       </div>
     </CardHeader>
-    <CardContent class="flex-1 min-h-0 px-1">
-      <ScrollArea class="h-full w-full min-h-0 flex items-start justify-start px-3 py-5">
+    <CardContent class="px-4 py-5">
+      {#if !key}
+        <div class="flex items-center justify-center h-54 text-sm text-muted-foreground">Select a key to preview.</div>
+      {:else}
         <KeycapPreview
           template={tpl}
           contentBySymbolId={key?.contentBySymbolId ?? {}}
@@ -233,7 +239,7 @@
           keyId={key?.id ?? null}
           bind:is3d={previewIs3d}
         />
-      </ScrollArea>
+      {/if}
     </CardContent>
   </Card>
 </div>

@@ -221,7 +221,7 @@
 </script>
 
 <div class="grid gap-4 lg:grid-cols-12">
-  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
+  <Card class="lg:col-span-4 lg:h-[calc(100vh-20rem)] lg:min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <div class="flex items-center gap-2 min-w-0">
@@ -238,50 +238,54 @@
     </CardHeader>
 
     <CardContent class="flex-1 min-h-0 px-1">
-      <ScrollArea class="h-full w-full min-h-0 px-3">
-        <div class="grid gap-2 px-1 py-6">
-          {#each $app.keycapModels as m (m.id)}
-            <Item size="sm" variant={selectedId === m.id ? 'muted' : 'outline'} class="w-full justify-between">
-              {#snippet child({ props })}
-                <div
-                  {...props}
-                  class={(props.class as string) + ' w-full flex items-center gap-2'}
-                  role="button"
-                  tabindex="0"
-                  onclick={() => actions.selectKeycapModel(m.id)}
-                  onkeydown={(ev: KeyboardEvent) => onRowKeydown(ev, () => actions.selectKeycapModel(m.id))}
-                >
-                  <ItemContent class="min-w-0 flex-1">
-                    <ItemTitle class="truncate">{m.name}</ItemTitle>
-                    <ItemDescription class="truncate">
-                      {m.widthMm.toFixed(1)}mm × {m.heightMm.toFixed(1)}mm
-                    </ItemDescription>
-                  </ItemContent>
-                  <ItemActions class="ms-auto">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      class="text-foreground/70 hover:text-foreground hover:bg-muted"
-                      title="Delete model"
-                      onclick={(ev: MouseEvent) => {
-                        ev.preventDefault()
-                        ev.stopPropagation()
-                        deleteModelById(m.id)
-                      }}
-                    >
-                      <X class="size-4" />
-                    </Button>
-                  </ItemActions>
-                </div>
-              {/snippet}
-            </Item>
-          {/each}
-        </div>
+      <ScrollArea class="lg:h-full w-full min-h-0 px-3">
+        {#if $app.keycapModels.length === 0}
+          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">No models created yet.</div>
+        {:else}
+          <div class="grid gap-2 px-1 py-6">
+            {#each $app.keycapModels as m (m.id)}
+              <Item size="sm" variant={selectedId === m.id ? 'muted' : 'outline'} class="w-full justify-between">
+                {#snippet child({ props })}
+                  <div
+                    {...props}
+                    class={(props.class as string) + ' w-full flex items-center gap-2'}
+                    role="button"
+                    tabindex="0"
+                    onclick={() => actions.selectKeycapModel(m.id)}
+                    onkeydown={(ev: KeyboardEvent) => onRowKeydown(ev, () => actions.selectKeycapModel(m.id))}
+                  >
+                    <ItemContent class="min-w-0 flex-1">
+                      <ItemTitle class="truncate">{m.name}</ItemTitle>
+                      <ItemDescription class="truncate">
+                        {m.widthMm.toFixed(1)}mm × {m.heightMm.toFixed(1)}mm
+                      </ItemDescription>
+                    </ItemContent>
+                    <ItemActions class="ms-auto">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        class="text-foreground/70 hover:text-foreground hover:bg-muted"
+                        title="Delete model"
+                        onclick={(ev: MouseEvent) => {
+                          ev.preventDefault()
+                          ev.stopPropagation()
+                          deleteModelById(m.id)
+                        }}
+                      >
+                        <X class="size-4" />
+                      </Button>
+                    </ItemActions>
+                  </div>
+                {/snippet}
+              </Item>
+            {/each}
+          </div>
+        {/if}
       </ScrollArea>
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
+  <Card class="lg:col-span-4 lg:h-[calc(100vh-20rem)] lg:min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Model configuration</CardTitle>
@@ -289,10 +293,10 @@
     </CardHeader>
 
     <CardContent class="flex-1 min-h-0 px-1">
-      <ScrollArea class="h-full w-full min-h-0 px-3">
+      <ScrollArea class="lg:h-full w-full min-h-0 px-3">
         {#if !model}
           <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
-            Create/select a model to edit.
+            Select a model to configure.
           </div>
         {:else}
           {@const modelNameId = `model-${model.id}-name`}
@@ -563,7 +567,7 @@
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4 h-[calc(100vh-20rem)] min-h-[24rem] flex flex-col">
+  <Card class="lg:col-span-4 flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <div class="flex items-center gap-2 min-w-0">
@@ -574,28 +578,24 @@
         </div>
       </div>
     </CardHeader>
-    <CardContent class="flex-1 min-h-0 px-1">
-      <ScrollArea class="h-full w-full min-h-0 px-3 py-5">
-        {#if !model}
-          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">Select a model to preview</div>
-        {:else if modelStlUrl || modelStlBuffer}
-          <div class="h-96 overflow-hidden">
-            {#key model.id}
-              <Model3DViewer
-                stlUrl={modelStlUrl}
-                stlBuffer={modelStlBuffer}
-                rotationX={model.rotationX}
-                rotationY={model.rotationY}
-                rotationZ={model.rotationZ}
-              />
-            {/key}
-          </div>
-        {:else}
-          <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
-            Upload or select an STL file to preview
-          </div>
-        {/if}
-      </ScrollArea>
+    <CardContent class="px-4 py-5">
+      {#if (modelStlUrl || modelStlBuffer) && model}
+        <div class="h-96 overflow-hidden">
+          {#key model.id}
+            <Model3DViewer
+              stlUrl={modelStlUrl}
+              stlBuffer={modelStlBuffer}
+              rotationX={model.rotationX}
+              rotationY={model.rotationY}
+              rotationZ={model.rotationZ}
+            />
+          {/key}
+        </div>
+      {:else}
+        <div class="flex items-center justify-center h-54 text-sm text-muted-foreground">
+          Select a model to preview.
+        </div>
+      {/if}
     </CardContent>
   </Card>
 </div>
