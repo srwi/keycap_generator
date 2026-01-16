@@ -18,7 +18,7 @@
       "rotationX": 0,
       "rotationY": 0,
       "rotationZ": 0,
-      "extrusionDepthMm": 1.8
+      "extrusionDepthMm": 1.4
     },
     {
       "id": "model_2u",
@@ -37,7 +37,7 @@
       "rotationX": 0,
       "rotationY": 0,
       "rotationZ": 0,
-      "extrusionDepthMm": 1.8
+      "extrusionDepthMm": 1.4
     }
   ],
   "templates": [

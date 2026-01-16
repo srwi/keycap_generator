@@ -56,7 +56,7 @@ function defaultKeycapModel(): KeycapModel {
     rotationX: 0,
     rotationY: 0,
     rotationZ: 0,
-    extrusionDepthMm: 0.6,
+    extrusionDepthMm: 1.2,
   }
 }
 
