@@ -13,13 +13,46 @@ import { icons as iconsMeta } from '@phosphor-icons/core'
 /** Phosphor icons use a 256x256 viewBox */
 export const PHOSPHOR_ICON_VIEWBOX = 256
 
+/** Icon weight variants available in Phosphor */
+export type IconVariant = 'regular' | 'bold' | 'fill'
+
+export const ICON_VARIANTS: { value: IconVariant; label: string }[] = [
+  { value: 'regular', label: 'Regular' },
+  { value: 'bold', label: 'Bold' },
+  { value: 'fill', label: 'Fill' },
+]
+
+/**
+ * Parse icon name to extract base name and variant
+ * e.g., "heart-fill" -> { baseName: "heart", variant: "fill" }
+ * e.g., "heart-bold" -> { baseName: "heart", variant: "bold" }
+ * e.g., "heart" -> { baseName: "heart", variant: "regular" }
+ */
+export function parseIconName(iconNameWithVariant: string): { baseName: string; variant: IconVariant } {
+  if (iconNameWithVariant.endsWith('-fill')) {
+    return { baseName: iconNameWithVariant.slice(0, -5), variant: 'fill' }
+  }
+  if (iconNameWithVariant.endsWith('-bold')) {
+    return { baseName: iconNameWithVariant.slice(0, -5), variant: 'bold' }
+  }
+  return { baseName: iconNameWithVariant, variant: 'regular' }
+}
+
+/**
+ * Build icon name with variant suffix for storage
+ */
+export function buildIconName(baseName: string, variant: IconVariant): string {
+  if (variant === 'regular') return baseName
+  return `${baseName}-${variant}`
+}
+
 export interface IconInfo {
   name: string
   displayName: string
   path: string
 }
 
-// Cache for icon paths (loaded on demand)
+// Cache for icon paths (loaded on demand) - keyed by "variant:name"
 const iconPathCache = new Map<string, string>()
 let allIconsMetaCache: Array<{ name: string; displayName: string }> | null = null
 
@@ -61,21 +94,29 @@ export function getAllIconsMeta(): Array<{ name: string; displayName: string }> 
 }
 
 /**
+ * Get cache key for icon with variant
+ */
+function getCacheKey(iconName: string, variant: IconVariant): string {
+  return `${variant}:${iconName}`
+}
+
+/**
  * Fetch and cache the path for a specific icon
  */
-async function loadIconPath(iconName: string): Promise<string | null> {
-  const cached = iconPathCache.get(iconName)
+async function loadIconPath(iconName: string, variant: IconVariant = 'regular'): Promise<string | null> {
+  const cacheKey = getCacheKey(iconName, variant)
+  const cached = iconPathCache.get(cacheKey)
   if (cached) return cached
 
   try {
-    const baseUrl = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular'
-    const response = await fetch(`${baseUrl}/${iconName}.svg`)
+    const baseUrl = `https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/${variant}`
+    const response = await fetch(`${baseUrl}/${iconName}${variant === 'regular' ? '' : `-${variant}`}.svg`)
     if (!response.ok) return null
 
     const svg = await response.text()
     const path = extractPathFromSvg(svg)
     if (path) {
-      iconPathCache.set(iconName, path)
+      iconPathCache.set(cacheKey, path)
     }
     return path || null
   } catch {
@@ -86,11 +127,11 @@ async function loadIconPath(iconName: string): Promise<string | null> {
 /**
  * Get all available icons (with paths loaded)
  */
-export function getAllIcons(): IconInfo[] {
+export function getAllIcons(variant: IconVariant = 'regular'): IconInfo[] {
   const meta = getAllIconsMeta()
   return meta
     .map(m => {
-      const path = iconPathCache.get(m.name)
+      const path = iconPathCache.get(getCacheKey(m.name, variant))
       if (!path) return null
       return { name: m.name, displayName: m.displayName, path }
     })
@@ -100,7 +141,7 @@ export function getAllIcons(): IconInfo[] {
 /**
  * Get all icons with their paths loaded asynchronously
  */
-export async function loadAllIcons(): Promise<IconInfo[]> {
+export async function loadAllIcons(variant: IconVariant = 'regular'): Promise<IconInfo[]> {
   const meta = getAllIconsMeta()
 
   // Load icons in batches to avoid overwhelming the browser
@@ -110,7 +151,7 @@ export async function loadAllIcons(): Promise<IconInfo[]> {
   for (let i = 0; i < meta.length; i += batchSize) {
     const batch = meta.slice(i, i + batchSize)
     const loadPromises = batch.map(async m => {
-      const path = await loadIconPath(m.name)
+      const path = await loadIconPath(m.name, variant)
       if (!path) return null
       return { name: m.name, displayName: m.displayName, path }
     })
@@ -125,11 +166,11 @@ export async function loadAllIcons(): Promise<IconInfo[]> {
 /**
  * Get a specific icon by name (async)
  */
-export async function loadIcon(name: string): Promise<IconInfo | null> {
+export async function loadIcon(name: string, variant: IconVariant = 'regular'): Promise<IconInfo | null> {
   const meta = getAllIconsMeta().find(m => m.name === name)
   if (!meta) return null
 
-  const path = await loadIconPath(name)
+  const path = await loadIconPath(name, variant)
   if (!path) return null
 
   return { name: meta.name, displayName: meta.displayName, path }
@@ -138,8 +179,8 @@ export async function loadIcon(name: string): Promise<IconInfo | null> {
 /**
  * Get a specific icon by name (sync, from cache only)
  */
-export function getIcon(name: string): IconInfo | null {
-  const path = iconPathCache.get(name)
+export function getIcon(name: string, variant: IconVariant = 'regular'): IconInfo | null {
+  const path = iconPathCache.get(getCacheKey(name, variant))
   if (!path) return null
 
   const meta = getAllIconsMeta().find(m => m.name === name)
@@ -165,11 +206,11 @@ export function searchIconsMeta(query: string): Array<{ name: string; displayNam
 /**
  * Search and load icons
  */
-export function searchIcons(query: string): IconInfo[] {
+export function searchIcons(query: string, variant: IconVariant = 'regular'): IconInfo[] {
   const meta = searchIconsMeta(query)
   return meta
     .map(m => {
-      const path = iconPathCache.get(m.name)
+      const path = iconPathCache.get(getCacheKey(m.name, variant))
       if (!path) return null
       return { name: m.name, displayName: m.displayName, path }
     })
@@ -181,9 +222,10 @@ export function searchIcons(query: string): IconInfo[] {
  */
 export function getIconPath(
   iconName: string,
-  sizeMm: number
+  sizeMm: number,
+  variant: IconVariant = 'regular'
 ): { path: string; width: number; height: number; x: number; y: number } | null {
-  const icon = getIcon(iconName)
+  const icon = getIcon(iconName, variant)
   if (!icon) return null
 
   const scale = sizeMm / PHOSPHOR_ICON_VIEWBOX
@@ -203,11 +245,12 @@ export function getIconPath(
  */
 export async function loadIconPath2(
   iconName: string,
-  sizeMm: number
+  sizeMm: number,
+  variant: IconVariant = 'regular'
 ): Promise<{ path: string; width: number; height: number; x: number; y: number } | null> {
-  let icon = getIcon(iconName)
+  let icon = getIcon(iconName, variant)
   if (!icon) {
-    icon = await loadIcon(iconName)
+    icon = await loadIcon(iconName, variant)
   }
   if (!icon) return null
 
@@ -291,15 +334,15 @@ function transformSvgPath(path: string, scale: number, translateX: number, trans
 /**
  * Get the raw SVG path for an icon (unscaled)
  */
-export function getRawIconPath(iconName: string): string | null {
-  return iconPathCache.get(iconName) ?? null
+export function getRawIconPath(iconName: string, variant: IconVariant = 'regular'): string | null {
+  return iconPathCache.get(getCacheKey(iconName, variant)) ?? null
 }
 
 /**
  * Get the raw SVG path for an icon (async)
  */
-export async function loadRawIconPath(iconName: string): Promise<string | null> {
-  const cached = iconPathCache.get(iconName)
+export async function loadRawIconPath(iconName: string, variant: IconVariant = 'regular'): Promise<string | null> {
+  const cached = iconPathCache.get(getCacheKey(iconName, variant))
   if (cached) return cached
-  return loadIconPath(iconName)
+  return loadIconPath(iconName, variant)
 }

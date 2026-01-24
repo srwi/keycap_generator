@@ -6,7 +6,7 @@ import { getFont } from './fonts'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { BufferGeometry, Group, MathUtils, Mesh, Matrix4 } from 'three'
 import { createIconGeometry } from './svg-geometry'
-import { loadRawIconPath, PHOSPHOR_ICON_VIEWBOX } from '../services/icons'
+import { loadRawIconPath, parseIconName, PHOSPHOR_ICON_VIEWBOX } from '../services/icons'
 
 export type GenerationInput =
   | { kind: 'keyId'; keyId: string }
@@ -145,8 +145,8 @@ export async function buildKeycapGroup(
       } as any)
       symbolGeom.rotateY(Math.PI)
     } else {
-      // Icon content - use SVG geometry
-      const iconPath = await loadRawIconPath(content.iconName)
+      const { baseName, variant } = parseIconName(content.iconName)
+      const iconPath = await loadRawIconPath(baseName, variant)
       if (!iconPath) continue
 
       symbolGeom = createIconGeometry(iconPath, sym.fontSizeMm, model.extrusionDepthMm, PHOSPHOR_ICON_VIEWBOX)

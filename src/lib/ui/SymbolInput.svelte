@@ -1,6 +1,14 @@
 <script lang="ts">
   import type { SymbolContent } from '../state/types'
-  import { getIcon, loadIcon, PHOSPHOR_ICON_VIEWBOX, type IconInfo } from '../services/icons'
+  import {
+    getIcon,
+    loadIcon,
+    PHOSPHOR_ICON_VIEWBOX,
+    parseIconName,
+    buildIconName,
+    type IconInfo,
+    type IconVariant,
+  } from '../services/icons'
   import { InputGroup, InputGroupInput, InputGroupAddon } from '@/lib/components/ui/input-group'
   import { Switch } from '@/lib/components/ui/switch'
   import { Popover, PopoverContent, PopoverTrigger } from '@/lib/components/ui/popover'
@@ -19,11 +27,12 @@
   let popoverOpen = false
   let selectedIcon: IconInfo | null = null
 
-  // Load icon info when icon name changes
+  // Load icon info when icon name changes (parse variant from stored name)
   $: if (iconName) {
-    selectedIcon = getIcon(iconName)
+    const { baseName, variant } = parseIconName(iconName)
+    selectedIcon = getIcon(baseName, variant)
     if (!selectedIcon) {
-      loadIcon(iconName).then(icon => {
+      loadIcon(baseName, variant).then(icon => {
         if (icon) selectedIcon = icon
       })
     }
@@ -78,10 +87,11 @@
     onContentChange(value.trim() ? { kind: 'text', value } : null)
   }
 
-  function handleIconSelect(name: string) {
-    iconName = name
+  function handleIconSelect(name: string, variant: IconVariant) {
+    const fullName = buildIconName(name, variant)
+    iconName = fullName
     popoverOpen = false
-    onContentChange({ kind: 'icon', iconName: name })
+    onContentChange({ kind: 'icon', iconName: fullName })
   }
 </script>
 

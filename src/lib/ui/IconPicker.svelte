@@ -1,14 +1,24 @@
 <script lang="ts">
-  import { getAllIconsMeta, searchIconsMeta, loadIcon, PHOSPHOR_ICON_VIEWBOX, type IconInfo } from '../services/icons'
+  import {
+    getAllIconsMeta,
+    searchIconsMeta,
+    loadIcon,
+    PHOSPHOR_ICON_VIEWBOX,
+    ICON_VARIANTS,
+    type IconInfo,
+    type IconVariant,
+  } from '../services/icons'
   import { Search } from 'lucide-svelte'
   import { ScrollArea } from '@/lib/components/ui/scroll-area'
+  import * as Tabs from '@/lib/components/ui/tabs'
 
-  export let onSelect: (iconName: string) => void = () => {}
+  export let onSelect: (iconName: string, variant: IconVariant) => void = () => {}
 
   let searchQuery = ''
   let allIconsMeta: Array<{ name: string; displayName: string }> = []
   let loadedIcons = new Map<string, IconInfo>()
   let scrollContainer: HTMLElement | null = null
+  let selectedVariant: IconVariant = 'regular'
 
   const BATCH_SIZE = 200
   let displayLimit = BATCH_SIZE
@@ -38,24 +48,30 @@
     allIconsMeta = getAllIconsMeta()
   }
 
+  // Cache key includes variant
+  function getCacheKey(iconName: string, variant: IconVariant): string {
+    return `${variant}:${iconName}`
+  }
+
   // Load visible icon paths
-  async function ensureLoaded(iconName: string) {
-    if (loadedIcons.has(iconName)) return
+  async function ensureLoaded(iconName: string, variant: IconVariant) {
+    const cacheKey = getCacheKey(iconName, variant)
+    if (loadedIcons.has(cacheKey)) return
     try {
-      const icon = await loadIcon(iconName)
+      const icon = await loadIcon(iconName, variant)
       if (icon) {
-        loadedIcons = new Map(loadedIcons.set(iconName, icon))
+        loadedIcons = new Map(loadedIcons.set(cacheKey, icon))
       }
     } catch {
       // ignore
     }
   }
 
-  // Preload current result page
-  $: void Promise.all(filteredIconsMeta.map(i => ensureLoaded(i.name)))
+  // Preload current result page when icons or variant changes
+  $: void Promise.all(filteredIconsMeta.map(i => ensureLoaded(i.name, selectedVariant)))
 
   function handleSelect(iconName: string) {
-    onSelect(iconName)
+    onSelect(iconName, selectedVariant)
   }
 
   function handleScroll(e: Event) {
@@ -68,6 +84,12 @@
     if (scrollHeight - scrollTop - clientHeight < 100 && hasMore) {
       displayLimit += BATCH_SIZE
     }
+  }
+
+  function handleVariantChange(variant: string) {
+    selectedVariant = variant as IconVariant
+    // Clear the loaded icons for the new variant to trigger reload
+    displayLimit = BATCH_SIZE
   }
 </script>
 
@@ -86,6 +108,14 @@
         bind:value={searchQuery}
       />
     </div>
+    <!-- Variant tabs -->
+    <Tabs.Root value={selectedVariant} onValueChange={handleVariantChange} class="mt-2">
+      <Tabs.List class="w-full grid grid-cols-3">
+        {#each ICON_VARIANTS as variant}
+          <Tabs.Trigger value={variant.value} class="text-xs">{variant.label}</Tabs.Trigger>
+        {/each}
+      </Tabs.List>
+    </Tabs.Root>
   </div>
 
   <!-- Icon grid with scroll detection -->
@@ -95,7 +125,7 @@
     {:else}
       <div class="grid grid-cols-4 gap-2">
         {#each filteredIconsMeta as meta (meta.name)}
-          {@const icon = loadedIcons.get(meta.name)}
+          {@const icon = loadedIcons.get(getCacheKey(meta.name, selectedVariant))}
           <button
             type="button"
             class="flex flex-col items-center justify-center gap-1 p-2 rounded-md border border-transparent hover:bg-accent hover:border-border transition-colors group"

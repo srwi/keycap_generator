@@ -70,7 +70,7 @@
     scene.add(ambientLight)
 
     const frontLight = new THREE.DirectionalLight(0xffffff, 1.2)
-    frontLight.position.set(0, 20, -100)
+    frontLight.position.set(10, 10, -100)
     frontLight.castShadow = false
     scene.add(frontLight)
 

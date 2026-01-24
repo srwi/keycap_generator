@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { SymbolContent, Template } from '../state/types'
   import { getTextPath } from '../generate/fonts'
-  import { loadRawIconPath, PHOSPHOR_ICON_VIEWBOX } from '../services/icons'
+  import { loadRawIconPath, parseIconName, PHOSPHOR_ICON_VIEWBOX } from '../services/icons'
 
   export let template: Template | null
   export let contentBySymbolId: Record<string, SymbolContent> = {}
@@ -17,13 +17,6 @@
   $: r = Math.min(w, h) * 0.12
 
   type TextPathData = { path: string; width: number; height: number; x: number; y: number }
-
-  interface SymbolRenderData {
-    symbol: typeof template extends Template ? Template['symbols'][0] : never
-    content: SymbolContent | null
-    textPathData: TextPathData | null
-    iconPath: string | null
-  }
 
   // Get symbol content
   function getContent(symbolId: string): SymbolContent | null {
@@ -42,8 +35,9 @@
               const textPathData = await getTextPath(content.value, sym.fontName, sym.fontSizeMm)
               return { symbol: sym, content, textPathData, iconPath: null }
             } else {
-              // Icon content - get raw path (unscaled)
-              const iconPath = await loadRawIconPath(content.iconName)
+              // Icon content - get raw path (unscaled), parse variant from stored name
+              const { baseName, variant } = parseIconName(content.iconName)
+              const iconPath = await loadRawIconPath(baseName, variant)
               return { symbol: sym, content, textPathData: null, iconPath }
             }
           } catch (error) {
