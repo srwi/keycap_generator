@@ -8,6 +8,7 @@
   export let className = ''
   export let widthMm = 0
   export let heightMm = 0
+  export let transparent = false
 
   $: w = Math.max(0.01, widthMm)
   $: h = Math.max(0.01, heightMm)
@@ -60,7 +61,9 @@
   preserveAspectRatio="xMidYMid meet"
   style={`aspect-ratio: ${w} / ${h};`}
 >
-  <rect x={0} y={0} width={w} height={h} fill="var(--label-preview-bg)" rx={r} />
+  {#if !transparent}
+    <rect x={0} y={0} width={w} height={h} fill="var(--label-preview-bg)" rx={r} />
+  {/if}
 
   {#if template}
     {#await symbolData}

@@ -11,7 +11,6 @@ import type { AppState } from '../state/types'
 import { exportTo3MF } from 'three-3mf-exporter'
 import { zipSync } from 'fflate'
 import { registerCustomFonts } from './fonts'
-import { serializeGroupToPreviewMeshes, type PreviewMeshPayload } from './previewMesh'
 import {
   type GenerationInput,
   BaseGeometryCache,
@@ -26,7 +25,7 @@ export type WorkerRequest =
   | { type: 'cancel' }
 
 export interface GeneratePayload {
-  output: 'preview' | 'batch'
+  output: 'batch' | 'preview'
   state: AppState
   stlBuffersByModelId: Record<string, ArrayBuffer | null>
   items: GenerationInput[]
@@ -37,9 +36,9 @@ export interface ZipPayload {
 }
 
 export type WorkerResponse =
-  | { type: 'preview-complete'; payload: { meshes: PreviewMeshPayload[] } }
   | { type: 'batch-progress'; payload: { keyId: string } }
   | { type: 'batch-complete'; payload: { files: Record<string, Uint8Array> } }
+  | { type: 'preview-complete'; payload: { geometry: any } }
   | { type: 'zip-complete'; payload: { zipData: Uint8Array } }
   | { type: 'error'; payload: { message: string } }
 
@@ -75,29 +74,26 @@ async function handleGenerate(payload: GeneratePayload): Promise<void> {
 async function handlePreviewGeneration(
   state: AppState,
   stlBuffersByModelId: Record<string, ArrayBuffer | null>,
-  input: GenerationInput,
+  item: GenerationInput,
   geometryCache: BaseGeometryCache
 ): Promise<void> {
-  const resolved = resolveKeycap(state, input)
+  checkCancelled('Generation cancelled')
 
-  if (!resolved) {
-    self.postMessage({ type: 'preview-complete', payload: { meshes: [] } } satisfies WorkerResponse)
-    return
-  }
-
-  checkCancelled('Preview generation cancelled')
+  const resolved = resolveKeycap(state, item)
+  if (!resolved) throw new Error('Failed to resolve keycap')
 
   const baseGeom = await geometryCache.get(resolved.model, stlBuffersByModelId)
-  checkCancelled('Preview generation cancelled')
+  checkCancelled('Generation cancelled')
 
   const group = await buildKeycapGroup(state, resolved, baseGeom, () =>
-    yieldWithCancellationCheck('Preview generation cancelled')
+    yieldWithCancellationCheck('Generation cancelled')
   )
 
-  const { meshes, transfers } = serializeGroupToPreviewMeshes(group)
+  // Use JSON export for preview to avoid 3MF overhead/issues
+  const json = group.toJSON()
 
   if (!cancelled) {
-    self.postMessage({ type: 'preview-complete', payload: { meshes } } satisfies WorkerResponse, transfers)
+    self.postMessage({ type: 'preview-complete', payload: { geometry: json } } satisfies WorkerResponse)
   }
 }
 

@@ -1,8 +1,6 @@
-import type { Group } from 'three'
 import type { AppState } from '../state/types'
 import type { GenerationInput } from './keycap-builder'
 import type { GeneratePayload, WorkerResponse } from './generation-worker'
-import { groupFromPreviewMeshes } from './previewMesh'
 
 function createWorker(name?: string): Worker {
   return new Worker(new URL('./generation-worker.ts', import.meta.url), {
@@ -49,63 +47,6 @@ function setupWorker(name: string, signal: AbortSignal | undefined, onAbort: () 
       worker.terminate()
     },
   }
-}
-
-export interface PreviewOptions {
-  state: AppState
-  input: GenerationInput
-  stlBuffersByModelId: Record<string, ArrayBuffer | null>
-  signal?: AbortSignal
-}
-
-export function generatePreview(options: PreviewOptions): Promise<Group | null> {
-  const { state, input, stlBuffersByModelId, signal } = options
-
-  return new Promise((resolve, reject) => {
-    let finished = false
-
-    const { worker, terminate } = setupWorker('preview', signal, () => {
-      finish(() => reject(new Error('Preview generation cancelled')))
-    })
-
-    const finish = (fn: () => void) => {
-      if (finished) return
-      finished = true
-      terminate()
-      fn()
-    }
-
-    if (signal?.aborted) {
-      finish(() => reject(new Error('Preview generation cancelled')))
-      return
-    }
-
-    worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
-      const { type, payload } = e.data
-
-      if (type === 'preview-complete') {
-        const { meshes } = payload
-        finish(() => resolve(meshes.length ? groupFromPreviewMeshes(meshes) : null))
-      } else if (type === 'error') {
-        finish(() => reject(new Error(payload.message)))
-      }
-    }
-
-    worker.onerror = err => {
-      const errorEvent = err as ErrorEvent
-      const errorMsg = errorEvent.message || errorEvent.filename || 'Preview worker failed'
-      finish(() => reject(new Error(`Preview worker failed: ${errorMsg}`)))
-    }
-
-    const generatePayload: GeneratePayload = {
-      output: 'preview',
-      state,
-      stlBuffersByModelId,
-      items: [input],
-    }
-
-    worker.postMessage({ type: 'generate', payload: generatePayload })
-  })
 }
 
 export interface BatchOptions {
@@ -289,6 +230,54 @@ function downloadBytes(bytes: Uint8Array, fileName: string, mime = 'application/
   a.download = fileName
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+export async function generatePreview(
+  state: AppState,
+  input: GenerationInput,
+  stlBuffersByModelId: Record<string, ArrayBuffer | null>
+): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const worker = createWorker('preview')
+    let cancelled = false
+
+    const terminate = () => {
+      worker.terminate()
+    }
+
+    worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
+      const { type, payload } = e.data
+
+      if (type === 'preview-complete') {
+        if (!cancelled) {
+          resolve(payload.geometry)
+          terminate()
+        }
+      } else if (type === 'error') {
+        if (!cancelled) {
+          terminate()
+          reject(new Error(payload.message))
+        }
+      }
+    }
+
+    worker.onerror = error => {
+      if (!cancelled) {
+        cancelled = true
+        terminate()
+        reject(new Error('Worker failed'))
+      }
+    }
+
+    const generatePayload: GeneratePayload = {
+      output: 'preview',
+      state,
+      stlBuffersByModelId,
+      items: [input],
+    }
+
+    worker.postMessage({ type: 'generate', payload: generatePayload })
+  })
 }
 
 export type { GenerationInput } from './keycap-builder'

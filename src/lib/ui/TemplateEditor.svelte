@@ -1,13 +1,17 @@
 <script lang="ts">
   import { app, actions, selectedTemplate, getSlotName, getSlotSymbol, MAX_SLOTS } from '../state/store'
   import LabelPreview from './LabelPreview.svelte'
-  import KeycapPreview from './KeycapPreview.svelte'
+  import KeycapPreview3D from './KeycapPreview3D.svelte'
+  import KeycapPreviewSVGOverlay from './KeycapPreviewSVGOverlay.svelte'
   import { showConfirm, showMessage } from '../state/modalStore'
   import { slide } from 'svelte/transition'
-  import { X, Plus, ChevronRight } from 'lucide-svelte'
+  import { X, Plus, ChevronRight, Loader2, Eye } from 'lucide-svelte'
   import HelpTooltip from './HelpTooltip.svelte'
   import { newId } from '../utils/id'
   import { arrayBufferToBase64, baseNameFromFileName, isTtfFileName, makeUniqueFontName } from '../services/customFonts'
+  import { generatePreview } from '../generate/generation-api'
+  import { stlBuffersByModelId } from '../state/sessionAssets'
+  import * as THREE from 'three'
   import { Button } from '@/lib/components/ui/button'
   import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/card'
   import { Field, FieldGroup, FieldLabel } from '@/lib/components/ui/field'
@@ -15,8 +19,6 @@
   import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/lib/components/ui/item'
   import { ScrollArea } from '@/lib/components/ui/scroll-area'
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/lib/components/ui/select'
-  import { Switch } from '@/lib/components/ui/switch'
-  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/lib/components/ui/tooltip'
 
   $: tpl = $selectedTemplate
   $: hasModels = $app.keycapModels.length > 0
@@ -28,6 +30,56 @@
   }
   $: if (tpl && selectedKeycapModelId !== tpl.keycapModelId) {
     actions.setTemplateKeycapModel(tpl.id, selectedKeycapModelId)
+  }
+
+  let isGenerating = false
+  let generatedMesh: THREE.Group | null = null
+  let generationError: string | null = null
+
+  $: if (tpl) {
+    generatedMesh = null
+    generationError = null
+  }
+
+  $: showFullPreview = generatedMesh !== null
+
+  $: model = selectedKeycapModelId ? ($app.keycapModels.find(m => m.id === selectedKeycapModelId) ?? null) : null
+
+  async function generateFullPreview() {
+    if (!tpl) return
+
+    isGenerating = true
+    generationError = null
+
+    const targetTemplateId = tpl.id
+
+    try {
+      const previewContent = Object.fromEntries(
+        tpl.symbols.map((s, index) => [s.id, { kind: 'text', value: getSlotSymbol(index) } as const])
+      )
+
+      const json = await generatePreview(
+        $app,
+        { kind: 'template', template: tpl, contentBySymbolId: previewContent },
+        $stlBuffersByModelId
+      )
+
+      const loader = new THREE.ObjectLoader()
+      const group = loader.parse(json) as THREE.Group
+
+      if (tpl && tpl.id === targetTemplateId) {
+        generatedMesh = group
+      }
+    } catch (err) {
+      console.error('Preview generation failed', err)
+      if (tpl && tpl.id === targetTemplateId) {
+        generationError = err instanceof Error ? err.message : 'Generation failed'
+      }
+    } finally {
+      if (tpl && tpl.id === targetTemplateId) {
+        isGenerating = false
+      }
+    }
   }
 
   function deleteTemplateById(templateId: string) {
@@ -59,21 +111,6 @@
 
   $: customFontNames = $app.customFonts.map(f => f.name)
   $: fontOptions = [...AVAILABLE_FONTS, ...customFontNames.filter(n => !AVAILABLE_FONTS.includes(n))]
-
-  $: model = tpl == null ? null : ($app.keycapModels.find(m => m.id === tpl.keycapModelId) ?? null)
-  $: modelWidthMm = model?.widthMm ?? 0
-  $: modelHeightMm = model?.heightMm ?? 0
-
-  // Create preview content with text symbols for template preview
-  $: previewContentBySymbolId = tpl
-    ? Object.fromEntries(tpl.symbols.map((s, index) => [s.id, { kind: 'text', value: getSlotSymbol(index) } as const]))
-    : {}
-
-  let previewIs3d = false
-
-  function clamp(n: number, min: number, max: number) {
-    return Math.min(max, Math.max(min, n))
-  }
 
   function getTemplateModel(templateId: string) {
     const t = $app.templates.find(t => t.id === templateId)
@@ -461,31 +498,80 @@
     onchange={onFontUploadChange}
   />
 
-  <Card class="lg:col-span-4 flex flex-col">
+  <Card class="lg:col-span-4 min-h-[16rem] lg:h-[calc(100vh-20rem)] lg:min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
         <CardTitle class="text-base">Preview</CardTitle>
-        <div class="flex items-center gap-2">
-          <span class={previewIs3d ? 'text-xs text-muted-foreground' : 'text-xs font-medium'}>2D</span>
-          <Switch bind:checked={previewIs3d} disabled={!tpl} aria-label="Toggle 3D preview" />
-          <span class={previewIs3d ? 'text-xs font-medium' : 'text-xs text-muted-foreground'}>3D</span>
-        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!tpl || !model || isGenerating}
+          onclick={generateFullPreview}
+          title="Generate full 3D preview"
+        >
+          {#if isGenerating}
+            <Loader2 class="size-4 animate-spin" />
+          {:else}
+            <Eye class="size-4" />
+          {/if}
+          <span class="hidden sm:inline">Preview</span>
+        </Button>
       </div>
     </CardHeader>
-    <CardContent class="px-4 py-5">
-      {#if !tpl}
-        <div class="flex items-center justify-center h-54 text-sm text-muted-foreground">
-          Select a template to preview.
+    <CardContent class="flex-1 min-h-0 relative p-0 overflow-hidden">
+      {#if tpl && model}
+        <div class="absolute inset-0">
+          {#if isGenerating}
+            <div
+              class="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all"
+              transition:slide={{ duration: 200 }}
+            >
+              <div class="flex flex-col items-center gap-2">
+                <Loader2 class="size-6 animate-spin text-primary" />
+                <span class="text-xs font-medium">Generating...</span>
+              </div>
+            </div>
+          {/if}
+
+          {#if generationError}
+            <div
+              class="absolute inset-0 z-40 flex items-center justify-center bg-background/80 p-4 text-center pointer-events-none"
+            >
+              <div class="text-destructive text-sm max-w-[80%]">
+                <p class="font-bold">Generation Failed</p>
+                <p>{generationError}</p>
+              </div>
+            </div>
+          {/if}
+
+          <KeycapPreview3D
+            stlUrl={model.source.kind === 'server' ? model.source.url : null}
+            stlBuffer={model.source.kind === 'upload' ? $stlBuffersByModelId[model.id] : null}
+            {generatedMesh}
+            widthMm={model.widthMm}
+            heightMm={model.heightMm}
+            rotationX={model.rotationX}
+            rotationY={model.rotationY}
+            rotationZ={model.rotationZ}
+            enableControls={showFullPreview}
+          />
+
+          {#if !showFullPreview}
+            {@const previewContent = Object.fromEntries(
+              tpl.symbols.map((s, index) => [s.id, { kind: 'text', value: getSlotSymbol(index) } as const])
+            )}
+            <KeycapPreviewSVGOverlay
+              template={tpl}
+              contentBySymbolId={previewContent}
+              widthMm={model.widthMm}
+              heightMm={model.heightMm}
+            />
+          {/if}
         </div>
       {:else}
-        <KeycapPreview
-          template={tpl}
-          contentBySymbolId={previewContentBySymbolId}
-          widthMm={modelWidthMm}
-          heightMm={modelHeightMm}
-          keyId={null}
-          bind:is3d={previewIs3d}
-        />
+        <div class="flex items-center justify-center h-full text-sm text-muted-foreground m-4">
+          Select a template and ensure a model is linked.
+        </div>
       {/if}
     </CardContent>
   </Card>

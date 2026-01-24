@@ -9,7 +9,7 @@
   import { getPublicPath } from '../utils/paths'
   import { onMount } from 'svelte'
   import HelpTooltip from './HelpTooltip.svelte'
-  import Model3DViewer from './Model3DViewer.svelte'
+  import KeycapPreview3D from './KeycapPreview3D.svelte'
   import { Button } from '@/lib/components/ui/button'
   import { ButtonGroup } from '@/lib/components/ui/button-group'
   import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/card'
@@ -102,9 +102,6 @@
       .then(({ widthMm, heightMm }) => actions.updateKeycapModel(model.id, { widthMm, heightMm }))
       .catch(err => console.error('Failed to load server STL dimensions:', err))
   }
-
-  $: modelStlUrl = model?.source.kind === 'server' ? model.source.url : null
-  $: modelStlBuffer = model?.source.kind === 'upload' && model ? ($stlBuffersByModelId[model.id] ?? null) : null
 
   function deleteModelById(modelId: string) {
     const m = $app.keycapModels.find(m => m.id === modelId)
@@ -567,34 +564,28 @@
     </CardContent>
   </Card>
 
-  <Card class="lg:col-span-4 flex flex-col">
+  <Card class="lg:col-span-4 min-h-[16rem] lg:h-[calc(100vh-20rem)] lg:min-h-[24rem] flex flex-col">
     <CardHeader class="border-b">
       <div class="flex items-center justify-between gap-3 min-h-8">
-        <div class="flex items-center gap-2 min-w-0">
-          <CardTitle class="text-base">Preview</CardTitle>
-          <HelpTooltip
-            text="Preview the 3D model shape and orientation. This helps verify that uploaded models are correctly oriented before generating keycaps."
-          />
-        </div>
+        <CardTitle class="text-base">Preview</CardTitle>
       </div>
     </CardHeader>
-    <CardContent class="px-4 py-5">
-      {#if (modelStlUrl || modelStlBuffer) && model}
-        <div class="h-96 overflow-hidden">
-          {#key model.id}
-            <Model3DViewer
-              stlUrl={modelStlUrl}
-              stlBuffer={modelStlBuffer}
-              rotationX={model.rotationX}
-              rotationY={model.rotationY}
-              rotationZ={model.rotationZ}
-            />
-          {/key}
+    <CardContent class="flex-1 min-h-0 relative p-0 overflow-hidden">
+      {#if model}
+        <div class="absolute inset-0">
+          <KeycapPreview3D
+            stlUrl={model.source.kind === 'server' ? model.source.url : null}
+            stlBuffer={model.source.kind === 'upload' ? $stlBuffersByModelId[model.id] : null}
+            widthMm={model.widthMm}
+            heightMm={model.heightMm}
+            rotationX={model.rotationX}
+            rotationY={model.rotationY}
+            rotationZ={model.rotationZ}
+            enableControls={true}
+          />
         </div>
       {:else}
-        <div class="flex items-center justify-center h-54 text-sm text-muted-foreground">
-          Select a model to preview.
-        </div>
+        <div class="flex items-center justify-center h-full text-sm text-muted-foreground m-4">No model selected</div>
       {/if}
     </CardContent>
   </Card>
