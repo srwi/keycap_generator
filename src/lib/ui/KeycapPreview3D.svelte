@@ -66,33 +66,25 @@
   function initScene() {
     scene = new THREE.Scene()
 
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4)
-    hemisphereLight.position.set(0, 50, 0)
-    scene.add(hemisphereLight)
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45)
     scene.add(ambientLight)
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.0)
-    keyLight.position.set(50, 80, 50)
-    keyLight.castShadow = false
-    scene.add(keyLight)
+    const frontLight = new THREE.DirectionalLight(0xffffff, 1.2)
+    frontLight.position.set(0, 20, -100)
+    frontLight.castShadow = false
+    scene.add(frontLight)
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.5)
-    fillLight.position.set(-40, 30, 60)
-    scene.add(fillLight)
+    const leftLight = new THREE.DirectionalLight(0xffffff, 0.35)
+    leftLight.position.set(-60, 40, 30)
+    scene.add(leftLight)
 
-    const rimLight = new THREE.DirectionalLight(0xffffff, 0.6)
-    rimLight.position.set(-60, -40, -40)
-    scene.add(rimLight)
+    const rightLight = new THREE.DirectionalLight(0xffffff, 0.35)
+    rightLight.position.set(60, 40, 30)
+    scene.add(rightLight)
 
-    const bottomLight = new THREE.DirectionalLight(0xffffff, 0.35)
-    bottomLight.position.set(30, -50, 30)
-    scene.add(bottomLight)
-
-    const pointLight = new THREE.PointLight(0xffffff, 0.3, 200)
-    pointLight.position.set(0, 0, 100)
-    scene.add(pointLight)
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.3)
+    backLight.position.set(0, 50, -90)
+    scene.add(backLight)
 
     contentGroup = new THREE.Group()
     scene.add(contentGroup)

@@ -4,8 +4,8 @@
   import KeycapPreview3D from './KeycapPreview3D.svelte'
   import KeycapPreviewSVGOverlay from './KeycapPreviewSVGOverlay.svelte'
   import { showConfirm, showMessage } from '../state/modalStore'
-  import { slide } from 'svelte/transition'
-  import { X, Plus, ChevronRight, Loader2, Eye } from 'lucide-svelte'
+  import { slide, fade } from 'svelte/transition'
+  import { X, Plus, ChevronRight, Loader2, Box } from 'lucide-svelte'
   import HelpTooltip from './HelpTooltip.svelte'
   import { newId } from '../utils/id'
   import { arrayBufferToBase64, baseNameFromFileName, isTtfFileName, makeUniqueFontName } from '../services/customFonts'
@@ -505,16 +505,16 @@
         <Button
           size="sm"
           variant="outline"
-          disabled={!tpl || !model || isGenerating}
+          disabled={!tpl || !model || showFullPreview}
           onclick={generateFullPreview}
-          title="Generate full 3D preview"
+          title="Render 3D keycap"
         >
           {#if isGenerating}
             <Loader2 class="size-4 animate-spin" />
           {:else}
-            <Eye class="size-4" />
+            <Box class="size-4" />
           {/if}
-          <span class="hidden sm:inline">Preview</span>
+          <span class="hidden sm:inline">Apply</span>
         </Button>
       </div>
     </CardHeader>
@@ -523,14 +523,10 @@
         <div class="absolute inset-0">
           {#if isGenerating}
             <div
-              class="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-md transition-all"
-              transition:slide={{ duration: 200 }}
-            >
-              <div class="flex flex-col items-center gap-2">
-                <Loader2 class="size-6 animate-spin text-primary" />
-                <span class="text-xs font-medium">Generating...</span>
-              </div>
-            </div>
+              class="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-md rounded-xl transition-all"
+              in:fade={{ duration: 500 }}
+              out:fade={{ duration: 0 }}
+            ></div>
           {/if}
 
           {#if generationError}
