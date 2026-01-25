@@ -15,12 +15,13 @@
   import ProcessingModal from './lib/ui/ProcessingModal.svelte'
   import ModalContainer from './lib/ui/ModalContainer.svelte'
   import { showMessage, showConfirm } from './lib/state/modalStore'
-  import { Download, Upload, BookOpen, ChevronDown, Trash2, Github, Star, Heart, Coffee } from 'lucide-svelte'
+  import { Download, Upload, BookOpen, ChevronDown, Trash2, Github, Star, Heart, Coffee, Plus } from 'lucide-svelte'
   import { registerCustomFonts } from './lib/generate/fonts'
   import ModeToggle from './lib/ui/ModeToggle.svelte'
   import { initTheme } from './lib/state/theme'
   import { Button } from '@/lib/components/ui/button'
   import { ButtonGroup } from '@/lib/components/ui/button-group'
+  import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/lib/components/ui/empty'
   import {
     DropdownMenu,
     DropdownMenuContent,
@@ -33,6 +34,7 @@
   let tab: 'models' | 'templates' | 'keys' = 'models'
   let presetsMenuOpen = false
   let loadInput: HTMLInputElement
+  let hasInteracted = false
 
   const presets = [
     { value: 'numpad', label: 'Numpad' },
@@ -40,16 +42,23 @@
     { value: '60-percent', label: '60% ANSI' },
   ]
 
-  function onLoadPreset(presetValue: string) {
+  function startCleanProject() {
+    hasInteracted = true
+  }
+
+  function onLoadPreset(presetValue: string, fromEmptyState = false) {
     presetsMenuOpen = false
 
     const load = async () => {
       const result = await readPresetProject(presetValue)
       if ('error' in result) showMessage(result.error)
-      else applyLoadedProject(result.project)
+      else {
+        applyLoadedProject(result.project)
+        hasInteracted = true
+      }
     }
 
-    if (isProjectEmpty($app)) {
+    if (fromEmptyState || isProjectEmpty($app)) {
       load()
     } else {
       showConfirm('Loading a preset will replace your current project. Continue?', load)
@@ -174,9 +183,7 @@
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-        <ModeToggle />
-
+      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:ml-auto">
         <input
           bind:this={loadInput}
           class="hidden"
@@ -186,74 +193,126 @@
             const result = await readProjectFromFile(e)
             if (!result) return
             if ('error' in result) showMessage(result.error)
-            else applyLoadedProject(result.project)
+            else {
+              applyLoadedProject(result.project)
+              hasInteracted = true
+            }
           }}
         />
-        <ButtonGroup>
-          <Button variant="outline" size="sm" onclick={() => downloadStateFile($app)} title="Save project">
-            <Download class="size-4" />
-            <span class="hidden sm:inline">Save</span>
-          </Button>
-          <Button variant="outline" size="sm" onclick={() => loadInput?.click()} title="Load project">
-            <Upload class="size-4" />
-            <span class="hidden sm:inline">Load</span>
-          </Button>
-        </ButtonGroup>
+        {#if hasInteracted}
+          <ButtonGroup>
+            <Button variant="outline" size="sm" onclick={() => downloadStateFile($app)} title="Save project">
+              <Download class="size-4" />
+              <span class="hidden sm:inline">Save</span>
+            </Button>
+            <Button variant="outline" size="sm" onclick={() => loadInput?.click()} title="Load project">
+              <Upload class="size-4" />
+              <span class="hidden sm:inline">Load</span>
+            </Button>
+          </ButtonGroup>
 
-        <DropdownMenu bind:open={presetsMenuOpen}>
-          <DropdownMenuTrigger>
-            {#snippet child({ props })}
-              <Button variant="outline" size="sm" title="Load preset" {...props}>
-                <BookOpen class="size-4" />
-                <span class="sm:hidden">Presets</span>
-                <span class="hidden sm:inline">Load preset</span>
-                <ChevronDown class="size-3" />
-              </Button>
-            {/snippet}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" class="min-w-[160px]">
-            {#each presets as preset}
-              <DropdownMenuItem onclick={() => onLoadPreset(preset.value)}>{preset.label}</DropdownMenuItem>
-            {/each}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <DropdownMenu bind:open={presetsMenuOpen}>
+            <DropdownMenuTrigger>
+              {#snippet child({ props })}
+                <Button variant="outline" size="sm" title="Load preset" {...props}>
+                  <BookOpen class="size-4" />
+                  <span class="sm:hidden">Presets</span>
+                  <span class="hidden sm:inline">Load preset</span>
+                  <ChevronDown class="size-3" />
+                </Button>
+              {/snippet}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" class="min-w-[160px]">
+              {#each presets as preset}
+                <DropdownMenuItem onclick={() => onLoadPreset(preset.value)}>{preset.label}</DropdownMenuItem>
+              {/each}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <Button variant="destructive" size="sm" onclick={onClear} title="Clear all">
-          <Trash2 class="size-4" />
-          <span class="hidden sm:inline">Clear</span>
-        </Button>
+          <Button variant="destructive" size="sm" onclick={onClear} title="Clear all">
+            <Trash2 class="size-4" />
+            <span class="hidden sm:inline">Clear</span>
+          </Button>
+        {/if}
+
+        <ModeToggle />
       </div>
     </div>
   </header>
 
   <div class="mx-auto flex-1 w-full max-w-6xl px-3 py-4 sm:px-4 min-h-0 overflow-hidden">
-    <Tabs bind:value={tab} class="gap-4">
-      <div class="flex flex-wrap items-center gap-2">
-        <TabsList>
-          <TabsTrigger value="models">Models</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="keys">Keys</TabsTrigger>
-        </TabsList>
-
-        <Button
-          class="ml-auto"
-          disabled={$app.keys.length === 0 || missingUploadModels.length > 0 || isGenerating}
-          onclick={onGenerate}
-        >
-          Generate
-        </Button>
+    {#if !hasInteracted}
+      <div class="flex items-center justify-center h-full">
+        <Empty class="border-none">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <img src={getPublicPath('icon.png')} alt="Keycap" class="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>Welcome to Keycap Generator</EmptyTitle>
+            <EmptyDescription>
+              Create custom keycaps for multi-color 3D printing. Start a new project, load an existing one, or try a
+              preset.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent class="flex-col items-center gap-2">
+            <div class="flex flex-wrap justify-center gap-2">
+              <Button variant="outline" onclick={() => loadInput?.click()}>
+                <Upload class="size-4" />
+                Load Project
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  {#snippet child({ props })}
+                    <Button variant="outline" {...props}>
+                      <BookOpen class="size-4" />
+                      Load Preset
+                      <ChevronDown class="size-3" />
+                    </Button>
+                  {/snippet}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" class="min-w-[160px]">
+                  {#each presets as preset}
+                    <DropdownMenuItem onclick={() => onLoadPreset(preset.value, true)}>{preset.label}</DropdownMenuItem>
+                  {/each}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <Button onclick={startCleanProject}>
+              <Plus class="size-4" />
+              New Project
+            </Button>
+          </EmptyContent>
+        </Empty>
       </div>
+    {:else}
+      <Tabs bind:value={tab} class="gap-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <TabsList>
+            <TabsTrigger value="models">Models</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="keys">Keys</TabsTrigger>
+          </TabsList>
 
-      <TabsContent value="models">
-        <KeycapModelsEditor />
-      </TabsContent>
-      <TabsContent value="templates">
-        <TemplateEditor />
-      </TabsContent>
-      <TabsContent value="keys">
-        <KeyEditor />
-      </TabsContent>
-    </Tabs>
+          <Button
+            class="ml-auto"
+            disabled={$app.keys.length === 0 || missingUploadModels.length > 0 || isGenerating}
+            onclick={onGenerate}
+          >
+            Generate
+          </Button>
+        </div>
+
+        <TabsContent value="models">
+          <KeycapModelsEditor />
+        </TabsContent>
+        <TabsContent value="templates">
+          <TemplateEditor />
+        </TabsContent>
+        <TabsContent value="keys">
+          <KeyEditor />
+        </TabsContent>
+      </Tabs>
+    {/if}
   </div>
 
   {#if isGenerating}

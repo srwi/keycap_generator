@@ -585,7 +585,7 @@
           />
         </div>
       {:else}
-        <div class="flex items-center justify-center h-full text-sm text-muted-foreground m-4">No model selected</div>
+        <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">No model selected</div>
       {/if}
     </CardContent>
   </Card>

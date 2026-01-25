@@ -321,7 +321,7 @@
           {/if}
         </div>
       {:else}
-        <div class="flex items-center justify-center h-full text-sm text-muted-foreground m-4">
+        <div class="flex items-center justify-center h-64 text-sm text-muted-foreground">
           Select a key with a valid template and model.
         </div>
       {/if}
