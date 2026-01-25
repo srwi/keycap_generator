@@ -514,7 +514,7 @@
           {:else}
             <Box class="size-4" />
           {/if}
-          <span class="hidden sm:inline">Apply</span>
+          <span>Apply</span>
         </Button>
       </div>
     </CardHeader>

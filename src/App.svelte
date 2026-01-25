@@ -21,7 +21,7 @@
   import { initTheme } from './lib/state/theme'
   import { Button } from '@/lib/components/ui/button'
   import { ButtonGroup } from '@/lib/components/ui/button-group'
-  import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/lib/components/ui/empty'
+  import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/lib/components/ui/empty'
   import {
     DropdownMenu,
     DropdownMenuContent,
@@ -240,14 +240,11 @@
     </div>
   </header>
 
-  <div class="mx-auto flex-1 w-full max-w-6xl px-3 py-4 sm:px-4 min-h-0 overflow-hidden">
+  <div class="mx-auto flex-1 w-full max-w-6xl px-3 py-4 sm:px-4 min-h-0 overflow-hidden flex flex-col">
     {#if !hasInteracted}
-      <div class="flex items-center justify-center h-full">
+      <div class="flex items-center justify-center flex-1">
         <Empty class="border-none">
           <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <img src={getPublicPath('icon.png')} alt="Keycap" class="size-6" />
-            </EmptyMedia>
             <EmptyTitle>Welcome to Keycap Generator</EmptyTitle>
             <EmptyDescription>
               Create custom keycaps for multi-color 3D printing. Start a new project, load an existing one, or try a
