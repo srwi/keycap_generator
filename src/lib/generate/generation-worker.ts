@@ -8,7 +8,7 @@ if (!(globalThis as any).DOMParser) {
 }
 
 import type { AppState } from '../state/types'
-import { exportTo3MF } from 'three-3mf-exporter'
+import { exportTo3MF } from 'threejs-exporter-pc'
 import { zipSync } from 'fflate'
 import { registerCustomFonts } from './fonts'
 import {
@@ -121,24 +121,25 @@ async function handleBatchGeneration(
     try {
       resolved = resolveKeycap(state, item)
       if (!resolved) throw new Error(`Failed to resolve keycap from ${formatGenerationInput(item)}`)
+      const resolvedKey = resolved
 
-      const baseGeom = await geometryCache.get(resolved.model, stlBuffersByModelId)
+      const baseGeom = await geometryCache.get(resolvedKey.model, stlBuffersByModelId)
       checkCancelled('Generation cancelled')
 
-      const group = await buildKeycapGroup(resolved, baseGeom, () => yieldWithCancellationCheck('Generation cancelled'))
+      const group = await buildKeycapGroup(resolvedKey, baseGeom, () => yieldWithCancellationCheck('Generation cancelled'))
 
       const blob = await exportTo3MF(group)
       const arrayBuffer = await blob.arrayBuffer()
 
       // Generate filename with index for ordering
-      const keyIndex = state.keys.findIndex(k => k.id === resolved.key.id) + 1
-      const filename = `${keyIndex}. ${safeFileName(resolved.key.name)}.3mf`
+      const keyIndex = state.keys.findIndex(k => k.id === resolvedKey.key.id) + 1
+      const filename = `${keyIndex}. ${safeFileName(resolvedKey.key.name)}.3mf`
       files[filename] = new Uint8Array(arrayBuffer)
 
       // Report progress
       self.postMessage({
         type: 'batch-progress',
-        payload: { keyId: resolved.key.id },
+        payload: { keyId: resolvedKey.key.id },
       } satisfies WorkerResponse)
     } catch (error) {
       if (resolved) {

@@ -22,6 +22,15 @@ export interface ResolvedKeycap {
   model: KeycapModel
 }
 
+function sanitize3mfPartName(name: string | null | undefined): string {
+  if (!name) return 'symbol'
+  const cleaned = name
+    .replaceAll(/[&<>"']/g, '_')
+    .replaceAll(/[\u0000-\u001F]/g, '_')
+    .trim()
+  return cleaned || 'symbol'
+}
+
 export type CancellationCheck = () => Promise<void>
 
 export function getTemplate(state: AppState, templateId: string): Template | null {
@@ -164,7 +173,8 @@ export async function buildKeycapGroup(
     extrusionMeshes.push(extrMesh)
 
     const interMesh = makeMesh(symbolGeom.clone() as BufferGeometry, color)
-    const name = content.kind === 'text' ? content.value : content.iconName
+    const rawName = content.kind === 'text' ? content.value : content.iconName
+    const name = sanitize3mfPartName(rawName)
     symbolMeshes.push({ mesh: interMesh, color, name })
   }
 
