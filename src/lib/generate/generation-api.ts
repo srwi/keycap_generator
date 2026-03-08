@@ -36,7 +36,7 @@ export function generateBatch(options: BatchOptions): Promise<void> {
       typeof navigator !== 'undefined' && typeof navigator.hardwareConcurrency === 'number'
         ? navigator.hardwareConcurrency
         : 4
-    const workerCount = Math.max(1, Math.min(total, Math.max(1, cpuCount - 1)))
+    const workerCount = Math.min(Math.max(1, Math.min(total, Math.max(1, cpuCount - 1))), 2) // Limit to 2 workers (Chrome has a hard memory limit)
 
     const terminateAll = () => {
       if (signal) signal.removeEventListener('abort', abortHandler)
