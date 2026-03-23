@@ -22,6 +22,9 @@
   let prevMesh: THREE.Group | null = null
   let prevStlUrl: string | null = null
   let prevStlBuffer: ArrayBuffer | null = null
+  let prevRotationX: number | null = null
+  let prevRotationY: number | null = null
+  let prevRotationZ: number | null = null
 
   let container: HTMLDivElement
   let canvas: HTMLCanvasElement
@@ -49,12 +52,11 @@
     controls?.dispose()
   })
 
-  $: (stlUrl, stlBuffer, generatedMesh, updateContent())
+  $: (stlUrl, stlBuffer, generatedMesh, rotationX, rotationY, rotationZ, updateContent())
   $: if (displayedWidthMm || displayedHeightMm || orthographic) {
     updateCameraType()
     updateCamera()
   }
-  $: if (!generatedMesh && (rotationX || rotationY || rotationZ)) updateContent()
   $: if (controls) {
     controls.enabled = enableControls
     if (!enableControls) {
@@ -166,6 +168,7 @@
     const meshChanged = generatedMesh !== prevMesh
     const stlUrlChanged = stlUrl !== prevStlUrl
     const stlBufferChanged = stlBuffer !== prevStlBuffer
+    const rotationChanged = rotationX !== prevRotationX || rotationY !== prevRotationY || rotationZ !== prevRotationZ
 
     if (generatedMesh) {
       if (!meshChanged) return
@@ -173,6 +176,9 @@
       prevMesh = generatedMesh
       prevStlUrl = stlUrl
       prevStlBuffer = stlBuffer
+      prevRotationX = rotationX
+      prevRotationY = rotationY
+      prevRotationZ = rotationZ
 
       clearContentGroup()
       const mesh = generatedMesh.clone()
@@ -186,11 +192,14 @@
 
     if (stlBuffer || stlUrl) {
       const meshCleared = prevMesh !== null && generatedMesh === null
-      if (!meshCleared && !stlBufferChanged && !stlUrlChanged) return
+      if (!meshCleared && !stlBufferChanged && !stlUrlChanged && !rotationChanged) return
 
       prevMesh = generatedMesh
       prevStlUrl = stlUrl
       prevStlBuffer = stlBuffer
+      prevRotationX = rotationX
+      prevRotationY = rotationY
+      prevRotationZ = rotationZ
 
       clearContentGroup()
 
@@ -229,6 +238,9 @@
       prevMesh = null
       prevStlUrl = null
       prevStlBuffer = null
+      prevRotationX = null
+      prevRotationY = null
+      prevRotationZ = null
     }
   }
 
