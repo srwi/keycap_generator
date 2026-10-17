@@ -15,8 +15,21 @@
   import ProcessingModal from './lib/ui/ProcessingModal.svelte'
   import ModalContainer from './lib/ui/ModalContainer.svelte'
   import { showMessage, showConfirm } from './lib/state/modalStore'
-  import { Download, Upload, BookOpen, ChevronDown, Trash2, Github, Star, Heart, Coffee, Plus } from 'lucide-svelte'
+  import {
+    Download,
+    Upload,
+    BookOpen,
+    ChevronDown,
+    Trash2,
+    Github,
+    Star,
+    Heart,
+    Coffee,
+    Plus,
+    FileCode,
+  } from 'lucide-svelte'
   import { registerCustomFonts } from './lib/generate/fonts'
+  import KleImporter from './lib/ui/KleImporter.svelte'
   import ModeToggle from './lib/ui/ModeToggle.svelte'
   import { initTheme } from './lib/state/theme'
   import { Button } from '@/lib/components/ui/button'
@@ -35,6 +48,7 @@
   let presetsMenuOpen = false
   let loadInput: HTMLInputElement
   let hasInteracted = false
+  let kleImporterOpen = false
 
   const presets = [
     { value: 'numpad', label: 'Numpad' },
@@ -80,6 +94,7 @@
           selectedKeyId: null,
         },
       })
+      kleImporterOpen = false
     })
   }
 
@@ -196,6 +211,7 @@
             else {
               applyLoadedProject(result.project)
               hasInteracted = true
+              kleImporterOpen = false
             }
           }}
         />
@@ -224,7 +240,12 @@
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" class="min-w-[160px]">
               {#each presets as preset}
-                <DropdownMenuItem onclick={() => onLoadPreset(preset.value)}>{preset.label}</DropdownMenuItem>
+                <DropdownMenuItem
+                  onclick={() => {
+                    kleImporterOpen = false
+                    onLoadPreset(preset.value)
+                  }}>{preset.label}</DropdownMenuItem
+                >
               {/each}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -241,7 +262,16 @@
   </header>
 
   <div class="mx-auto flex-1 w-full max-w-6xl px-3 py-4 sm:px-4 min-h-0 overflow-hidden flex flex-col">
-    {#if !hasInteracted}
+    {#if kleImporterOpen}
+      <KleImporter
+        onClose={() => {
+          kleImporterOpen = false
+          if (!isProjectEmpty($app)) {
+            hasInteracted = true
+          }
+        }}
+      />
+    {:else if !hasInteracted}
       <div class="flex items-center justify-center flex-1">
         <Empty class="border-none">
           <EmptyHeader>
@@ -273,6 +303,15 @@
                   {/each}
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Button
+                variant="outline"
+                onclick={() => {
+                  kleImporterOpen = true
+                }}
+              >
+                <FileCode class="size-4" />
+                Import KLE
+              </Button>
             </div>
             <Button onclick={startCleanProject}>
               <Plus class="size-4" />

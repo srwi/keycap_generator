@@ -10,16 +10,14 @@
   import { onMount } from 'svelte'
   import HelpTooltip from './HelpTooltip.svelte'
   import KeycapPreview3D from './KeycapPreview3D.svelte'
+  import StlSourcePicker from './StlSourcePicker.svelte'
   import { Button } from '@/lib/components/ui/button'
   import { ButtonGroup } from '@/lib/components/ui/button-group'
   import { Card, CardContent, CardHeader, CardTitle } from '@/lib/components/ui/card'
   import { Field, FieldGroup, FieldLabel } from '@/lib/components/ui/field'
   import { Input } from '@/lib/components/ui/input'
   import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/lib/components/ui/item'
-  import { Label } from '@/lib/components/ui/label'
-  import { RadioGroup, RadioGroupItem } from '@/lib/components/ui/radio-group'
   import { ScrollArea } from '@/lib/components/ui/scroll-area'
-  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/lib/components/ui/select'
 
   let registry: Registry | null = null
 
@@ -43,30 +41,6 @@
 
   $: selectedCategory = selectedKeycapInfo?.category ?? registry?.categories[0]?.name ?? ''
   $: selectedKeycapPath = selectedKeycapInfo?.keycap.path ?? registry?.categories[0]?.keycaps[0]?.path ?? ''
-
-  $: categories = registry ? registry.categories.map(c => c.name) : []
-  $: selectedCategoryData = registry ? registry.categories.find(c => c.name === selectedCategory) : null
-  $: keycapsInCategory = selectedCategoryData ? selectedCategoryData.keycaps : []
-  $: selectedKeycap = selectedKeycapInfo?.keycap ?? null
-
-  let categoryValue: string = ''
-  let keycapPathValue: string = ''
-  let prevSelectedCategory: string | null = null
-  let prevSelectedKeycapPath: string | null = null
-  $: if (selectedCategory !== prevSelectedCategory) {
-    prevSelectedCategory = selectedCategory
-    categoryValue = selectedCategory
-  }
-  $: if (selectedKeycapPath !== prevSelectedKeycapPath) {
-    prevSelectedKeycapPath = selectedKeycapPath
-    keycapPathValue = selectedKeycapPath
-  }
-  $: if (categoryValue && categoryValue !== selectedCategory) {
-    onCategoryChange(categoryValue)
-  }
-  $: if (keycapPathValue && keycapPathValue !== selectedKeycapPath) {
-    onKeycapChange(keycapPathValue)
-  }
 
   let stlSourceKind: 'server' | 'upload' = 'server'
   let prevStlSourceKind: 'server' | 'upload' | null = null
@@ -140,22 +114,23 @@
     }
   }
 
-  async function onUploadStl(ev: Event) {
+  function onUploadStlFile({
+    file,
+    buffer,
+    widthMm,
+    heightMm,
+  }: {
+    file: File
+    buffer: ArrayBuffer
+    widthMm: number
+    heightMm: number
+  }) {
     if (!model) return
-    const input = ev.currentTarget as HTMLInputElement
-    const file = input.files?.[0]
-    input.value = ''
-    if (!file) return
-
-    const buf = await file.arrayBuffer()
-    stlBuffersByModelId.update(m => ({ ...m, [model.id]: buf }))
+    stlBuffersByModelId.update(m => ({ ...m, [model.id]: buffer }))
 
     const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
     actions.renameKeycapModel(model.id, fileNameWithoutExt)
-    actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0 })
-
-    const { widthMm, heightMm } = await getStlDimensions(buf)
-    actions.updateKeycapModel(model.id, { widthMm, heightMm })
+    actions.updateKeycapModel(model.id, { rotationX: 0, rotationY: 0, rotationZ: 0, widthMm, heightMm })
 
     actions.setKeycapModelSource(model.id, {
       kind: 'upload',
@@ -196,24 +171,6 @@
 
     // Reset to 0 so reactive statement will reload dimensions
     actions.updateKeycapModel(model.id, { widthMm: 0, heightMm: 0 })
-  }
-
-  function onCategoryChange(category: string) {
-    if (!model || !registry) return
-    const categoryData = registry.categories.find(c => c.name === category)
-    if (!categoryData || categoryData.keycaps.length === 0) return
-
-    // Check if current keycap is in new category
-    const currentInCategory = categoryData.keycaps.find(k => k.path === selectedKeycapPath)
-    const keycapPath = currentInCategory ? currentInCategory.path : categoryData.keycaps[0].path
-
-    applyServerModel(keycapPath)
-  }
-
-  function onKeycapChange(keycapPath: string) {
-    if (model) {
-      applyServerModel(keycapPath)
-    }
   }
 </script>
 
@@ -298,10 +255,6 @@
         {:else}
           {@const modelNameId = `model-${model.id}-name`}
           {@const extrusionDepthId = `model-${model.id}-extrusion-depth`}
-          {@const stlSourceServerId = `stl-source-${model.id}-server`}
-          {@const stlSourceUploadId = `stl-source-${model.id}-upload`}
-          {@const categoryId = `model-${model.id}-category`}
-          {@const keycapId = `model-${model.id}-keycap`}
 
           <FieldGroup class="py-5">
             <Field>
@@ -336,119 +289,17 @@
             <div class="grid gap-3">
               <div class="text-sm font-medium">STL source</div>
 
-              <div class="card-box grid gap-2 p-3">
-                <RadioGroup
-                  bind:value={stlSourceKind}
-                  onValueChange={(next: string) => onStlSourceKindChange(next as 'server' | 'upload')}
-                  class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"
-                >
-                  <div class="flex items-center gap-3">
-                    <RadioGroupItem value="server" id={stlSourceServerId} />
-                    <Label for={stlSourceServerId}>From server</Label>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <RadioGroupItem value="upload" id={stlSourceUploadId} />
-                    <Label for={stlSourceUploadId}>Upload file</Label>
-                  </div>
-                </RadioGroup>
-
-                {#if model.source.kind === 'server'}
-                  {#if registry}
-                    <div class="grid gap-2">
-                      <div class="grid grid-cols-2 gap-2">
-                        <Field>
-                          <FieldLabel for={categoryId}>Category</FieldLabel>
-                          <Select type="single" bind:value={categoryValue}>
-                            <SelectTrigger id={categoryId} class="w-full" data-placeholder={!categoryValue}>
-                              <SelectValue placeholder="Select a category" value={categoryValue || null} />
-                            </SelectTrigger>
-                            <SelectContent class="w-full">
-                              {#each categories as cat}
-                                <SelectItem value={cat} label={cat} />
-                              {/each}
-                            </SelectContent>
-                          </Select>
-                        </Field>
-                        <Field>
-                          <FieldLabel for={keycapId}>Keycap</FieldLabel>
-                          <Select type="single" bind:value={keycapPathValue}>
-                            <SelectTrigger id={keycapId} class="w-full" data-placeholder={!keycapPathValue}>
-                              <SelectValue
-                                placeholder="Select a keycap"
-                                value={keycapsInCategory.find(k => k.path === keycapPathValue)?.displayName ?? null}
-                              />
-                            </SelectTrigger>
-                            <SelectContent class="w-full">
-                              {#each keycapsInCategory as keycap}
-                                <SelectItem value={keycap.path} label={keycap.displayName} />
-                              {/each}
-                            </SelectContent>
-                          </Select>
-                        </Field>
-                      </div>
-                      {#if selectedKeycap}
-                        <div class="mt-2 pt-2 border-t text-xs text-muted-foreground">
-                          {#if selectedKeycap.author}
-                            <div class="mb-1">
-                              Author:
-                              {#if selectedKeycap.authorLink}
-                                <a
-                                  href={selectedKeycap.authorLink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  class="text-primary hover:text-primary/90 underline"
-                                >
-                                  {selectedKeycap.author}
-                                </a>
-                              {:else}
-                                <span class="text-foreground">{selectedKeycap.author}</span>
-                              {/if}
-                            </div>
-                          {/if}
-                          {#if selectedKeycap.license}
-                            <div>
-                              License: <span class="text-foreground">{selectedKeycap.license}</span>
-                            </div>
-                          {/if}
-                        </div>
-                      {/if}
-                    </div>
-                  {:else}
-                    <div class="text-xs text-muted-foreground">Loading registry...</div>
-                  {/if}
-                {:else}
-                  <Field>
-                    <FieldLabel for="file-input-{model.id}">Choose STL file</FieldLabel>
-                    <div class="flex items-center gap-2">
-                      <input
-                        id="file-input-{model.id}"
-                        class="hidden"
-                        type="file"
-                        accept=".stl,model/stl"
-                        onchange={onUploadStl}
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        type="button"
-                        onclick={() => {
-                          const fileInput = document.getElementById(`file-input-${model.id}`) as HTMLInputElement
-                          fileInput?.click()
-                        }}
-                      >
-                        Browse...
-                      </Button>
-                      {#if model.source.stl?.fileName}
-                        <span class="text-xs text-foreground truncate flex-1">
-                          {model.source.stl.fileName}
-                        </span>
-                      {:else}
-                        <span class="text-xs text-muted-foreground">No file selected</span>
-                      {/if}
-                    </div>
-                  </Field>
-                {/if}
-              </div>
+              <StlSourcePicker
+                {registry}
+                sourceKind={stlSourceKind}
+                {selectedCategory}
+                {selectedKeycapPath}
+                uploadedFileName={model.source.kind === 'upload' ? model.source.stl?.fileName : null}
+                idPrefix="model-{model.id}"
+                onSourceKindChange={onStlSourceKindChange}
+                onSelectServerKeycap={({ keycap }) => applyServerModel(keycap.path)}
+                onUploadFile={onUploadStlFile}
+              />
             </div>
 
             {#if model.source.kind === 'upload' && model.source.stl}

@@ -8,8 +8,8 @@
   }
 
   function handleConfirmConfirm(data: { onConfirm: () => void }) {
-    data.onConfirm()
     modalStore.set(null)
+    data.onConfirm()
   }
 
   function handleConfirmCancel(data: { onCancel?: () => void }) {

@@ -3,6 +3,8 @@ import { getPublicPath } from '../utils/paths'
 export type KeycapEntry = {
   path: string
   displayName: string
+  uWidth: number
+  uHeight: number
   author: string
   authorLink: string
   license: string
@@ -56,4 +58,17 @@ export function findKeycapByPath(registry: Registry, path: string): { category: 
     }
   }
   return null
+}
+
+/**
+ * Tests if a keycap's unit dimensions match target dimensions.
+ */
+export function matchesKeycapSize(
+  uWidth: number,
+  uHeight: number,
+  targetWidth: number,
+  targetHeight: number,
+  tolerance = 0.01
+): boolean {
+  return Math.abs(uWidth - targetWidth) < tolerance && Math.abs(uHeight - targetHeight) < tolerance
 }
