@@ -281,11 +281,27 @@
               preset.
             </EmptyDescription>
           </EmptyHeader>
-          <EmptyContent class="flex-col items-center gap-2">
+          <EmptyContent class="flex-col items-center gap-3">
+            <Button onclick={startCleanProject}>
+              <Plus class="size-4" />
+              New Project
+            </Button>
+
+            <div class="flex items-center gap-3 w-full max-w-xs my-0.5">
+              <div class="flex-1 border-t border-border"></div>
+              <span class="text-[11px] text-muted-foreground uppercase font-medium tracking-wider">or</span>
+              <div class="flex-1 border-t border-border"></div>
+            </div>
+
             <div class="flex flex-wrap justify-center gap-2">
-              <Button variant="outline" onclick={() => loadInput?.click()}>
-                <Upload class="size-4" />
-                Load Project
+              <Button
+                variant="outline"
+                onclick={() => {
+                  kleImporterOpen = true
+                }}
+              >
+                <FileCode class="size-4" />
+                Import KLE
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger>
@@ -303,20 +319,11 @@
                   {/each}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button
-                variant="outline"
-                onclick={() => {
-                  kleImporterOpen = true
-                }}
-              >
-                <FileCode class="size-4" />
-                Import KLE
+              <Button variant="outline" onclick={() => loadInput?.click()}>
+                <Upload class="size-4" />
+                Load Project
               </Button>
             </div>
-            <Button onclick={startCleanProject}>
-              <Plus class="size-4" />
-              New Project
-            </Button>
           </EmptyContent>
         </Empty>
       </div>
