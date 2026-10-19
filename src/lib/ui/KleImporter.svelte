@@ -177,18 +177,12 @@
     if (!activeSize) return selectedProfileCategory || registry.categories[0]?.name || ''
     if (selectedProfileCategory) {
       const prefCat = registry.categories.find(c => c.name === selectedProfileCategory)
-      if (
-        prefCat?.keycaps.some(
-          kc => matchesKeycapSize(kc.uWidth, kc.uHeight, activeSize.width, activeSize.height)
-        )
-      ) {
+      if (prefCat?.keycaps.some(kc => matchesKeycapSize(kc.uWidth, kc.uHeight, activeSize.width, activeSize.height))) {
         return selectedProfileCategory
       }
     }
     const matchingCat = registry.categories.find(c =>
-      c.keycaps.some(
-        kc => matchesKeycapSize(kc.uWidth, kc.uHeight, activeSize.width, activeSize.height)
-      )
+      c.keycaps.some(kc => matchesKeycapSize(kc.uWidth, kc.uHeight, activeSize.width, activeSize.height))
     )
     return matchingCat?.name || ''
   })()
@@ -276,7 +270,6 @@
     }
     assignedModelByKeyId = next
   }
-
 
   // Auto-assign all keys in layout from a registry category
   function handleAutoAssignCategory(categoryName: string) {
@@ -474,7 +467,10 @@
             <div class="flex items-center gap-2 min-w-0">
               <CardTitle class="text-base">Keyboard Layout</CardTitle>
               {#if parsedKeyboard.meta.name}
-                <span class="text-xs text-muted-foreground truncate max-w-[160px] sm:max-w-[240px]" title={parsedKeyboard.meta.name}>
+                <span
+                  class="text-xs text-muted-foreground truncate max-w-[160px] sm:max-w-[240px]"
+                  title={parsedKeyboard.meta.name}
+                >
                   ({parsedKeyboard.meta.name})
                 </span>
               {/if}
@@ -503,7 +499,9 @@
         <div class="px-3.5 py-2.5 min-h-[44px] flex items-center justify-between gap-2 shrink-0">
           <div class="flex items-center gap-3 text-xs text-muted-foreground">
             {#if activeSize}
-              <span class="font-medium text-foreground">{activeSize.width.toFixed(2)}u × {activeSize.height.toFixed(2)}u</span>
+              <span class="font-medium text-foreground"
+                >{activeSize.width.toFixed(2)}u × {activeSize.height.toFixed(2)}u</span
+              >
             {:else}
               <span class="opacity-75">Click any key to select</span>
             {/if}
@@ -658,9 +656,8 @@
                   <div class="flex flex-col gap-3">
                     <div class="flex flex-col gap-1">
                       <span class="text-xs font-semibold">
-                        {selectedKeyIds.size} key{selectedKeyIds.size === 1 ? '' : 's'} ({activeSize.width.toFixed(
-                          2
-                        )}u × {activeSize.height.toFixed(2)}u)
+                        {selectedKeyIds.size} key{selectedKeyIds.size === 1 ? '' : 's'} ({activeSize.width.toFixed(2)}u
+                        × {activeSize.height.toFixed(2)}u)
                       </span>
                       <span class="text-[11px] text-muted-foreground">
                         Choose a 3D keycap model to assign to this selection.

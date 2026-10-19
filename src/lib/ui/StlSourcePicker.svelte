@@ -31,9 +31,7 @@
     if (!filterSize) return registry.categories.map(c => c.name)
     return registry.categories
       .filter(c =>
-        c.keycaps.some(
-          kc => matchesKeycapSize(kc.uWidth, kc.uHeight, filterSize.uWidth, filterSize.uHeight)
-        )
+        c.keycaps.some(kc => matchesKeycapSize(kc.uWidth, kc.uHeight, filterSize.uWidth, filterSize.uHeight))
       )
       .map(c => c.name)
   })()
@@ -72,8 +70,8 @@
 
     let nextKeycaps = catData.keycaps
     if (filterSize) {
-      nextKeycaps = nextKeycaps.filter(
-        kc => matchesKeycapSize(kc.uWidth, kc.uHeight, filterSize.uWidth, filterSize.uHeight)
+      nextKeycaps = nextKeycaps.filter(kc =>
+        matchesKeycapSize(kc.uWidth, kc.uHeight, filterSize.uWidth, filterSize.uHeight)
       )
     }
 

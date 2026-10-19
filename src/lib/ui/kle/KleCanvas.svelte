@@ -35,7 +35,14 @@
     fill: string
   }
 
-  function getKeyCanvasLabels(k: KleKey, keyX: number, keyY: number, keyW: number, keyH: number): CanvasLabel[] {
+  function getKeyCanvasLabels(
+    k: KleKey,
+    keyX: number,
+    keyY: number,
+    keyW: number,
+    keyH: number,
+    isAssigned: boolean
+  ): CanvasLabel[] {
     const list: CanvasLabel[] = []
     const padX = 7
     const padTop = 15
@@ -116,7 +123,14 @@
           ? 10
           : 11
 
-      const color = k.textColor[slot] || (slot >= 9 ? '#94a3b8' : slot === 0 && !isSingle ? '#cbd5e1' : '#ffffff')
+      const isSub = !isSingle && (slot === 0 || slot === 1 || slot === 2 || slot >= 9)
+      const color = isAssigned
+        ? isSub
+          ? 'var(--kle-assigned-text-sub)'
+          : 'var(--kle-assigned-text)'
+        : isSub
+          ? 'var(--kle-unassigned-text-sub)'
+          : 'var(--kle-unassigned-text)'
 
       list.push({
         text: txt.slice(0, maxChars),
@@ -132,7 +146,9 @@
   }
 </script>
 
-<div class="relative w-full h-full min-h-[220px] flex items-center justify-center overflow-hidden p-3 select-none">
+<div
+  class="kle-canvas-root relative w-full h-full min-h-[220px] flex items-center justify-center overflow-hidden p-3 select-none"
+>
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <svg
@@ -150,28 +166,37 @@
       {@const y = k.y * U}
       {@const w = k.width * U}
       {@const h = k.height * U}
-      {@const keyLabels = getKeyCanvasLabels(k, x, y, w, h)}
+      {@const keyLabels = getKeyCanvasLabels(k, x, y, w, h, isAssigned)}
       {@const hasRotation = k.rotation_angle !== 0}
       {@const rotX = k.rotation_x * U}
       {@const rotY = k.rotation_y * U}
 
       {@const hasSecondaryRect = hasSecondaryShape(k)}
 
-      {@const fillColor = isAssigned ? '#065f46' : '#334155'}
-      {@const strokeColor = isSelected ? '#38bdf8' : isAssigned ? '#10b981' : '#64748b'}
-      {@const strokeW = isSelected ? 3 : 1.5}
+      {@const fillColor = isAssigned ? 'var(--kle-assigned-fill)' : 'var(--kle-unassigned-fill)'}
+      {@const strokeColor = isSelected
+        ? 'var(--kle-selected-stroke)'
+        : isAssigned
+          ? 'var(--kle-assigned-stroke)'
+          : 'var(--kle-unassigned-stroke)'}
+      {@const strokeW = isSelected ? 2.5 : 1.25}
+      {@const insetColor = isSelected
+        ? 'var(--kle-selected-inset)'
+        : isAssigned
+          ? 'var(--kle-assigned-inset)'
+          : 'var(--kle-unassigned-inset)'}
 
       {@const isSameSize = activeSize ? k.width === activeSize.width && k.height === activeSize.height : true}
       {@const isDimmed = activeSize !== null && !isSameSize}
 
       <g
         transform={hasRotation ? `rotate(${k.rotation_angle} ${rotX} ${rotY})` : undefined}
-        class="transition-opacity duration-150 {isDimmed ? 'opacity-30 hover:opacity-70' : 'opacity-100'}"
+        class="transition-opacity duration-150 {isDimmed ? 'opacity-25 hover:opacity-75' : 'opacity-100'}"
       >
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <g
-          class="cursor-pointer"
+          class="cursor-pointer transition-all duration-100 hover:brightness-105 dark:hover:brightness-110"
           onclick={e => {
             e.stopPropagation()
             onKeyClick(k, e)
@@ -189,7 +214,11 @@
             {@const y2 = (k.y + k.y2) * U}
             {@const w2 = k.width2 * U}
             {@const h2 = k.height2 * U}
-            <g class={isSelected ? 'filter drop-shadow-[0_0_6px_rgba(56,189,248,0.65)]' : ''}>
+            <g
+              class={isSelected
+                ? 'filter drop-shadow-[0_0_6px_rgba(59,130,246,0.5)] dark:drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]'
+                : ''}
+            >
               <!-- Pass 1: Outer stroke rects -->
               <rect
                 x={x + 2}
@@ -236,7 +265,9 @@
               fill={fillColor}
               stroke={strokeColor}
               stroke-width={strokeW}
-              class={isSelected ? 'filter drop-shadow-[0_0_6px_rgba(56,189,248,0.65)]' : ''}
+              class={isSelected
+                ? 'filter drop-shadow-[0_0_6px_rgba(59,130,246,0.5)] dark:drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]'
+                : ''}
             />
 
             <!-- Top surface inset line for realistic keycap feel -->
@@ -247,9 +278,8 @@
               height={Math.max(2, h - 11)}
               rx="3"
               fill="none"
-              stroke={isSelected ? '#38bdf8' : isAssigned ? '#34d399' : '#9ca3af'}
+              stroke={insetColor}
               stroke-width="0.75"
-              stroke-opacity="0.35"
               pointer-events="none"
             />
           {/if}
@@ -273,3 +303,39 @@
     {/each}
   </svg>
 </div>
+
+<style>
+  :global(.kle-canvas-root) {
+    --kle-unassigned-fill: #ffffff;
+    --kle-unassigned-stroke: oklch(0.78 0.01 260);
+    --kle-unassigned-text: var(--foreground);
+    --kle-unassigned-text-sub: var(--muted-foreground);
+    --kle-unassigned-inset: rgba(0, 0, 0, 0.08);
+
+    --kle-assigned-fill: oklch(0.935 0.04 160);
+    --kle-assigned-stroke: oklch(0.55 0.14 160);
+    --kle-assigned-text: oklch(0.22 0.06 160);
+    --kle-assigned-text-sub: oklch(0.38 0.06 160);
+    --kle-assigned-inset: oklch(0.55 0.14 160 / 30%);
+
+    --kle-selected-stroke: oklch(0.48 0.15 240);
+    --kle-selected-inset: oklch(0.48 0.15 240 / 50%);
+  }
+
+  :global(.dark .kle-canvas-root) {
+    --kle-unassigned-fill: oklch(0.32 0.01 260);
+    --kle-unassigned-stroke: oklch(0.44 0.015 260);
+    --kle-unassigned-text: var(--foreground);
+    --kle-unassigned-text-sub: var(--muted-foreground);
+    --kle-unassigned-inset: rgba(255, 255, 255, 0.08);
+
+    --kle-assigned-fill: oklch(0.29 0.045 170);
+    --kle-assigned-stroke: oklch(0.7 0.14 170);
+    --kle-assigned-text: oklch(0.96 0.02 170);
+    --kle-assigned-text-sub: oklch(0.78 0.06 170);
+    --kle-assigned-inset: oklch(0.7 0.14 170 / 35%);
+
+    --kle-selected-stroke: var(--primary);
+    --kle-selected-inset: oklch(0.74 0.11 200 / 55%);
+  }
+</style>
