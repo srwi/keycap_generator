@@ -27,6 +27,7 @@
   } from '@/lib/components/ui/dropdown-menu'
 
   const LETTER_CHARS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
+  const DIGIT_CHARS = Array.from({ length: 10 }, (_, i) => String(i))
 
   let newKeyMenuOpen = false
 
@@ -149,6 +150,7 @@
             <DropdownMenuItem onclick={addSingleKey}>Blank key</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onclick={() => addKeys(LETTER_CHARS)}>Add A–Z (26 keys)</DropdownMenuItem>
+            <DropdownMenuItem onclick={() => addKeys(DIGIT_CHARS)}>Add 0–9 (10 keys)</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
