@@ -299,6 +299,28 @@ export const actions = {
     })
   },
 
+  // Creates one key per character, filling the template's first symbol slot with that character
+  createKeysForCharacters(characters: string[]) {
+    app.update(s => {
+      if (characters.length === 0) return s
+
+      const tplId = s.ui.selectedTemplateId ?? s.templates[0]?.id
+      if (!tplId) return s
+      const tpl = s.templates.find(t => t.id === tplId)
+      if (!tpl) return s
+
+      const primarySymbolId = tpl.symbols[0]?.id ?? null
+      const newKeys: KeyDef[] = characters.map(ch => ({
+        id: newId('key'),
+        name: ch,
+        templateId: tpl.id,
+        contentBySymbolId: primarySymbolId ? { [primarySymbolId]: { kind: 'text', value: ch } } : {},
+      }))
+
+      return { ...s, keys: [...s.keys, ...newKeys], ui: { ...s.ui, selectedKeyId: newKeys[0].id } }
+    })
+  },
+
   renameKey(keyId: string, name: string) {
     app.update(s => ({ ...s, keys: s.keys.map(k => (k.id === keyId ? { ...k, name } : k)) }))
   },
