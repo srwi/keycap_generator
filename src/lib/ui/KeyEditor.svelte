@@ -5,7 +5,7 @@
   import SymbolInput from './SymbolInput.svelte'
   import KeycapPreview3D from './KeycapPreview3D.svelte'
   import KeycapPreviewSVGOverlay from './KeycapPreviewSVGOverlay.svelte'
-  import { X, Plus, Loader2, Box } from 'lucide-svelte'
+  import { X, Plus, Loader2, Box, ChevronDown } from 'lucide-svelte'
   import HelpTooltip from './HelpTooltip.svelte'
   import { slide, fade } from 'svelte/transition'
   import { generatePreview } from '../generate/generation-api'
@@ -18,6 +18,19 @@
   import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/lib/components/ui/item'
   import { ScrollArea } from '@/lib/components/ui/scroll-area'
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/lib/components/ui/select'
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+  } from '@/lib/components/ui/dropdown-menu'
+
+  let newKeyMenuOpen = false
+
+  function addSingleKey() {
+    newKeyMenuOpen = false
+    actions.createKey()
+  }
 
   function getSymbolContent(keyId: string, symbolId: string): SymbolContent | null {
     const k = $app.keys.find(k => k.id === keyId)
@@ -114,10 +127,20 @@
             text="A key is a specific instance of a keycap that uses a template and contains actual text values. Each key represents one physical keycap you'll generate. Keys share the layout and styling from their template but have unique text for each symbol position (e.g., 'Q', 'Shift', 'Enter')."
           />
         </div>
-        <Button size="sm" disabled={!hasTemplates} onclick={actions.createKey} title="New key">
-          <Plus class="size-4" />
-          <span class="hidden sm:inline">New</span>
-        </Button>
+        <DropdownMenu bind:open={newKeyMenuOpen}>
+          <DropdownMenuTrigger>
+            {#snippet child({ props })}
+              <Button size="sm" disabled={!hasTemplates} title="New key" {...props}>
+                <Plus class="size-4" />
+                <span class="hidden sm:inline">New</span>
+                <ChevronDown class="size-3" />
+              </Button>
+            {/snippet}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="min-w-[200px]">
+            <DropdownMenuItem onclick={addSingleKey}>Blank key</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </CardHeader>
 
