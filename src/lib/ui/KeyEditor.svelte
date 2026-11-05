@@ -5,6 +5,7 @@
   import SymbolInput from './SymbolInput.svelte'
   import KeycapPreview3D from './KeycapPreview3D.svelte'
   import KeycapPreviewSVGOverlay from './KeycapPreviewSVGOverlay.svelte'
+  import BulkKeyCreateModal from './BulkKeyCreateModal.svelte'
   import { X, Plus, Loader2, Box, ChevronDown } from 'lucide-svelte'
   import HelpTooltip from './HelpTooltip.svelte'
   import { slide, fade } from 'svelte/transition'
@@ -30,10 +31,17 @@
   const DIGIT_CHARS = Array.from({ length: 10 }, (_, i) => String(i))
 
   let newKeyMenuOpen = false
+  let bulkRequest: { title: string; characters: string[] } | null = null
 
-  function addKeys(characters: string[]) {
+  function openBulkModal(title: string, characters: string[]) {
     newKeyMenuOpen = false
-    actions.createKeysForCharacters(characters)
+    bulkRequest = { title, characters }
+  }
+
+  function confirmBulkCreate(templateId: string) {
+    if (!bulkRequest) return
+    actions.createKeysForCharacters(bulkRequest.characters, templateId)
+    bulkRequest = null
   }
 
   function addSingleKey() {
@@ -149,8 +157,12 @@
           <DropdownMenuContent align="end" class="min-w-[200px]">
             <DropdownMenuItem onclick={addSingleKey}>Blank key</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onclick={() => addKeys(LETTER_CHARS)}>Add A–Z (26 keys)</DropdownMenuItem>
-            <DropdownMenuItem onclick={() => addKeys(DIGIT_CHARS)}>Add 0–9 (10 keys)</DropdownMenuItem>
+            <DropdownMenuItem onclick={() => openBulkModal('Add A–Z (26 keys)', LETTER_CHARS)}>
+              Add A–Z (26 keys)
+            </DropdownMenuItem>
+            <DropdownMenuItem onclick={() => openBulkModal('Add 0–9 (10 keys)', DIGIT_CHARS)}>
+              Add 0–9 (10 keys)
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -363,3 +375,12 @@
     </CardContent>
   </Card>
 </div>
+
+{#if bulkRequest}
+  <BulkKeyCreateModal
+    title={bulkRequest.title}
+    characters={bulkRequest.characters}
+    onConfirm={confirmBulkCreate}
+    onCancel={() => (bulkRequest = null)}
+  />
+{/if}
