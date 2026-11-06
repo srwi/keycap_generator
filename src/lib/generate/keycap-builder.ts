@@ -7,6 +7,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { BufferGeometry, Group, MathUtils, Mesh, Matrix4 } from 'three'
 import { createIconGeometry } from './svg-geometry'
 import { loadRawIconPath, parseIconName, PHOSPHOR_ICON_VIEWBOX } from '../services/icons'
+import { getIconTransform } from '../utils/iconTransform'
 
 export type GenerationInput =
   | { kind: 'keyId'; keyId: string }
@@ -157,7 +158,13 @@ export async function buildKeycapGroup(
       const iconPath = await loadRawIconPath(baseName, variant)
       if (!iconPath) continue
 
-      symbolGeom = await createIconGeometry(iconPath, sym.fontSizeMm, model.extrusionDepthMm, PHOSPHOR_ICON_VIEWBOX)
+      symbolGeom = await createIconGeometry(
+        iconPath,
+        sym.fontSizeMm,
+        model.extrusionDepthMm,
+        PHOSPHOR_ICON_VIEWBOX,
+        getIconTransform(content)
+      )
     }
 
     symbolGeom.computeVertexNormals()
