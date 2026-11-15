@@ -19,7 +19,17 @@ export type SymbolDef = {
   rotationDeg: number
 }
 
-export type SymbolContent = { kind: 'text'; value: string } | { kind: 'icon'; iconName: string }
+export type IconRotationDeg = 0 | 90 | 180 | 270
+
+export type IconTransform = {
+  rotationDeg: IconRotationDeg
+  flipAcrossX: boolean
+  flipAcrossY: boolean
+}
+
+export type SymbolContent =
+  | { kind: 'text'; value: string }
+  | ({ kind: 'icon'; iconName: string } & Partial<IconTransform>)
 
 export type StlRef = {
   fileName: string

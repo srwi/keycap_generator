@@ -2,6 +2,7 @@
   import type { SymbolContent, Template } from '../state/types'
   import { getTextPath } from '../generate/fonts'
   import { loadRawIconPath, parseIconName, PHOSPHOR_ICON_VIEWBOX } from '../services/icons'
+  import { getIconTransform, iconFlipScale } from '../utils/iconTransform'
 
   export let template: Template | null
   export let contentBySymbolId: Record<string, SymbolContent> = {}
@@ -103,10 +104,14 @@
             <!-- Icon content - render raw path with SVG scaling -->
             {@const scale = sym.fontSizeMm / PHOSPHOR_ICON_VIEWBOX}
             {@const halfSize = sym.fontSizeMm / 2}
+            {@const iconTransform = getIconTransform(content)}
+            {@const flip = iconFlipScale(iconTransform)}
             <g transform={`translate(${x} ${y}) rotate(${sym.rotationDeg})`}>
-              <!-- Scale and center the icon: translate to center, then scale from viewBox to fontSizeMm -->
-              <g transform={`translate(${-halfSize} ${-halfSize}) scale(${scale})`}>
-                <path d={iconPath} fill={sym.color} />
+              <g transform={`rotate(${iconTransform.rotationDeg}) scale(${flip.x} ${flip.y})`}>
+                <!-- Scale and center the icon: translate to center, then scale from viewBox to fontSizeMm -->
+                <g transform={`translate(${-halfSize} ${-halfSize}) scale(${scale})`}>
+                  <path d={iconPath} fill={sym.color} />
+                </g>
               </g>
             </g>
           {:else}
