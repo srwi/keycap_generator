@@ -28,7 +28,8 @@ export type IconTransform = {
 }
 
 export type SymbolContent =
-  { kind: 'text'; value: string } | ({ kind: 'icon'; iconName: string } & Partial<IconTransform>)
+  | { kind: 'text'; value: string }
+  | ({ kind: 'icon'; iconName: string } & Partial<IconTransform>)
 
 export type StlRef = {
   fileName: string
@@ -36,7 +37,8 @@ export type StlRef = {
 }
 
 export type KeycapModelSource =
-  { kind: 'upload'; stl: StlRef | null } | { kind: 'server'; serverId: string; url: string; stl: StlRef }
+  | { kind: 'upload'; stl: StlRef | null }
+  | { kind: 'server'; serverId: string; url: string; stl: StlRef }
 
 export type KeycapModel = {
   id: string
